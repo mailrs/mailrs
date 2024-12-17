@@ -16,7 +16,9 @@ fn main() {
     dioxus_logger::init(Level::INFO).expect("failed to init logger");
     info!("starting app");
 
-    let cfg = dioxus::desktop::Config::new();
+    let cfg = dioxus::desktop::Config::new()
+        // TODO: Fixme: Do not link to some web page
+        .with_custom_head(r#"<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">"#.to_string());
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
 }
 
