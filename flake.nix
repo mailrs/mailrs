@@ -76,7 +76,6 @@
         nativeBuildInputs = [
           pkgs.pkg-config
           pkgs.makeWrapper
-          pkgs.tailwindcss
         ];
 
         cargoArtifacts = craneLib.buildDepsOnly {
