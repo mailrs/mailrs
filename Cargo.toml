@@ -6,3 +6,4 @@ edition = "2021"
 license = "GPL-2.0-only"
 
 [dependencies]
+dioxus = { version = "0.6.0", features = ["launch", "fullstack", "desktop"] }

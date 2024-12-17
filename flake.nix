@@ -63,14 +63,28 @@
             filter = filterPath;
           };
 
-        buildInputs = [];
+        buildInputs = [
+          pkgs.glib
+          pkgs.gtk3
+          pkgs.libiconv
+          pkgs.libsoup_3
+          pkgs.openssl
+          pkgs.webkitgtk_4_1
+          pkgs.xdotool
+        ];
+
+        nativeBuildInputs = [
+          pkgs.pkg-config
+          pkgs.makeWrapper
+          pkgs.tailwindcss
+        ];
 
         cargoArtifacts = craneLib.buildDepsOnly {
-          inherit src pname buildInputs;
+          inherit src pname buildInputs nativeBuildInputs;
         };
 
         mailrs = craneLib.buildPackage {
-          inherit cargoArtifacts src pname version buildInputs;
+          inherit cargoArtifacts src pname version buildInputs nativeBuildInputs;
           cargoExtraArgs = "--all-features -p mailrs";
         };
 
@@ -110,7 +124,7 @@
 
           mailrs-tests = craneLib.cargoNextest {
             inherit cargoArtifacts src pname buildInputs;
-            nativeBuildInputs = [
+            nativeBuildInputs = nativeBuildInputs ++ [
               pkgs.coreutils
             ];
           };
@@ -122,7 +136,12 @@
         };
 
         devShells.default = pkgs.mkShell {
-          nativeBuildInputs = [
+          buildInputs = [
+            pkgs.webkitgtk_4_1
+            pkgs.xdotool
+          ];
+
+          nativeBuildInputs = nativeBuildInputs ++ [
             customCargoMultiplexer
             rustfmt'
             rustTarget
@@ -131,6 +150,8 @@
             pkgs.cargo-deny
             pkgs.gitlint
             pkgs.statix
+
+            pkgs.dioxus-cli
           ];
         };
       }
