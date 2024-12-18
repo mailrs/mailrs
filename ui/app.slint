@@ -1,18 +1,46 @@
-import { Button, VerticalBox } from "std-widgets.slint";
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { Facade } from "global.slint";
+import { Boxes } from "boxes.slint";
+import { Commander } from "commander.slint";
+
+enum Page {
+    loading,
+    boxes,
+}
+
+component MainContent inherits VerticalLayout {
+    property <Page> active-page: Page.loading;
+
+    HorizontalBox {
+        alignment: center;
+
+        Boxes {
+            visible: active-page == Page.boxes;
+        }
+    }
+}
+
+component WelcomePage inherits VerticalLayout {
+    HorizontalBox {
+        alignment: center;
+    }
+}
 
 export component AppWindow inherits Window {
-    in-out property <int> counter: 42;
-    callback request-increase-value();
-    VerticalBox {
-        Text {
-            text: "Counter: \{root.counter}";
-        }
+    title: "mailrs";
 
-        Button {
-            text: "Increase value";
-            clicked => {
-                root.request-increase-value();
-            }
-        }
+    min-width: 512px;
+    min-height: 320px;
+    preferred-width: 1200px;
+    preferred-height: 640px;
+
+    MainContent {
+        visible: Facade.boxes.length != 0;
+    }
+
+    if (Facade.boxes.length == 0): WelcomePage {}
+
+    Commander {
+        visible: true;
     }
 }

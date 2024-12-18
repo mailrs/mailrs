@@ -1,0 +1,14 @@
+import { Box } from "structs.slint";
+
+export global Facade {
+    // Models
+
+    in-out property <[Box]> boxes;
+
+    // Actions
+
+    callback open-box(string);
+    callback close-box();
+
+    // Functions
+}
