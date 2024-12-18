@@ -8,6 +8,15 @@ pub enum ApplicationError {
 
     #[error(transparent)]
     Notmuch(#[from] NotmuchError),
+
+    #[error("Notmuch Worker setup failed")]
+    NotmuchWorkerSetup,
+
+    #[error("Notmuch Worker errored")]
+    Worker(#[from] crate::notmuch::WorkerError<()>),
+
+    #[error("Notmuch Worker errored")]
+    WorkerNotmuch(#[from] crate::notmuch::WorkerError<NotmuchError>),
 }
 
 #[derive(Debug, thiserror::Error)]

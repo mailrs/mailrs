@@ -1,8 +1,7 @@
 use crate::cli::Cli;
 use crate::config::Config;
 use crate::error::ApplicationError;
-use crate::error::NotmuchError;
-use crate::notmuch::AsyncNotmuchDatabase;
+use crate::notmuch::NotmuchWorker;
 
 slint::include_modules!();
 
@@ -16,16 +15,29 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
         notmuch::DatabaseMode::ReadWrite
     };
 
-    let nm_db = notmuch::Database::open_with_config(
-        config.notmuch.database_path.as_ref(),
-        nm_database_mode,
-        config.notmuch.config_path.as_ref(),
-        config.notmuch.profile.as_deref(),
-    )
-    .map_err(NotmuchError::from)
-    .map(AsyncNotmuchDatabase::from)?;
+    let (handle_sender, handle_recv) = tokio::sync::oneshot::channel();
 
-    let messages = nm_db.create_query(&startup_query).search_messages().await?;
+    std::thread::spawn(move || {
+        let worker = NotmuchWorker::open_database(
+            config.notmuch.database_path.as_ref(),
+            nm_database_mode,
+            config.notmuch.config_path.as_ref(),
+            config.notmuch.profile.as_deref(),
+        )
+        .unwrap();
+
+        let handle = worker.handle();
+        handle_sender.send(handle).unwrap();
+        worker.run()
+    });
+
+    let handle = handle_recv
+        .await
+        .map_err(|_| ApplicationError::NotmuchWorkerSetup)?;
+    let messages = handle
+        .create_query(&startup_query)
+        .search_messages()
+        .await?;
 
     match cli.mode {
         crate::cli::Mode::Gui => {
@@ -52,11 +64,12 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
 
         crate::cli::Mode::Test => {
             for message in messages {
-                let tags = message.tags().await.into_vec().await;
-                tracing::debug!(id = ?message.id().await, ?tags, "Found message");
+                let tags = handle.tags_for_message(&message).await?;
+                tracing::info!(id = ?message.id(), ?tags, "Found message");
             }
         }
     }
 
+    handle.shutdown().await?;
     Ok(())
 }
