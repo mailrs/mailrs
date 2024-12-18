@@ -1,5 +1,4 @@
 name: Nix CI
-
 on:
   push:
     branches:
@@ -7,10 +6,8 @@ on:
   pull_request:
     branches:
       - master
-
 env:
   CARGO_TERM_COLOR: always
-
 jobs:
   check:
     name: check
@@ -28,7 +25,6 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Run code and formatting checks
         run: nix --print-build-logs flake check --show-trace
-
   gitlint:
     name: gitlint
     runs-on: ubuntu-latest
@@ -46,7 +42,6 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Check git messages in branch
         run: nix develop -c gitlint --commits $(git merge-base origin/main HEAD)..HEAD
-
   dead:
     name: deadnix
     runs-on: ubuntu-latest
@@ -63,7 +58,6 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Run deadnix
         run: nix run github:astro/deadnix
-
   statix:
     name: statix
     runs-on: ubuntu-latest
@@ -80,4 +74,3 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Run deadnix
         run: nix develop -c statix check
-
