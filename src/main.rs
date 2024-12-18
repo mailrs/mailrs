@@ -6,6 +6,7 @@ mod app;
 mod cli;
 mod config;
 mod error;
+mod notmuch;
 
 use clap::Parser;
 use miette::IntoDiagnostic;

@@ -6,6 +6,10 @@ pub enum ApplicationError {
     #[error("Internal Toktio error")]
     TokioJoin(#[from] tokio::task::JoinError),
 
-    #[error("Notmuch errored")]
-    Notmuch(#[from] notmuch::Error),
+    #[error(transparent)]
+    Notmuch(#[from] NotmuchError),
 }
+
+#[derive(Debug, thiserror::Error)]
+#[error("Notmuch errored")]
+pub struct NotmuchError(#[from] notmuch::Error);

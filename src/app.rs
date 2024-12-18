@@ -1,6 +1,8 @@
 use crate::cli::Cli;
 use crate::config::Config;
 use crate::error::ApplicationError;
+use crate::error::NotmuchError;
+use crate::notmuch::AsyncNotmuchDatabase;
 
 slint::include_modules!();
 
@@ -19,9 +21,11 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
         nm_database_mode,
         config.notmuch.config_path.as_ref(),
         config.notmuch.profile.as_deref(),
-    )?;
+    )
+    .map_err(NotmuchError::from)
+    .map(AsyncNotmuchDatabase::from)?;
 
-    let messages = nm_db.create_query(&startup_query)?.search_messages()?;
+    let messages = nm_db.create_query(&startup_query).search_messages().await?;
 
     match cli.mode {
         crate::cli::Mode::Gui => {
@@ -48,7 +52,8 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
 
         crate::cli::Mode::Test => {
             for message in messages {
-                tracing::debug!(id = ?message.id(), tags = ?message.tags().collect::<Vec<String>>(), "Found message");
+                let tags = message.tags().await.into_vec().await;
+                tracing::debug!(id = ?message.id().await, ?tags, "Found message");
             }
         }
     }
