@@ -5,4 +5,7 @@ pub enum ApplicationError {
 
     #[error("Internal Toktio error")]
     TokioJoin(#[from] tokio::task::JoinError),
+
+    #[error("Notmuch errored")]
+    Notmuch(#[from] notmuch::Error),
 }

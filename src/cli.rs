@@ -23,4 +23,7 @@ pub enum Mode {
     #[default]
     Gui,
     Tui,
+
+    // to be removed
+    Test,
 }

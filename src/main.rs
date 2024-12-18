@@ -51,7 +51,7 @@ async fn main() -> Result<(), miette::Error> {
     let _guards = setup_logging(cli.verbosity.tracing_level());
     tracing::debug!(?cli, "Found CLI");
 
-    let config = crate::config::Config::find_xdg()
+    let config = crate::config::Config::find(cli.config.clone())
         .await
         .map_err(crate::error::ApplicationError::from)
         .into_diagnostic()?;

@@ -169,6 +169,7 @@
             pkgs.wayland
             pkgs.libxkbcommon
             pkgs.fontconfig
+            pkgs.notmuch
           ];
 
           nativeBuildInputs = [
@@ -176,6 +177,7 @@
             rustfmt'
             rustTarget
 
+            pkgs.notmuch
             pkgs.cargo-insta
             pkgs.cargo-deny
             pkgs.gitlint

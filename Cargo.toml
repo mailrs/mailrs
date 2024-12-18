@@ -7,11 +7,12 @@ license = "GPL-3.0-only"
 description = "a notmuch GUI/TUI mail client"
 
 [dependencies]
-camino = "1.1.9"
+camino = { version = "1.1.9", features = ["serde1"] }
 clap = { version = "4.5.23", features = ["color", "suggestions", "derive"] }
 clap-verbosity-flag = { version = "3.0.2", default-features = false, features = ["tracing"] }
 human-panic = "2.0.2"
 miette = { version = "7.4.0", features = ["fancy"] }
+notmuch = "0.8.0"
 serde = { version = "1.0.216", features = ["derive"] }
 slint = "1.8.0"
 thiserror = "2.0.8"

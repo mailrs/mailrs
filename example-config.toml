@@ -1,0 +1,4 @@
+default_query = "date:today"
+
+[notmuch]
+database_readonly = true
