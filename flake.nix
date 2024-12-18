@@ -63,7 +63,11 @@
             filter = filterPath;
           };
 
-        buildInputs = [];
+        buildInputs = [
+          pkgs.pkg-config
+          pkgs.fontconfig
+          pkgs.wayland-protocols
+        ];
 
         cargoArtifacts = craneLib.buildDepsOnly {
           inherit src pname buildInputs;
@@ -122,6 +126,12 @@
         };
 
         devShells.default = pkgs.mkShell {
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+            pkgs.wayland
+            pkgs.libxkbcommon
+            pkgs.fontconfig
+          ];
+
           nativeBuildInputs = [
             customCargoMultiplexer
             rustfmt'
