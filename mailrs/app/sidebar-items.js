@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["start"],"mod":["slint_generatedAppWindow"]};

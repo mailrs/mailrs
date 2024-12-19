@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["send_and_recv"],"struct":["NotmuchWorkerHandle","Query"]};

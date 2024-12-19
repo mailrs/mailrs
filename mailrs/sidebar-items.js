@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["main"],"mod":["slint_generatedAppWindow"],"struct":["AppWindow","TextStyle"]};
+window.SIDEBAR_ITEMS = {"fn":["main","setup_logging"],"mod":["app","cli","config","error","notmuch"],"struct":["Guards"]};
