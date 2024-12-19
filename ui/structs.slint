@@ -3,13 +3,16 @@ export struct Header {
     value: string,
 }
 
-export struct Message {
-    id: string,
-    header: [Header],
-    body: string,
+export struct Tag {
+    name: string,
 }
 
-export struct Box {
+export struct Message {
+    id: string,
+    tags: [Tag],
+}
+
+export struct MBox {
     query: string,
     messages: [Message],
 }
