@@ -16,6 +16,8 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Layer;
 
+slint::include_modules!();
+
 struct Guards {
     _append_guard: Option<()>, // TODO
 }

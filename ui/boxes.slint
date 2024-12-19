@@ -1,6 +1,58 @@
+import { TabWidget, StandardTableView } from "std-widgets.slint";
+
+import { Message, Tag } from "structs.slint";
+import { Facade } from "global.slint";
+
+export component TagList inherits Rectangle {
+    in-out property <[Tag]> tags;
+
+    HorizontalLayout {
+        for tag in tags: Rectangle {
+            Text {
+                text: tag.name;
+            }
+        }
+    }
+}
+
+export component MBox inherits Rectangle {
+    in-out property <string> title;
+    in-out property <[Message]> messages;
+
+    Rectangle {
+        Text {
+            text: "Message ID";
+        }
+    }
+    Rectangle {
+        Text {
+            text: "Tags";
+        }
+    }
+    for message in messages: HorizontalLayout {
+        Rectangle {
+            Text {
+                text: message.id;
+            }
+        }
+        Rectangle {
+            TagList {
+                tags: message.tags;
+            }
+        }
+    }
+}
+
 // Boxes is a meta-object that contains all the opened boxes
 //
 // Showing a header column that contains the name of the box (or the query)
 // and a "body" that contains the list of messages
-export component Boxes inherits VerticalLayout {
+export component Boxes inherits Rectangle {
+    in-out property <int> focused_box: 0;
+
+    MBox {
+        title: Facade.mboxes[focused_box].query;
+        messages: Facade.mboxes[focused_box].messages;
+    }
 }
+

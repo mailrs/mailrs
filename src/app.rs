@@ -4,9 +4,6 @@ use crate::error::ApplicationError;
 use crate::notmuch::NotmuchWorker;
 
 pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationError> {
-    let startup_query = cli.init_query.unwrap_or(config.default_query);
-    tracing::debug!(?startup_query);
-
     let nm_database_mode = if config.notmuch.database_readonly {
         notmuch::DatabaseMode::ReadOnly
     } else {
@@ -14,39 +11,41 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
     };
 
     let (handle_sender, handle_recv) = tokio::sync::oneshot::channel();
+    {
+        let notmuch_database_path = config.notmuch.database_path.clone();
+        let notmuch_config_path = config.notmuch.config_path.clone();
+        let notmuch_profile = config.notmuch.profile.clone();
 
-    std::thread::spawn(move || {
-        let worker = NotmuchWorker::open_database(
-            config.notmuch.database_path.as_ref(),
-            nm_database_mode,
-            config.notmuch.config_path.as_ref(),
-            config.notmuch.profile.as_deref(),
-        )
-        .unwrap();
+        std::thread::spawn(move || {
+            let worker = NotmuchWorker::open_database(
+                notmuch_database_path,
+                nm_database_mode,
+                notmuch_config_path,
+                notmuch_profile,
+            )
+            .unwrap();
 
-        let handle = worker.handle();
-        handle_sender.send(handle).unwrap();
-        worker.run()
-    });
-
+            let handle = worker.handle();
+            handle_sender.send(handle).unwrap();
+            worker.run()
+        });
+    }
     let handle = handle_recv
         .await
         .map_err(|_| ApplicationError::NotmuchWorkerSetup)?;
 
     match cli.mode {
         crate::cli::Mode::Gui => {
-            let h = handle.clone();
-            let ui_result = tokio::task::spawn_blocking(move || {
-                crate::gui::run(h)
-            });
-
-            let () = ui_result.await??;
+            let () = crate::gui::run(cli, config, handle.clone()).await?;
         }
         crate::cli::Mode::Tui => {
             let () = crate::tui::run()?;
         }
 
         crate::cli::Mode::Test => {
+            let startup_query = cli.init_query.unwrap_or(config.default_query);
+            tracing::debug!(?startup_query);
+
             let messages = handle
                 .create_query(&startup_query)
                 .search_messages()
