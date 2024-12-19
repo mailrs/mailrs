@@ -3,8 +3,6 @@ use crate::config::Config;
 use crate::error::ApplicationError;
 use crate::notmuch::NotmuchWorker;
 
-slint::include_modules!();
-
 pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationError> {
     let startup_query = cli.init_query.unwrap_or(config.default_query);
     tracing::debug!(?startup_query);
@@ -42,24 +40,13 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
     match cli.mode {
         crate::cli::Mode::Gui => {
             let ui_result = tokio::task::spawn_blocking(|| {
-                let ui = AppWindow::new()?;
-
-                ui.on_request_increase_value({
-                    let ui_handle = ui.as_weak();
-                    move || {
-                        let ui = ui_handle.unwrap();
-                        ui.set_counter(ui.get_counter() + 1);
-                    }
-                });
-
-                ui.run()
+                crate::gui::run()
             });
 
-            let _ = ui_result.await?;
+            let () = ui_result.await??;
         }
         crate::cli::Mode::Tui => {
-            eprintln!("TUI mode is not implemented yet!");
-            std::process::exit(1);
+            let () = crate::tui::run()?;
         }
 
         crate::cli::Mode::Test => {
