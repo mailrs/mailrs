@@ -35,8 +35,9 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
 
     match cli.mode {
         crate::cli::Mode::Gui => {
-            let ui_result = tokio::task::spawn_blocking(|| {
-                crate::gui::run()
+            let h = handle.clone();
+            let ui_result = tokio::task::spawn_blocking(move || {
+                crate::gui::run(h)
             });
 
             let () = ui_result.await??;
