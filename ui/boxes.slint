@@ -1,7 +1,9 @@
-import { TabWidget, StandardTableView } from "std-widgets.slint";
+import { TabWidget, StandardTableView, ScrollView } from "std-widgets.slint";
 
 import { Message, Tag } from "structs.slint";
 import { Facade } from "global.slint";
+
+import { HorizontalListView } from "widgets/widgets.slint";
 
 export component TagList inherits Rectangle {
     in-out property <[Tag]> tags;
@@ -19,28 +21,63 @@ export component MBox inherits Rectangle {
     in-out property <string> title;
     in-out property <[Message]> messages;
 
-    Rectangle {
-        Text {
-            text: "Message ID";
+    width: 100%;
+    height: 100%;
+
+    ScrollView {
+        width: 100%;
+        height: 100%;
+
+        viewport-width: parent.width;
+        viewport-height: parent.height;
+
+        scrolled() => {
+            debug("viewport-x: ", self.viewport-x);
+            debug("viewport-y: ", self.viewport-y);
         }
-    }
-    Rectangle {
-        Text {
-            text: "Tags";
-        }
-    }
-    for message in messages: HorizontalLayout {
+
         Rectangle {
-            Text {
-                text: message.id;
+            width: 100%;
+            height: 100%;
+            background: green;
+
+            HorizontalLayout {
+                width: 100%;
+                height: 100%;
+                Rectangle {
+                    width: 100%;
+                    height: 100%;
+                    Text {
+                        text: "Message ID";
+                    }
+                }
+
+                Rectangle {
+                    Text {
+                        text: "Tags";
+                    }
+                }
             }
         }
-        Rectangle {
-            TagList {
-                tags: message.tags;
+
+        for message in messages: Rectangle {
+            HorizontalLayout {
+                Rectangle {
+                    Text {
+                        text: message.id;
+                    }
+                }
+
+                Rectangle {
+                    TagList {
+                        tags: message.tags;
+                    }
+                }
             }
         }
     }
+
+
 }
 
 // Boxes is a meta-object that contains all the opened boxes
