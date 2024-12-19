@@ -1,6 +1,8 @@
+use crate::notmuch::NotmuchWorkerHandle;
+
 slint::include_modules!();
 
-pub fn run() -> Result<(), Error> {
+pub fn run(notmuch: NotmuchWorkerHandle) -> Result<(), Error> {
     let ui = AppWindow::new()?;
 
     ui.on_request_increase_value({
