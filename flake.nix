@@ -91,6 +91,10 @@
           pkgs.wayland-protocols
         ];
 
+        nativeBuildInputs = [
+          pkgs.notmuch
+        ];
+
         cargoArtifacts = craneLib.buildDepsOnly {
           inherit src pname buildInputs;
         };
@@ -102,6 +106,7 @@
             pname
             version
             buildInputs
+            nativeBuildInputs
             ;
           cargoExtraArgs = "--all-features -p mailrs";
         };
@@ -151,7 +156,7 @@
               pname
               buildInputs
               ;
-            nativeBuildInputs = [
+            nativeBuildInputs = nativeBuildInputs ++ [
               pkgs.coreutils
             ];
           };
