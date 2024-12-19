@@ -32,10 +32,6 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
     let handle = handle_recv
         .await
         .map_err(|_| ApplicationError::NotmuchWorkerSetup)?;
-    let messages = handle
-        .create_query(&startup_query)
-        .search_messages()
-        .await?;
 
     match cli.mode {
         crate::cli::Mode::Gui => {
@@ -50,6 +46,11 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
         }
 
         crate::cli::Mode::Test => {
+            let messages = handle
+                .create_query(&startup_query)
+                .search_messages()
+                .await?;
+
             for message in messages {
                 let tags = handle.tags_for_message(&message).await?;
                 tracing::info!(id = ?message.id(), ?tags, "Found message");
