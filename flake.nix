@@ -111,6 +111,17 @@
           cargoExtraArgs = "--all-features -p mailrs";
         };
 
+        mailrs-doc = craneLib.cargoDoc {
+          inherit
+            cargoArtifacts
+            src
+            pname
+            version
+            buildInputs
+            ;
+          cargoExtraArgs = "--document-private-items -p mailrs";
+        };
+
         rustfmt' = pkgs.writeShellScriptBin "rustfmt" ''
           exec "${nightlyRustTarget}/bin/rustfmt" "$@"
         '';
@@ -166,7 +177,7 @@
 
         packages = {
           default = packages.mailrs;
-          inherit mailrs;
+          inherit mailrs mailrs-doc;
         };
 
         devShells.default = pkgs.mkShell {
