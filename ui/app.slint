@@ -4,8 +4,11 @@ import { Facade } from "global.slint";
 import { Boxes } from "boxes.slint";
 import { Commander } from "commander.slint";
 import { MBox } from "structs.slint";
+import { Theme } from "theme.slint";
+import { ListViewItem, HorizontalListView, ScrollView } from "widgets/widgets.slint";
+import { StateLayer } from "components/state_layer.slint";
 
-export { Facade, MBox }
+export { Facade, MBox, Theme }
 
 enum Page {
     boxes,
@@ -14,12 +17,7 @@ enum Page {
 component MainContent inherits Rectangle {
     property <Page> active-page: Page.boxes;
 
-    HorizontalBox {
-        alignment: center;
-
-        Boxes {
-            visible: active-page == Page.boxes;
-        }
+    Boxes {
     }
 }
 
@@ -42,13 +40,8 @@ export component AppWindow inherits Window {
         width: parent.width;
 
         MainContent {
-            background: red;
             width: parent.width;
             visible: Facade.mboxes.length != 0;
-
-            Text {
-                text: "main, " + Facade.mboxes.length;
-            }
         }
 
         if (Facade.mboxes.length == 0): WelcomePage { }

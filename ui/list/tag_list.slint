@@ -1,0 +1,19 @@
+import { Tag } from "../structs.slint";
+
+export component TagListItem inherits Rectangle {
+    in-out property <Tag> tag;
+
+    Text {
+        text: tag.name;
+    }
+}
+
+export component TagList inherits Rectangle {
+    in-out property <[Tag]> tags;
+
+    HorizontalLayout {
+        for tag in tags: TagListItem {
+            tag: tag;
+        }
+    }
+}

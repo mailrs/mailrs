@@ -1,44 +1,21 @@
-import { TabWidget, StandardTableView } from "std-widgets.slint";
+import { TabWidget, VerticalBox, ListView } from "std-widgets.slint";
 
 import { Message, Tag } from "structs.slint";
 import { Facade } from "global.slint";
+import { MessageList } from "list/message.slint";
 
-export component TagList inherits Rectangle {
-    in-out property <[Tag]> tags;
-
-    HorizontalLayout {
-        for tag in tags: Rectangle {
-            Text {
-                text: tag.name;
-            }
-        }
-    }
-}
+import { HorizontalListView } from "widgets/widgets.slint";
 
 export component MBox inherits Rectangle {
     in-out property <string> title;
     in-out property <[Message]> messages;
 
-    Rectangle {
-        Text {
-            text: "Message ID";
-        }
-    }
-    Rectangle {
-        Text {
-            text: "Tags";
-        }
-    }
-    for message in messages: HorizontalLayout {
-        Rectangle {
-            Text {
-                text: message.id;
-            }
-        }
-        Rectangle {
-            TagList {
-                tags: message.tags;
-            }
+    width: 100%;
+    height: 100%;
+
+    VerticalBox {
+        MessageList {
+            messages: messages;
         }
     }
 }
@@ -49,6 +26,8 @@ export component MBox inherits Rectangle {
 // and a "body" that contains the list of messages
 export component Boxes inherits Rectangle {
     in-out property <int> focused_box: 0;
+    width: 100%;
+    height: 100%;
 
     MBox {
         title: Facade.mboxes[focused_box].query;
