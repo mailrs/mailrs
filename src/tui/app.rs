@@ -87,7 +87,7 @@ impl App {
         let [main_area, commander_area] =
             Layout::vertical([Constraint::Percentage(100), Constraint::Min(6)]).areas(frame.area());
 
-        frame.render_stateful_widget(&self.boxes, main_area, &mut self.boxes_state);
+        frame.render_stateful_widget(&mut self.boxes, main_area, &mut self.boxes_state);
         frame.render_widget(self.commander.ui(), commander_area);
     }
 
@@ -114,10 +114,6 @@ impl App {
                             self.current_focus = FocusState::Commander;
                             self.commander.activate();
                         }
-
-                        KeyCode::Up => {}
-
-                        KeyCode::Down => {}
 
                         _ => {
                             tracing::debug!(key = ?key.code, "Unhandled key press");
