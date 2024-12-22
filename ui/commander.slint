@@ -1,0 +1,43 @@
+import { ListView, VerticalBox, LineEdit, HorizontalBox } from "std-widgets.slint";
+
+import { Facade } from "global.slint";
+
+export component AutoCompleteList inherits Rectangle {
+    in property <[string]> suggestions;
+
+    VerticalBox {
+        ListView {
+            for suggestion in suggestions: Rectangle {
+                height: 30px;
+                width: parent.width;
+                Text {
+                    text: suggestion;
+                }
+            }
+        }
+    }
+}
+
+// Commander is a command input field
+export component Commander inherits Rectangle {
+    width: 100%;
+    height: 100%;
+
+    HorizontalBox {
+        spacing: 5px;
+
+        Rectangle {
+            width: 5%;
+            background: blue;
+
+            Text {
+                text: "mailrs:";
+            }
+        }
+
+        LineEdit {
+            text <=> Facade.commander_text;
+            placeholder-text: "Press : to start commander";
+        }
+    }
+}

@@ -17,14 +17,18 @@ impl NotmuchWorker {
         database_path: Option<DP>,
         mode: notmuch::DatabaseMode,
         config_path: Option<CP>,
-        profile: Option<&str>,
+        profile: Option<String>,
     ) -> Result<Self, NotmuchError>
     where
         DP: AsRef<std::path::Path>,
         CP: AsRef<std::path::Path>,
     {
-        let database =
-            notmuch::Database::open_with_config(database_path, mode, config_path, profile)?;
+        let database = notmuch::Database::open_with_config(
+            database_path,
+            mode,
+            config_path,
+            profile.as_deref(),
+        )?;
         let (sender, receiver) = tokio::sync::mpsc::channel(1);
         Ok(Self {
             database,

@@ -6,13 +6,18 @@ mod app;
 mod cli;
 mod config;
 mod error;
+mod gui;
 mod notmuch;
+mod state;
+mod tui;
 
 use clap::Parser;
 use miette::IntoDiagnostic;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Layer;
+
+slint::include_modules!();
 
 struct Guards {
     _append_guard: Option<()>, // TODO

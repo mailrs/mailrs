@@ -1,0 +1,32 @@
+import { ListView } from "std-widgets.slint";
+
+import { Message } from "../structs.slint";
+import { TagList } from "tag_list.slint";
+
+export component MessageListItem inherits Rectangle {
+    in-out property <Message> message;
+
+    height: 30px;
+    HorizontalLayout {
+        Rectangle {
+            width: 50%;
+            Text {
+                text: message.id;
+            }
+        }
+
+        Rectangle {
+            TagList {
+                tags: message.tags;
+            }
+        }
+    }
+}
+
+export component MessageList inherits ListView {
+    in-out property <[Message]> messages;
+
+    for message in messages: MessageListItem {
+        message: message;
+    }
+}

@@ -5,6 +5,7 @@ use super::Request;
 use super::WorkerError;
 use crate::error::NotmuchError;
 
+#[derive(Clone)]
 pub struct NotmuchWorkerHandle {
     pub(super) sender: NotmuchRequestSender,
 }

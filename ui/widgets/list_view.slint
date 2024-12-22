@@ -1,0 +1,67 @@
+import { ListViewItem } from "list_item.slint";
+import { ScrollView } from "scroll_view.slint";
+import { Theme } from "../theme.slint";
+
+export component HorizontalListView {
+    in property <[StandardListViewItem]> model;
+    in-out property <int> selected-index;
+
+    callback selection-changed(/* index */ int);
+
+    function select(index: int) {
+        selected-index = index;
+        selection-changed(index);
+    }
+
+    i-scroll-view := ScrollView {
+       i-blub := HorizontalLayout {
+            alignment: start;
+            spacing: Theme.spaces.medium;
+
+            for item[index] in model : ListViewItem {
+                clicked => {
+                    select(index);
+                }
+
+                private property <length> offset: i-scroll-view.viewport-y + index * (self.height + parent.spacing);
+
+                text: item.text;
+                selected: index == selected-index;
+
+                animate opacity { duration: Theme.durations.fast;  }
+            }
+       }
+    }
+}
+
+export component VerticalListView {
+    in property <[StandardListViewItem]> model;
+    in-out property <int> selected-index;
+
+    callback selection-changed(/* index */ int);
+
+    function select(index: int) {
+        selected-index = index;
+        selection-changed(index);
+    }
+
+    i-scroll-view := ScrollView {
+       i-blub := VerticalLayout {
+            alignment: start;
+            spacing: Theme.spaces.medium;
+
+            for item[index] in model : ListViewItem {
+                clicked => {
+                    select(index);
+                }
+
+                private property <length> offset: i-scroll-view.viewport-y + index * (self.height + parent.spacing);
+
+                text: item.text;
+                selected: index == selected-index;
+
+                animate opacity { duration: Theme.durations.fast;  }
+            }
+       }
+    }
+}

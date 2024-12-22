@@ -1,0 +1,19 @@
+export struct Header {
+    key: string,
+    value: string,
+}
+
+export struct Tag {
+    name: string,
+}
+
+export struct Message {
+    id: string,
+    tags: [Tag],
+}
+
+export struct MBox {
+    query: string,
+    messages: [Message],
+}
+
