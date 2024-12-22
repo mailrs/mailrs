@@ -85,7 +85,7 @@ impl App {
 
     fn draw(&mut self, frame: &mut ratatui::Frame<'_>) {
         let [main_area, commander_area] =
-            Layout::vertical([Constraint::Percentage(100), Constraint::Min(6)]).areas(frame.area());
+            Layout::vertical([Constraint::Percentage(100), Constraint::Min(9)]).areas(frame.area());
 
         frame.render_stateful_widget(&mut self.boxes, main_area, &mut self.boxes_state);
         frame.render_widget(self.commander.ui(), commander_area);

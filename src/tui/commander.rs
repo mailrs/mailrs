@@ -53,6 +53,11 @@ impl Commander {
                 self.ui.clear();
             }
 
+            KeyCode::Tab => {
+                tracing::trace!("Autocompleting command");
+                self.ui.autocomplete_command();
+            }
+
             KeyCode::Enter => {
                 tracing::trace!(command = ?self.ui.value(), "Processing command");
 

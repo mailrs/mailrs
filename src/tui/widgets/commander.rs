@@ -48,6 +48,15 @@ impl CommanderUi {
     pub fn value(&self) -> &str {
         self.input.value()
     }
+
+    pub(crate) fn autocomplete_command(&mut self) {
+        let Some(value) = self.suggestions.first().cloned() else {
+            return;
+        };
+
+        let value_len = value.len();
+        self.input = self.input.clone().with_value(value).with_cursor(value_len);
+    }
 }
 
 impl Widget for &CommanderUi {
