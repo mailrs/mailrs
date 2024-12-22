@@ -14,6 +14,7 @@ futures = "0.3.31"
 human-panic = "2.0.2"
 miette = { version = "7.4.0", features = ["fancy"] }
 notmuch = "0.8.0"
+ratatui = "0.29.0"
 serde = { version = "1.0.216", features = ["derive"] }
 slint = "1.8.0"
 thiserror = "2.0.8"
@@ -22,6 +23,8 @@ tokio = { version = "1.42.0", features = ["rt", "macros", "fs", "sync"] }
 toml = "0.8.19"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tui-input = "0.11.1"
+tui-widget-list = "0.13.0"
 xdg = "2.5.2"
 
 [build-dependencies]
