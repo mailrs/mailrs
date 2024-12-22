@@ -1,9 +1,9 @@
 (function() {
-    var implementors = Object.fromEntries([["mailrs",[["impl ItemTree for <a class=\"struct\" href=\"mailrs/app/slint_generatedAppWindow/struct.InnerAppWindow.html\" title=\"struct mailrs::app::slint_generatedAppWindow::InnerAppWindow\">InnerAppWindow</a>"],["impl ItemTree for <a class=\"struct\" href=\"mailrs/app/slint_generatedAppWindow/struct.InnerComponent_image_9.html\" title=\"struct mailrs::app::slint_generatedAppWindow::InnerComponent_image_9\">InnerComponent_image_9</a>"],["impl ItemTree for <a class=\"struct\" href=\"mailrs/app/slint_generatedAppWindow/struct.InnerComponent_rectangle_15.html\" title=\"struct mailrs::app::slint_generatedAppWindow::InnerComponent_rectangle_15\">InnerComponent_rectangle_15</a>"],["impl ItemTree for <a class=\"struct\" href=\"mailrs/app/slint_generatedAppWindow/struct.InnerComponent_text_11.html\" title=\"struct mailrs::app::slint_generatedAppWindow::InnerComponent_text_11\">InnerComponent_text_11</a>"]]]]);
+    var implementors = Object.fromEntries([["mailrs",[["impl ItemTree for <a class=\"struct\" href=\"mailrs/slint_generatedAppWindow/struct.InnerAppWindow.html\" title=\"struct mailrs::slint_generatedAppWindow::InnerAppWindow\">InnerAppWindow</a>"],["impl ItemTree for <a class=\"struct\" href=\"mailrs/slint_generatedAppWindow/struct.InnerComponent_rectangle_19.html\" title=\"struct mailrs::slint_generatedAppWindow::InnerComponent_rectangle_19\">InnerComponent_rectangle_19</a>"],["impl ItemTree for <a class=\"struct\" href=\"mailrs/slint_generatedAppWindow/struct.InnerComponent_rectangle_36.html\" title=\"struct mailrs::slint_generatedAppWindow::InnerComponent_rectangle_36\">InnerComponent_rectangle_36</a>"],["impl ItemTree for <a class=\"struct\" href=\"mailrs/slint_generatedAppWindow/struct.InnerComponent_rectangle_52.html\" title=\"struct mailrs::slint_generatedAppWindow::InnerComponent_rectangle_52\">InnerComponent_rectangle_52</a>"]]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {
         window.pending_implementors = implementors;
     }
 })()
-//{"start":57,"fragment_lengths":[915]}
+//{"start":57,"fragment_lengths":[909]}

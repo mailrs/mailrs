@@ -61,29 +61,12 @@
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
 <a href="#62" id="62">62</a>
-<a href="#63" id="63">63</a>
-<a href="#64" id="64">64</a>
-<a href="#65" id="65">65</a>
-<a href="#66" id="66">66</a>
-<a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
-<a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::cli::Cli;
+<a href="#63" id="63">63</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::cli::Cli;
 <span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::error::ApplicationError;
 <span class="kw">use </span><span class="kw">crate</span>::notmuch::NotmuchWorker;
 
-<span class="macro">slint::include_modules!</span>();
-
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>start(cli: Cli, config: Config) -&gt; <span class="prelude-ty">Result</span>&lt;(), ApplicationError&gt; {
-    <span class="kw">let </span>startup_query = cli.init_query.unwrap_or(config.default_query);
-    <span class="macro">tracing::debug!</span>(<span class="question-mark">?</span>startup_query);
-
     <span class="kw">let </span>nm_database_mode = <span class="kw">if </span>config.notmuch.database_readonly {
         notmuch::DatabaseMode::ReadOnly
     } <span class="kw">else </span>{
@@ -91,53 +74,46 @@
     };
 
     <span class="kw">let </span>(handle_sender, handle_recv) = tokio::sync::oneshot::channel();
+    {
+        <span class="kw">let </span>notmuch_database_path = config.notmuch.database_path.clone();
+        <span class="kw">let </span>notmuch_config_path = config.notmuch.config_path.clone();
+        <span class="kw">let </span>notmuch_profile = config.notmuch.profile.clone();
 
-    std::thread::spawn(<span class="kw">move </span>|| {
-        <span class="kw">let </span>worker = NotmuchWorker::open_database(
-            config.notmuch.database_path.as_ref(),
-            nm_database_mode,
-            config.notmuch.config_path.as_ref(),
-            config.notmuch.profile.as_deref(),
-        )
-        .unwrap();
+        std::thread::spawn(<span class="kw">move </span>|| {
+            <span class="kw">let </span>worker = NotmuchWorker::open_database(
+                notmuch_database_path,
+                nm_database_mode,
+                notmuch_config_path,
+                notmuch_profile,
+            )
+            .unwrap();
 
-        <span class="kw">let </span>handle = worker.handle();
-        handle_sender.send(handle).unwrap();
-        worker.run()
-    });
-
+            <span class="kw">let </span>handle = worker.handle();
+            handle_sender.send(handle).unwrap();
+            worker.run()
+        });
+    }
     <span class="kw">let </span>handle = handle_recv
         .<span class="kw">await
         </span>.map_err(|<span class="kw">_</span>| ApplicationError::NotmuchWorkerSetup)<span class="question-mark">?</span>;
-    <span class="kw">let </span>messages = handle
-        .create_query(<span class="kw-2">&amp;</span>startup_query)
-        .search_messages()
-        .<span class="kw">await</span><span class="question-mark">?</span>;
 
     <span class="kw">match </span>cli.mode {
         <span class="kw">crate</span>::cli::Mode::Gui =&gt; {
-            <span class="kw">let </span>ui_result = tokio::task::spawn_blocking(|| {
-                <span class="kw">let </span>ui = AppWindow::new()<span class="question-mark">?</span>;
-
-                ui.on_request_increase_value({
-                    <span class="kw">let </span>ui_handle = ui.as_weak();
-                    <span class="kw">move </span>|| {
-                        <span class="kw">let </span>ui = ui_handle.unwrap();
-                        ui.set_counter(ui.get_counter() + <span class="number">1</span>);
-                    }
-                });
-
-                ui.run()
-            });
-
-            <span class="kw">let _ </span>= ui_result.<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>() = <span class="kw">crate</span>::gui::run(cli, config, handle.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="kw">crate</span>::cli::Mode::Tui =&gt; {
-            <span class="macro">eprintln!</span>(<span class="string">"TUI mode is not implemented yet!"</span>);
-            std::process::exit(<span class="number">1</span>);
+            <span class="kw">let </span>() = <span class="kw">crate</span>::tui::run()<span class="question-mark">?</span>;
         }
 
         <span class="kw">crate</span>::cli::Mode::Test =&gt; {
+            <span class="kw">let </span>startup_query = cli.init_query.unwrap_or(config.default_query);
+            <span class="macro">tracing::debug!</span>(<span class="question-mark">?</span>startup_query);
+
+            <span class="kw">let </span>messages = handle
+                .create_query(<span class="kw-2">&amp;</span>startup_query)
+                .search_messages()
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+
             <span class="kw">for </span>message <span class="kw">in </span>messages {
                 <span class="kw">let </span>tags = handle.tags_for_message(<span class="kw-2">&amp;</span>message).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="macro">tracing::info!</span>(id = <span class="question-mark">?</span>message.id(), <span class="question-mark">?</span>tags, <span class="string">"Found message"</span>);

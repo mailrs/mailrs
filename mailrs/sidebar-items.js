@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["main","setup_logging"],"mod":["app","cli","config","error","notmuch"],"struct":["Guards"]};
+window.SIDEBAR_ITEMS = {"enum":["CurrentFocus"],"fn":["main","setup_logging"],"mod":["app","cli","config","error","gui","notmuch","slint_generatedAppWindow","state","tui"],"struct":["AppWindow","Durations","Facade","Font","Guards","MBox","Message","Palette","Spaces","Tag","TextStyle","Theme","Typo"]};

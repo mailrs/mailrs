@@ -110,7 +110,11 @@
 <a href="#109" id="109">109</a>
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::NotmuchWorkerHandle;
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::NotmuchWorkerHandle;
 <span class="kw">use </span><span class="kw">super</span>::Request;
 <span class="kw">use </span><span class="kw">super</span>::WorkerError;
 <span class="kw">use </span><span class="kw">crate</span>::error::NotmuchError;
@@ -129,14 +133,18 @@
         database_path: <span class="prelude-ty">Option</span>&lt;DP&gt;,
         mode: notmuch::DatabaseMode,
         config_path: <span class="prelude-ty">Option</span>&lt;CP&gt;,
-        profile: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        profile: <span class="prelude-ty">Option</span>&lt;String&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, NotmuchError&gt;
     <span class="kw">where
         </span>DP: AsRef&lt;std::path::Path&gt;,
         CP: AsRef&lt;std::path::Path&gt;,
     {
-        <span class="kw">let </span>database =
-            notmuch::Database::open_with_config(database_path, mode, config_path, profile)<span class="question-mark">?</span>;
+        <span class="kw">let </span>database = notmuch::Database::open_with_config(
+            database_path,
+            mode,
+            config_path,
+            profile.as_deref(),
+        )<span class="question-mark">?</span>;
         <span class="kw">let </span>(sender, receiver) = tokio::sync::mpsc::channel(<span class="number">1</span>);
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             database,

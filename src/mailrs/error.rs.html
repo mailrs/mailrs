@@ -22,7 +22,13 @@
 <a href="#21" id="21">21</a>
 <a href="#22" id="22">22</a>
 <a href="#23" id="23">23</a>
-<a href="#24" id="24">24</a></pre></div><pre class="rust"><code><span class="attr">#[derive(Debug, thiserror::Error)]
+<a href="#24" id="24">24</a>
+<a href="#25" id="25">25</a>
+<a href="#26" id="26">26</a>
+<a href="#27" id="27">27</a>
+<a href="#28" id="28">28</a>
+<a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a></pre></div><pre class="rust"><code><span class="attr">#[derive(Debug, thiserror::Error)]
 </span><span class="kw">pub enum </span>ApplicationError {
     <span class="attr">#[error(<span class="string">"Configuration error"</span>)]
     </span>Config(<span class="attr">#[from] </span><span class="kw">crate</span>::config::ConfigError),
@@ -41,6 +47,12 @@
 
     <span class="attr">#[error(<span class="string">"Notmuch Worker errored"</span>)]
     </span>WorkerNotmuch(<span class="attr">#[from] </span><span class="kw">crate</span>::notmuch::WorkerError&lt;NotmuchError&gt;),
+
+    <span class="attr">#[error(<span class="string">"GUI errored"</span>)]
+    </span>Gui(<span class="attr">#[from] </span><span class="kw">crate</span>::gui::error::Error),
+
+    <span class="attr">#[error(<span class="string">"TUI errored"</span>)]
+    </span>Tui(<span class="attr">#[from] </span><span class="kw">crate</span>::tui::Error),
 }
 
 <span class="attr">#[derive(Debug, thiserror::Error)]

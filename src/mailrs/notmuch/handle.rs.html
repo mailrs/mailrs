@@ -70,14 +70,16 @@
 <a href="#69" id="69">69</a>
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::message::Message;
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::message::Message;
 <span class="kw">use </span><span class="kw">super</span>::tag::Tag;
 <span class="kw">use </span><span class="kw">super</span>::worker::NotmuchRequestSender;
 <span class="kw">use </span><span class="kw">super</span>::Request;
 <span class="kw">use </span><span class="kw">super</span>::WorkerError;
 <span class="kw">use </span><span class="kw">crate</span>::error::NotmuchError;
 
-<span class="kw">pub struct </span>NotmuchWorkerHandle {
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>NotmuchWorkerHandle {
     <span class="kw">pub</span>(<span class="kw">super</span>) sender: NotmuchRequestSender,
 }
 
