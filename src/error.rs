@@ -18,11 +18,13 @@ pub enum ApplicationError {
     #[error("Notmuch Worker errored")]
     WorkerNotmuch(#[from] crate::notmuch::WorkerError<NotmuchError>),
 
+    #[cfg(feature = "gui")]
     #[error("GUI errored")]
     Gui(#[from] crate::gui::error::Error),
 
+    #[cfg(feature = "tui")]
     #[error("TUI errored")]
-    Tui(#[from] crate::tui::Error),
+    Tui(#[from] crate::tui::error::Error),
 }
 
 #[derive(Debug, thiserror::Error)]

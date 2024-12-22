@@ -20,8 +20,12 @@ pub struct Cli {
 
 #[derive(Default, Debug, clap::Subcommand)]
 pub enum Mode {
-    #[default]
+    #[cfg(feature = "gui")]
+    #[cfg_attr(feature = "gui", default)]
     Gui,
+
+    #[cfg(feature = "tui")]
+    #[cfg_attr(not(feature = "gui"), default)]
     Tui,
 
     // to be removed

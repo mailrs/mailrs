@@ -2,13 +2,20 @@
 // starting the app via file manager. Ignored on other platforms.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+#[cfg(all(not(feature = "gui"), not(feature = "tui")))]
+compile_error!("Either 'gui' or 'tui' feature must be enabled!");
+
 mod app;
 mod cli;
 mod config;
 mod error;
-mod gui;
 mod notmuch;
 mod state;
+
+#[cfg(feature = "gui")]
+mod gui;
+
+#[cfg(feature = "tui")]
 mod tui;
 
 use clap::Parser;
@@ -17,6 +24,7 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Layer;
 
+#[cfg(feature = "gui")]
 slint::include_modules!();
 
 struct Guards {

@@ -1177,6 +1177,7 @@ checksum = "829d955a0bb380ef178a640b91779e3987da38c9aea133b20614cfed8cdea9c6"
 dependencies = [
  "bitflags 2.6.0",
  "crossterm_winapi",
+ "futures-core",
  "mio",
  "parking_lot",
  "rustix",
@@ -1321,6 +1322,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_more"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a9b99b9cbbe49445b21764dc0625032a89b145a2642e67603e1c936f5458d05"
+dependencies = [
+ "derive_more-impl",
+]
+
+[[package]]
+name = "derive_more-impl"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb7330aeadfbe296029522e6c40f315320aba36fc43a5b3632f3795348f3bd22"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.90",
+ "unicode-xid",
+]
+
+[[package]]
 name = "derive_utils"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1449,6 +1471,26 @@ name = "endi"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3d8a32ae18130a3c84dd492d4215c3d913c3b07c6b63c2eb3eb7ff1101ab7bf"
+
+[[package]]
+name = "enum-iterator"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c280b9e6b3ae19e152d8e31cf47f18389781e119d4013a2a2bb0180e5facc635"
+dependencies = [
+ "enum-iterator-derive",
+]
+
+[[package]]
+name = "enum-iterator-derive"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1ab991c1362ac86c61ab6f556cff143daa22e5a15e4e189df818b2fd19fe65b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.90",
+]
 
 [[package]]
 name = "enumflags2"
@@ -2126,7 +2168,7 @@ dependencies = [
  "cocoa",
  "const-field-offset",
  "copypasta",
- "derive_more",
+ "derive_more 0.99.18",
  "glutin",
  "glutin-winit",
  "i-slint-common",
@@ -2155,7 +2197,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bdd025e9a8c1bb6f2132ab453a0f552408050115552134200a7edea2247cccce"
 dependencies = [
  "cfg-if",
- "derive_more",
+ "derive_more 0.99.18",
  "fontdb",
  "libloading",
 ]
@@ -2169,7 +2211,7 @@ dependencies = [
  "by_address",
  "codemap",
  "codemap-diagnostic",
- "derive_more",
+ "derive_more 0.99.18",
  "fontdue",
  "i-slint-common",
  "image 0.24.9",
@@ -2202,7 +2244,7 @@ dependencies = [
  "chrono",
  "clru",
  "const-field-offset",
- "derive_more",
+ "derive_more 0.99.18",
  "euclid",
  "fontdue",
  "i-slint-common",
@@ -2256,7 +2298,7 @@ dependencies = [
  "const-field-offset",
  "core-foundation 0.9.4",
  "core-text",
- "derive_more",
+ "derive_more 0.99.18",
  "dwrote",
  "femtovg",
  "glow",
@@ -2290,7 +2332,7 @@ dependencies = [
  "const-field-offset",
  "core-foundation 0.9.4",
  "core-graphics-types 0.1.3",
- "derive_more",
+ "derive_more 0.99.18",
  "foreign-types",
  "glow",
  "glutin",
@@ -2874,10 +2916,14 @@ dependencies = [
  "camino",
  "clap",
  "clap-verbosity-flag",
+ "crossterm",
+ "derive_more 1.0.0",
+ "enum-iterator",
  "futures",
  "human-panic",
  "miette",
  "notmuch",
+ "nucleo-matcher",
  "ratatui",
  "serde",
  "slint",
@@ -3080,6 +3126,16 @@ checksum = "77a8165726e8236064dbb45459242600304b42a5ea24ee2948e18e023bf7ba84"
 dependencies = [
  "overload",
  "winapi",
+]
+
+[[package]]
+name = "nucleo-matcher"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf33f538733d1a5a3494b836ba913207f14d9d4a1d3cd67030c5061bdd2cac85"
+dependencies = [
+ "memchr",
+ "unicode-segmentation",
 ]
 
 [[package]]
