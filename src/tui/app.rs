@@ -128,21 +128,27 @@ impl App {
     }
 
     fn handle_app_message(&mut self, message: AppMessage) -> Result<(), AppError> {
+        use crate::tui::commander::Command::*;
+
         match message {
             AppMessage::Shutdown(_message) => {
                 self.do_exit = true;
             }
-            AppMessage::Command(crate::tui::commander::Command::Quit) => {
+            AppMessage::Command { command: Quit, .. } => {
                 tracing::info!("Quit Command received");
                 self.do_exit = true;
             }
 
-            AppMessage::Command(crate::tui::commander::Command::NextMessage) => {
+            AppMessage::Command { command: NextMessage, .. }=> {
                 tracing::info!("Next Sidebar Entry command received");
             }
 
-            AppMessage::Command(crate::tui::commander::Command::PrevMessage) => {
+            AppMessage::Command{ command: PrevMessage, .. } => {
                 tracing::info!("Prev Sidebar Entry command received");
+            }
+
+            AppMessage::Command{ command: Query, args } => {
+                tracing::info!(?args, "Query received");
             }
         }
 
@@ -154,5 +160,8 @@ impl App {
 pub enum AppMessage {
     #[allow(dead_code)]
     Shutdown(String),
-    Command(crate::tui::commander::Command),
+    Command {
+        command: crate::tui::commander::Command,
+        args: Vec<String>,
+    },
 }

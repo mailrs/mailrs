@@ -85,12 +85,24 @@ impl Commander {
                 self.ui.suggestions = found.into_iter().map(|(s, _)| s.to_string()).collect();
 
                 if let Some(command) = first {
-                    let Ok(command) = Command::from_str(command.0) else {
+                    let (command_part, args) = {
+                        let mut it = command.0.split(' ');
+                        if let Some(first) = it.next() {
+                            (first.to_string(), it.map(String::from).collect())
+                        } else {
+                            (command.0.to_string(), Vec::new())
+                        }
+                    };
+
+                    let Ok(command) = Command::from_str(&command_part) else {
                         panic!("Bug")
                     };
 
                     tracing::debug!(?command, "Sending command to app");
-                    let _ = self.sender.send(AppMessage::Command(command)).await;
+                    let _ = self
+                        .sender
+                        .send(AppMessage::Command { command, args })
+                        .await;
                     self.ui.clear()
                 }
             }
@@ -134,6 +146,8 @@ pub enum Command {
     NextMessage,
     #[display("previous")]
     PrevMessage,
+    #[display("query")]
+    Query,
 }
 
 impl FromStr for Command {
@@ -146,6 +160,7 @@ impl FromStr for Command {
             "quit" => Ok(Quit),
             "next" => Ok(NextMessage),
             "previous" => Ok(PrevMessage),
+            "query" => Ok(Query),
 
             _other => Err(()),
         }
