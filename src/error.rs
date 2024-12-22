@@ -19,7 +19,7 @@ pub enum ApplicationError {
     WorkerNotmuch(#[from] crate::notmuch::WorkerError<NotmuchError>),
 
     #[error("GUI errored")]
-    Gui(#[from] crate::gui::Error),
+    Gui(#[from] crate::gui::error::Error),
 
     #[error("TUI errored")]
     Tui(#[from] crate::tui::Error),

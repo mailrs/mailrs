@@ -1,3 +1,6 @@
+use std::sync::Arc;
+use std::sync::Mutex;
+
 use futures::StreamExt;
 use slint::ComponentHandle;
 use slint::ModelRc;
@@ -7,9 +10,17 @@ use crate::cli::Cli;
 use crate::config::Config;
 use crate::notmuch::NotmuchWorkerHandle;
 use crate::slint_generatedAppWindow::*;
+use crate::state::AppState;
+
+mod callbacks;
+pub mod error;
+
+use self::error::Error;
 
 pub async fn run(cli: Cli, config: Config, notmuch: NotmuchWorkerHandle) -> Result<(), Error> {
-    let ui = AppWindow::new()?;
+    let app_state = Arc::new(Mutex::new(AppState::default()));
+    let mut ui = AppWindow::new()?;
+    crate::gui::callbacks::register_callbacks(&mut ui, app_state)?;
 
     let startup_query = cli.init_query.unwrap_or(config.default_query);
     tracing::debug!(?startup_query);
@@ -56,13 +67,4 @@ pub async fn run(cli: Cli, config: Config, notmuch: NotmuchWorkerHandle) -> Resu
     facade.set_mboxes(ModelRc::new(VecModel::<MBox>::from_slice(&[mbox])));
 
     ui.run().map_err(Error::from)
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error(transparent)]
-    SlintPlatform(#[from] slint::PlatformError),
-
-    #[error(transparent)]
-    WorkerNotmuch(#[from] crate::notmuch::WorkerError<crate::error::NotmuchError>),
 }

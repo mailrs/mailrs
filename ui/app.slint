@@ -2,7 +2,7 @@ import { VerticalBox, HorizontalBox } from "std-widgets.slint";
 
 import { Facade } from "global.slint";
 import { Boxes } from "boxes.slint";
-import { Commander } from "commander.slint";
+import { Commander, AutoCompleteList } from "commander.slint";
 import { MBox } from "structs.slint";
 import { Theme } from "theme.slint";
 import { ListViewItem, HorizontalListView, ScrollView } from "widgets/widgets.slint";
@@ -10,21 +10,11 @@ import { StateLayer } from "components/state_layer.slint";
 
 export { Facade, MBox, Theme }
 
-enum Page {
-    boxes,
-}
-
-component MainContent inherits Rectangle {
-    property <Page> active-page: Page.boxes;
-
-    Boxes {
-    }
-}
-
-component WelcomePage inherits VerticalLayout {
-    HorizontalBox {
-        alignment: center;
-    }
+enum CurrentFocus {
+    none,
+    commander,
+    mbox,
+    mail,
 }
 
 export component AppWindow inherits Window {
@@ -35,19 +25,49 @@ export component AppWindow inherits Window {
     preferred-width: 1200px;
     preferred-height: 640px;
 
+    in-out property <CurrentFocus> current_focus: CurrentFocus.none;
+
+    forward-focus: global-key-handler;
+
+    global-key-handler := FocusScope {
+        key-pressed(event) => {
+            debug("Event: ", event.text);
+
+            if (event.text == Key.Escape) {
+                current_focus = CurrentFocus.none;
+                Facade.unfocus-commander()
+            }
+
+            if (current_focus == CurrentFocus.commander) {
+                Facade.commander-keypress(event.text);
+                return accept;
+            }
+
+            if (event.text == ":") {
+                current_focus = CurrentFocus.commander;
+                Facade.focus-commander()
+            }
+
+            accept
+        }
+    }
+
     VerticalLayout {
         spacing: 5px;
         width: parent.width;
 
-        MainContent {
+        Boxes {
             width: parent.width;
             visible: Facade.mboxes.length != 0;
         }
 
-        if (Facade.mboxes.length == 0): WelcomePage { }
+        AutoCompleteList {
+            width: parent.width;
+            visible: Facade.commander_visible;
+            suggestions: Facade.commander_suggestions;
+        }
 
         Commander {
-            background: blue;
             max-height: 5cm;
             preferred-height: 1cm;
             width: parent.width;

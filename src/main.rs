@@ -8,6 +8,7 @@ mod config;
 mod error;
 mod gui;
 mod notmuch;
+mod state;
 mod tui;
 
 use clap::Parser;

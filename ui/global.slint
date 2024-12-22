@@ -3,12 +3,20 @@ import { MBox } from "structs.slint";
 export global Facade {
     // Models
 
-    in-out property <[MBox]> mboxes;
+    in property <[MBox]> mboxes;
+
+    in property <[string]> commander_suggestions;
+    in-out property <string> commander_text;
+    in-out property <bool> commander_visible;
 
     // Actions
 
     callback open-box(string);
     callback close-box();
+
+    callback focus-commander();
+    callback unfocus-commander();
+    callback commander-keypress(string);
 
     // Functions
 }
