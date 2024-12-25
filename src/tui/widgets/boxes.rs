@@ -84,6 +84,7 @@ impl StatefulWidget for &mut Boxes {
 
         {
             let bx = self.boxes.get(self.tab_bar_focus).unwrap().clone();
+            let item_count = bx.messages.len();
 
             let builder = ListBuilder::new(move |context| {
                 let message = bx.messages.get(context.index).unwrap();
@@ -113,7 +114,6 @@ impl StatefulWidget for &mut Boxes {
                 (item, main_axis_size)
             });
 
-            let item_count = 2;
             let list = ListView::new(builder, item_count);
             list.render(message_list, buf, &mut self.current_box_list_state);
         }
