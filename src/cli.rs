@@ -6,6 +6,10 @@ pub struct Cli {
     #[clap(flatten)]
     pub(crate) verbosity: clap_verbosity_flag::Verbosity,
 
+    /// A file path to write logs to
+    #[clap(long, short)]
+    pub(crate) logfile: Option<camino::Utf8PathBuf>,
+
     // Overwrite where to look for the configuration file
     #[clap(long, value_name = "FILE")]
     pub(crate) config: Option<camino::Utf8PathBuf>,
