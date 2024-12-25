@@ -79,7 +79,6 @@ impl Widget for &CommanderUi {
     {
         // This automatically renders itself over other widgets, if it needs to
         if self.activated {
-
             let msg = vec![
                 Span::styled("ESC", Style::default().add_modifier(Modifier::BOLD)),
                 Span::raw(" to exit prompt"),
@@ -97,10 +96,14 @@ impl Widget for &CommanderUi {
             .flex(ratatui::layout::Flex::Start)
             .areas(area);
 
-            let [suggestions_area, command_area] =
-                Layout::vertical([Constraint::Length(suggestions_height), Constraint::Length(3)]).areas(commander_area);
+            let [suggestions_area, command_area] = Layout::vertical([
+                Constraint::Length(suggestions_height),
+                Constraint::Length(3),
+            ])
+            .areas(commander_area);
 
             if !self.suggestions.is_empty() {
+                ratatui::widgets::Clear.render(suggestions_area, buf);
                 List::new(self.suggestions.clone())
                     .block(Block::bordered().title("Suggestions"))
                     .style(Style::new().white())
@@ -138,6 +141,7 @@ impl Widget for &CommanderUi {
                 })
                 .block(Block::default().borders(Borders::ALL).title("Input"));
 
+            ratatui::widgets::Clear.render(command_area, buf);
             logo.render(commander_logo_area, buf);
             input.render(inserting_area, buf);
             desc_text.render(desc_area, buf);
