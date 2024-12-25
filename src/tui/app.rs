@@ -3,8 +3,6 @@ use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
 use futures::FutureExt;
 use futures::StreamExt;
-use ratatui::layout::Constraint;
-use ratatui::layout::Layout;
 use ratatui::prelude::Backend;
 use ratatui::Terminal;
 
@@ -84,11 +82,8 @@ impl App {
     }
 
     fn draw(&mut self, frame: &mut ratatui::Frame<'_>) {
-        let [main_area, commander_area] =
-            Layout::vertical([Constraint::Percentage(100), Constraint::Min(9)]).areas(frame.area());
-
-        frame.render_stateful_widget(&mut self.boxes, main_area, &mut self.boxes_state);
-        frame.render_widget(self.commander.ui(), commander_area);
+        frame.render_stateful_widget(&mut self.boxes, frame.area(), &mut self.boxes_state);
+        frame.render_widget(self.commander.ui(), frame.area());
     }
 
     async fn handle_tui_event(&mut self, event: crossterm::event::Event) {
@@ -139,15 +134,24 @@ impl App {
                 self.do_exit = true;
             }
 
-            AppMessage::Command { command: NextMessage, .. }=> {
+            AppMessage::Command {
+                command: NextMessage,
+                ..
+            } => {
                 tracing::info!("Next Sidebar Entry command received");
             }
 
-            AppMessage::Command{ command: PrevMessage, .. } => {
+            AppMessage::Command {
+                command: PrevMessage,
+                ..
+            } => {
                 tracing::info!("Prev Sidebar Entry command received");
             }
 
-            AppMessage::Command{ command: Query, args } => {
+            AppMessage::Command {
+                command: Query,
+                args,
+            } => {
                 tracing::info!(?args, "Query received");
             }
         }

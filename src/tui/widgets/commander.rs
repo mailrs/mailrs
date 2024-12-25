@@ -18,12 +18,25 @@ use ratatui::widgets::Widget;
 use tui_input::backend::crossterm::EventHandler;
 use tui_input::Input;
 
-#[derive(Default)]
 pub struct CommanderUi {
     activated: bool,
     pub unknown_command: bool,
     pub suggestions: Vec<String>,
     input: Input,
+
+    pub max_height_percent: u16,
+}
+
+impl Default for CommanderUi {
+    fn default() -> Self {
+        Self {
+            activated: false,
+            unknown_command: false,
+            suggestions: Vec::new(),
+            input: Input::default(),
+            max_height_percent: 50,
+        }
+    }
 }
 
 impl CommanderUi {
@@ -64,15 +77,28 @@ impl Widget for &CommanderUi {
     where
         Self: Sized,
     {
+        // This automatically renders itself over other widgets, if it needs to
         if self.activated {
+
             let msg = vec![
                 Span::styled("ESC", Style::default().add_modifier(Modifier::BOLD)),
                 Span::raw(" to exit prompt"),
             ];
             let style = Style::default().add_modifier(Modifier::RAPID_BLINK);
 
+            let suggestions_height = self.max_height_percent.min({
+                self.suggestions.len() as u16 + 2 // borders
+            });
+
+            let [_rest, commander_area] = Layout::vertical([
+                Constraint::Fill(1),
+                Constraint::Length(suggestions_height + 3),
+            ])
+            .flex(ratatui::layout::Flex::Start)
+            .areas(area);
+
             let [suggestions_area, command_area] =
-                Layout::vertical([Constraint::Min(3), Constraint::Min(3)]).areas(area);
+                Layout::vertical([Constraint::Length(suggestions_height), Constraint::Length(3)]).areas(commander_area);
 
             if !self.suggestions.is_empty() {
                 List::new(self.suggestions.clone())
