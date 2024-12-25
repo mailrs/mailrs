@@ -2,43 +2,41 @@ use std::sync::Arc;
 
 use ratatui::layout::Constraint;
 use ratatui::layout::Layout;
-use ratatui::style::Color;
 use ratatui::style::Style;
 use ratatui::style::Stylize;
 use ratatui::widgets::Block;
 use ratatui::widgets::StatefulWidget;
 use ratatui::widgets::Tabs;
 use ratatui::widgets::Widget;
-use tui_widget_list::ListBuilder;
-use tui_widget_list::ListState;
-use tui_widget_list::ListView;
-
-use crate::tui::model::MBox;
-use crate::tui::widgets::message_list_item::MessageListItem;
 
 #[derive(Debug)]
 pub struct Boxes {
-    boxes: Vec<Arc<MBox>>,
-    tab_bar_focus: usize,
-    current_box_list_state: ListState,
+    boxes: Vec<crate::tui::widgets::mbox::MBox>,
 }
 
 impl Boxes {
-    pub fn new(initial_box: MBox) -> Self {
-        let boxes = vec![Arc::new(initial_box)];
-        Self {
-            boxes,
-            tab_bar_focus: 0,
-            current_box_list_state: ListState::default(),
-        }
+    pub fn empty() -> Self {
+        Self { boxes: Vec::new() }
     }
 
+    pub fn add_box(&mut self, bx: Arc<crate::tui::model::MBox>) {
+        self.boxes.push(crate::tui::widgets::mbox::MBox::new(bx));
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct BoxesState {
+    tab_bar_focus: usize,
+    box_state: Vec<super::mbox::MBoxState>,
+}
+
+impl BoxesState {
     #[inline]
     pub fn focus_next(&mut self) {
         self.tab_bar_focus = self.tab_bar_focus.saturating_add(1);
 
-        if self.tab_bar_focus >= self.boxes.len() {
-            self.tab_bar_focus = self.boxes.len() - 1;
+        if self.tab_bar_focus >= self.box_state.len() {
+            self.tab_bar_focus = self.box_state.len() - 1;
         }
     }
 
@@ -46,10 +44,15 @@ impl Boxes {
     pub fn focus_prev(&mut self) {
         self.tab_bar_focus = self.tab_bar_focus.saturating_sub(1);
     }
-}
 
-#[derive(Debug, Default)]
-pub struct BoxesState {}
+    pub fn get_current_state_mut(&mut self) -> Option<&mut super::mbox::MBoxState> {
+        self.box_state.get_mut(self.tab_bar_focus)
+    }
+
+    pub(crate) fn increase_boxes_count(&mut self) {
+        self.box_state.push(Default::default());
+    }
+}
 
 impl StatefulWidget for &mut Boxes {
     type State = BoxesState;
@@ -69,53 +72,30 @@ impl StatefulWidget for &mut Boxes {
             let tabs = Tabs::new(
                 self.boxes
                     .iter()
-                    .map(|bx| bx.query.to_string())
+                    .map(|bx| bx.query().to_string())
                     .collect::<Vec<String>>(),
             )
             .block(Block::bordered().title("Boxes"))
             .style(Style::default().white())
             .highlight_style(Style::default().yellow())
-            .select(self.tab_bar_focus)
+            .select(state.tab_bar_focus)
             .divider(ratatui::symbols::DOT)
             .padding("->", "<-");
 
             tabs.render(tab_bar, buf);
         }
 
+        if let Some((bx, state)) = self
+            .boxes
+            .get_mut(state.tab_bar_focus)
+            .into_iter()
+            .zip(state.get_current_state_mut())
+            .next()
         {
-            let bx = self.boxes.get(self.tab_bar_focus).unwrap().clone();
-            let item_count = bx.messages.len();
-
-            let builder = ListBuilder::new(move |context| {
-                let message = bx.messages.get(context.index).unwrap();
-                let mut item = MessageListItem {
-                    id: message.id.clone(),
-                    tags: message.tags.iter().map(|t| t.name.to_string()).collect(),
-                    style: Style::default(),
-                };
-
-                // Alternating styles
-                if context.index % 2 == 0 {
-                    item.style = Style::default().bg(Color::Rgb(28, 28, 32));
-                } else {
-                    item.style = Style::default().bg(Color::Rgb(0, 0, 0));
-                }
-
-                // Style the selected element
-                if context.is_selected {
-                    item.style = Style::default()
-                        .bg(Color::Rgb(255, 153, 0))
-                        .fg(Color::Rgb(28, 28, 32));
-                };
-
-                // Return the size of the widget along the main axis.
-                let main_axis_size = 1;
-
-                (item, main_axis_size)
-            });
-
-            let list = ListView::new(builder, item_count);
-            list.render(message_list, buf, &mut self.current_box_list_state);
+            tracing::debug!("Rendering box");
+            bx.render(message_list, buf, state);
+        } else {
+            tracing::debug!("Rendering no box, none there");
         }
     }
 }

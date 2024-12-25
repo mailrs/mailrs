@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crossterm::event::EventStream;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
@@ -31,7 +33,7 @@ enum FocusState {
 }
 
 impl App {
-    pub fn new(tui_context: TuiContext, initial_box: MBox) -> Self {
+    pub fn new(tui_context: TuiContext) -> Self {
         let (command_sender, command_receiver) = tokio::sync::mpsc::channel(1);
 
         Self {
@@ -39,10 +41,16 @@ impl App {
             command_receiver,
             do_exit: false,
             current_focus: FocusState::None,
-            boxes: Boxes::new(initial_box),
+            boxes: Boxes::empty(),
             boxes_state: BoxesState::default(),
             tui_context,
         }
+    }
+
+    #[inline]
+    pub fn add_box(&mut self, bx: Arc<crate::tui::model::MBox>) {
+        self.boxes.add_box(bx);
+        self.boxes_state.increase_boxes_count()
     }
 
     pub async fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<(), AppError> {

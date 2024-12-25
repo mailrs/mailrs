@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use error::AppError;
 use futures::StreamExt;
 use model::MBox;
@@ -70,8 +72,8 @@ pub async fn run(
 
     let tui_context = self::context::TuiContext::new(cli, config, notmuch);
 
-    let app = self::app::App::new(tui_context, initial_box);
-
+    let mut app = self::app::App::new(tui_context);
+    app.add_box(Arc::new(initial_box));
     let res = app.run(terminal).await;
 
     restore_tui()?;
