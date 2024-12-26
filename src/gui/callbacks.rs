@@ -3,9 +3,9 @@ use std::sync::Mutex;
 
 use slint::ComponentHandle;
 
+use crate::gui::state::AppState;
 use crate::gui::AppWindow;
 use crate::gui::Facade;
-use crate::state::AppState;
 
 pub fn register_callbacks(
     ui: &mut AppWindow,
