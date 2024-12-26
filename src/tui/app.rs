@@ -11,10 +11,10 @@ use ratatui::Terminal;
 use super::commander::Commander;
 use super::context::TuiContext;
 use super::error::AppError;
-use super::model::MBox;
 use super::widgets::boxes::Boxes;
 use super::widgets::boxes::BoxesState;
 
+#[allow(unused)]
 pub struct App {
     commander: Commander,
     boxes: Boxes,
