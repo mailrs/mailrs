@@ -2927,6 +2927,7 @@ dependencies = [
  "clap-verbosity-flag",
  "crossterm",
  "derive_more 1.0.0",
+ "downcast-rs",
  "enum-iterator",
  "futures",
  "human-panic",

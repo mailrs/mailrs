@@ -10,6 +10,7 @@ mod cli;
 mod config;
 mod error;
 mod notmuch;
+mod commander;
 
 #[cfg(feature = "gui")]
 mod gui;
