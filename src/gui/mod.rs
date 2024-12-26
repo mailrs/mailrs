@@ -10,12 +10,13 @@ use crate::cli::Cli;
 use crate::config::Config;
 use crate::notmuch::NotmuchWorkerHandle;
 use crate::slint_generatedAppWindow::*;
-use crate::state::AppState;
 
 mod callbacks;
 pub mod error;
+mod state;
 
 use self::error::Error;
+use self::state::AppState;
 
 pub async fn run(cli: Cli, config: Config, notmuch: NotmuchWorkerHandle) -> Result<(), Error> {
     let app_state = Arc::new(Mutex::new(AppState::default()));

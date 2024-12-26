@@ -6,6 +6,10 @@ pub struct Cli {
     #[clap(flatten)]
     pub(crate) verbosity: clap_verbosity_flag::Verbosity,
 
+    /// A file path to write logs to
+    #[clap(long, short)]
+    pub(crate) logfile: Option<camino::Utf8PathBuf>,
+
     // Overwrite where to look for the configuration file
     #[clap(long, value_name = "FILE")]
     pub(crate) config: Option<camino::Utf8PathBuf>,
@@ -20,8 +24,12 @@ pub struct Cli {
 
 #[derive(Default, Debug, clap::Subcommand)]
 pub enum Mode {
-    #[default]
+    #[cfg(feature = "gui")]
+    #[cfg_attr(feature = "gui", default)]
     Gui,
+
+    #[cfg(feature = "tui")]
+    #[cfg_attr(not(feature = "gui"), default)]
     Tui,
 
     // to be removed

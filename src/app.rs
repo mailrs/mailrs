@@ -35,11 +35,14 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
         .map_err(|_| ApplicationError::NotmuchWorkerSetup)?;
 
     match cli.mode {
+        #[cfg(feature = "gui")]
         crate::cli::Mode::Gui => {
             let () = crate::gui::run(cli, config, handle.clone()).await?;
         }
+
+        #[cfg(feature = "tui")]
         crate::cli::Mode::Tui => {
-            let () = crate::tui::run()?;
+            let () = crate::tui::run(cli, config, handle.clone()).await?;
         }
 
         crate::cli::Mode::Test => {
