@@ -1,46 +1,95 @@
+#![allow(dead_code)]
+
 use nucleo_matcher::Matcher;
 
 mod test;
 
 #[derive(Default)]
 pub struct Commander {
-    commands: Vec<Box<dyn DynamicCommand>>,
+    commands: Vec<ErasedCommand>,
     search_engine: Matcher,
-    current_input: String,
+    current_input: Vec<String>,
+
+    do_suggest_on_empty_input: bool,
 }
 
 impl Commander {
-    pub fn with_command(mut self, command: Box<dyn DynamicCommand>) -> Self {
-        self.commands.push(command);
+    pub fn with_command<C>(mut self, command: C) -> Self
+    where
+        C: Command,
+    {
+        self.commands.push(command.erase());
         self
     }
 
-    pub fn set_input(&mut self, input: String) {
+    pub fn set_input(&mut self, input: Vec<String>) {
         self.current_input = input;
     }
 
-    pub fn suggestions(&mut self) -> Vec<&str> {
-        let suggestions = nucleo_matcher::pattern::Pattern::new(
-            &self.current_input,
-            nucleo_matcher::pattern::CaseMatching::Ignore,
-            nucleo_matcher::pattern::Normalization::Never,
-            nucleo_matcher::pattern::AtomKind::Fuzzy,
-        )
-        .match_list(
-            self.commands.iter().map(|c| c.name()),
-            &mut self.search_engine,
-        );
+    pub fn suggestions(&mut self) -> Vec<String> {
+        match self.current_input.len() {
+            0 => {
+                if self.do_suggest_on_empty_input {
+                    self.commands.iter().map(|c| c.name().to_string()).collect()
+                } else {
+                    Vec::new()
+                }
+            }
 
-        tracing::debug!(n = %suggestions.len(), command = ?self.current_input, "Searched command");
+            1 => {
+                // suggest a command
+                let suggestions = nucleo_matcher::pattern::Pattern::new(
+                    self.current_input.first().unwrap(),
+                    nucleo_matcher::pattern::CaseMatching::Ignore,
+                    nucleo_matcher::pattern::Normalization::Never,
+                    nucleo_matcher::pattern::AtomKind::Fuzzy,
+                )
+                .match_list(
+                    self.commands.iter().map(|c| c.name()),
+                    &mut self.search_engine,
+                );
 
-        suggestions.into_iter().map(|tpl| tpl.0).collect()
+                tracing::debug!(n = %suggestions.len(), command = ?self.current_input, "Searched command");
+
+                suggestions
+                    .into_iter()
+                    .map(|tpl| tpl.0.to_string())
+                    .collect()
+            }
+
+            _ => {
+                // suggest an argument for the current command
+
+                // safe because of above check:
+                let current_input_command = self.current_input.first().unwrap();
+                let Some(current_command) = self
+                    .commands
+                    .iter()
+                    .find(|c| c.name() == current_input_command)
+                else {
+                    // No current command found, suggest nothing
+                    return Vec::new();
+                };
+
+                current_command.arg_suggestions()
+            }
+        }
     }
 
-    pub fn execute_current_suggestion(&mut self) -> Result<(), CommandError> {
-        // let Some(current_suggestions) = self.suggestions().first() else {
-        //     return Err(CommandError::NoSuggestion);
-        // };
-        todo!()
+    pub fn execute_current_input(&mut self) -> Result<(), CommandError> {
+        let mut it = self.current_input.iter();
+
+        let Some(command) = it.next() else {
+            return Err(CommandError::NoInput);
+        };
+
+        let Some(command) = self.commands.iter().find(|c| c.name() == command) else {
+            return Err(CommandError::UnknownCommand);
+        };
+
+        let args = it.cloned().collect();
+
+        command.execute(args)
     }
 
     pub fn clear(&mut self) {
@@ -50,15 +99,14 @@ impl Commander {
 
 pub trait Command: Send + 'static {
     type Error: std::error::Error;
-    type Arg: Argument<Error = Self::Error>;
-
     const NAME: &'static str;
 
     fn name(&self) -> &'static str {
         Self::NAME
     }
 
-    fn execute(&self, args: Vec<Self::Arg>) -> Result<(), Self::Error>;
+    fn arg_suggestions() -> Vec<String>;
+    fn execute(&self, args: Vec<String>) -> Result<(), Self::Error>;
 }
 
 trait EraseCommand {
@@ -69,7 +117,7 @@ impl<C: Command> EraseCommand for C {
     fn erase(self) -> ErasedCommand {
         fn command_handler<C>(
             command: &dyn DynamicCommand,
-            args: Vec<ErasedArgument>,
+            args: Vec<String>,
         ) -> Result<(), CommandError>
         where
             C: Command,
@@ -79,18 +127,10 @@ impl<C: Command> EraseCommand for C {
                 None => panic!("Bug"),
             };
 
-            let args = args
-                .into_iter()
-                .map(|arg| match arg.argument.downcast::<C::Arg>() {
-                    Ok(a) => a,
-                    Err(_) => panic!("Bug"),
-                })
-                .map(|a| *a)
-                .collect::<Vec<C::Arg>>();
             command
                 .execute(args)
                 .map_err(Box::new)
-                .map_err(|e| CommandError(e))
+                .map_err(|e| CommandError::CommandImpl(e))
         }
 
         ErasedCommand {
@@ -100,8 +140,9 @@ impl<C: Command> EraseCommand for C {
     }
 }
 
-trait DynamicCommand: Send + downcast_rs::Downcast + 'static {
+pub trait DynamicCommand: Send + downcast_rs::Downcast + 'static {
     fn name(&self) -> &'static str;
+    fn arg_suggestions(&self) -> Vec<String>;
 }
 
 downcast_rs::impl_downcast!(DynamicCommand);
@@ -110,12 +151,16 @@ impl<C: Command> DynamicCommand for C {
     fn name(&self) -> &'static str {
         C::NAME
     }
+
+    fn arg_suggestions(&self) -> Vec<String> {
+        C::arg_suggestions()
+    }
 }
 
 type BoxedCommand = Box<dyn DynamicCommand>;
 
 type CommandHandlerFn =
-    for<'r> fn(&'r dyn DynamicCommand, Vec<ErasedArgument>) -> Result<(), CommandError>;
+    for<'r> fn(&'r dyn DynamicCommand, Vec<String>) -> Result<(), CommandError>;
 
 struct ErasedCommand {
     command: BoxedCommand,
@@ -123,32 +168,29 @@ struct ErasedCommand {
 }
 
 impl ErasedCommand {
-    pub fn execute(&self, args: Vec<ErasedArgument>) -> Result<(), CommandError> {
+    pub fn execute(&self, args: Vec<String>) -> Result<(), CommandError> {
         (self.command_handler)(&*self.command, args)
+    }
+
+    #[inline]
+    pub fn name(&self) -> &str {
+        self.command.name()
+    }
+
+    #[inline]
+    pub fn arg_suggestions(&self) -> Vec<String> {
+        self.command.arg_suggestions()
     }
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("Command error")]
-pub struct CommandError(#[from] Box<dyn std::error::Error>);
+pub enum CommandError {
+    #[error("Command error")]
+    CommandImpl(#[from] Box<dyn std::error::Error>),
 
-pub trait Argument
-where
-    Self: Sized + Send + 'static,
-{
-    type Error: std::error::Error;
+    #[error("Unknown command")]
+    UnknownCommand,
 
-    fn build_from_str(s: &str) -> Result<Option<Self>, Self::Error>;
-}
-
-pub trait DynamicArgument: Send + downcast_rs::Downcast + 'static {}
-
-downcast_rs::impl_downcast!(DynamicArgument);
-
-impl<A: Argument> DynamicArgument for A {}
-
-type BoxedArgument = Box<dyn DynamicArgument>;
-
-struct ErasedArgument {
-    argument: BoxedArgument,
+    #[error("No command input")]
+    NoInput,
 }
