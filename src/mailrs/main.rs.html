@@ -66,18 +66,61 @@
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a></pre></div><pre class="rust"><code><span class="comment">// Prevent console window in addition to Slint window in Windows release builds when, e.g.,
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a></pre></div><pre class="rust"><code><span class="comment">// Prevent console window in addition to Slint window in Windows release builds when, e.g.,
 // starting the app via file manager. Ignored on other platforms.
 </span><span class="attr">#![cfg_attr(not(debug_assertions), windows_subsystem = <span class="string">"windows"</span>)]
 
-</span><span class="kw">mod </span>app;
+#[cfg(all(not(feature = <span class="string">"gui"</span>), not(feature = <span class="string">"tui"</span>)))]
+</span><span class="macro">compile_error!</span>(<span class="string">"Either 'gui' or 'tui' feature must be enabled!"</span>);
+
+<span class="kw">mod </span>app;
 <span class="kw">mod </span>cli;
 <span class="kw">mod </span>config;
 <span class="kw">mod </span>error;
-<span class="kw">mod </span>gui;
 <span class="kw">mod </span>notmuch;
-<span class="kw">mod </span>state;
-<span class="kw">mod </span>tui;
+
+<span class="attr">#[cfg(feature = <span class="string">"gui"</span>)]
+</span><span class="kw">mod </span>gui;
+
+<span class="attr">#[cfg(feature = <span class="string">"tui"</span>)]
+</span><span class="kw">mod </span>tui;
 
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>miette::IntoDiagnostic;
@@ -85,31 +128,62 @@
 <span class="kw">use </span>tracing_subscriber::EnvFilter;
 <span class="kw">use </span>tracing_subscriber::Layer;
 
-<span class="macro">slint::include_modules!</span>();
+<span class="attr">#[cfg(feature = <span class="string">"gui"</span>)]
+</span><span class="macro">slint::include_modules!</span>();
 
 <span class="kw">struct </span>Guards {
-    _append_guard: <span class="prelude-ty">Option</span>&lt;()&gt;, <span class="comment">// TODO
-</span>}
+    _append_guard: <span class="prelude-ty">Option</span>&lt;tracing_appender::non_blocking::WorkerGuard&gt;,
+}
 
-<span class="kw">fn </span>setup_logging(log_level: <span class="prelude-ty">Option</span>&lt;tracing::metadata::Level&gt;) -&gt; Guards {
+<span class="kw">fn </span>setup_logging(cli: <span class="kw-2">&amp;</span><span class="kw">crate</span>::cli::Cli) -&gt; Guards {
     <span class="kw">let </span><span class="kw-2">mut </span>env_filter = EnvFilter::from_default_env();
 
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(log_level) = log_level {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(log_level) = cli.verbosity.tracing_level() {
         <span class="kw">let </span>level_filter = tracing::metadata::LevelFilter::from_level(log_level);
         <span class="kw">let </span>directive = tracing_subscriber::filter::Directive::from(level_filter);
         env_filter = env_filter.add_directive(directive);
     }
 
+    <span class="kw">let </span>(file_logger, guard) = <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = cli.logfile.as_ref() {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(dir) = path.parent() <span class="kw">else </span>{
+            <span class="macro">eprintln!</span>(<span class="string">"Path has no parent: {}, exiting"</span>, path);
+            std::process::exit(<span class="number">1</span>);
+        };
+        <span class="kw">let </span><span class="prelude-val">Some</span>(filename) = path.file_name() <span class="kw">else </span>{
+            <span class="macro">eprintln!</span>(<span class="string">"Path has no file name: {}, exiting"</span>, path);
+            std::process::exit(<span class="number">1</span>);
+        };
+
+        <span class="kw">let </span>file_appender = tracing_appender::rolling::never(dir, filename);
+
+        <span class="kw">let </span>(logger, guard) = tracing_appender::non_blocking(file_appender);
+        (<span class="prelude-val">Some</span>(logger), <span class="prelude-val">Some</span>(guard))
+    } <span class="kw">else </span>{
+        (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
+    };
+
     <span class="kw">let </span>subscriber = tracing_subscriber::registry::Registry::default()
         .with(tracing_subscriber::fmt::layer().with_filter(env_filter));
 
-    <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = tracing::subscriber::set_global_default(subscriber) {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(file_logger) = file_logger {
+        <span class="kw">let </span>subscriber = subscriber.with(
+            tracing_subscriber::fmt::Layer::new()
+                .with_target(<span class="bool-val">true</span>)
+                .with_level(<span class="bool-val">true</span>)
+                .with_writer(file_logger),
+        );
+
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = tracing::subscriber::set_global_default(subscriber) {
+            <span class="macro">eprintln!</span>(<span class="string">"Failed to set global logging subscriber: {:?}"</span>, e);
+            std::process::exit(<span class="number">1</span>)
+        }
+    } <span class="kw">else if let </span><span class="prelude-val">Err</span>(e) = tracing::subscriber::set_global_default(subscriber) {
         <span class="macro">eprintln!</span>(<span class="string">"Failed to set global logging subscriber: {:?}"</span>, e);
         std::process::exit(<span class="number">1</span>)
     }
 
     Guards {
-        _append_guard: <span class="prelude-val">None</span>,
+        _append_guard: guard,
     }
 }
 
@@ -122,7 +196,7 @@
     .authors(<span class="string">"Matthias Beyer &lt;mail@beyermatthias.de&gt;"</span>));
 
     <span class="kw">let </span>cli = <span class="kw">crate</span>::cli::Cli::parse();
-    <span class="kw">let </span>_guards = setup_logging(cli.verbosity.tracing_level());
+    <span class="kw">let </span>_guards = setup_logging(<span class="kw-2">&amp;</span>cli);
     <span class="macro">tracing::debug!</span>(<span class="question-mark">?</span>cli, <span class="string">"Found CLI"</span>);
 
     <span class="kw">let </span>config = <span class="kw">crate</span>::config::Config::find(cli.config.clone())

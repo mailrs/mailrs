@@ -27,13 +27,25 @@
 <a href="#26" id="26">26</a>
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
-<a href="#29" id="29">29</a></pre></div><pre class="rust"><code><span class="kw">use </span>clap::Parser;
+<a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
+<a href="#33" id="33">33</a>
+<a href="#34" id="34">34</a>
+<a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
+<a href="#37" id="37">37</a></pre></div><pre class="rust"><code><span class="kw">use </span>clap::Parser;
 
 <span class="attr">#[derive(Debug, Parser)]
 #[command(version, about)]
 </span><span class="kw">pub struct </span>Cli {
     <span class="attr">#[clap(flatten)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) verbosity: clap_verbosity_flag::Verbosity,
+
+    <span class="doccomment">/// A file path to write logs to
+    </span><span class="attr">#[clap(long, short)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) logfile: <span class="prelude-ty">Option</span>&lt;camino::Utf8PathBuf&gt;,
 
     <span class="comment">// Overwrite where to look for the configuration file
     </span><span class="attr">#[clap(long, value_name = <span class="string">"FILE"</span>)]
@@ -49,9 +61,13 @@
 
 <span class="attr">#[derive(Default, Debug, clap::Subcommand)]
 </span><span class="kw">pub enum </span>Mode {
-    <span class="attr">#[default]
+    <span class="attr">#[cfg(feature = <span class="string">"gui"</span>)]
+    #[cfg_attr(feature = <span class="string">"gui"</span>, default)]
     </span>Gui,
-    Tui,
+
+    <span class="attr">#[cfg(feature = <span class="string">"tui"</span>)]
+    #[cfg_attr(not(feature = <span class="string">"gui"</span>), default)]
+    </span>Tui,
 
     <span class="comment">// to be removed
     </span>Test,

@@ -61,7 +61,10 @@
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
 <a href="#62" id="62">62</a>
-<a href="#63" id="63">63</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::cli::Cli;
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::cli::Cli;
 <span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::error::ApplicationError;
 <span class="kw">use </span><span class="kw">crate</span>::notmuch::NotmuchWorker;
@@ -98,11 +101,14 @@
         </span>.map_err(|<span class="kw">_</span>| ApplicationError::NotmuchWorkerSetup)<span class="question-mark">?</span>;
 
     <span class="kw">match </span>cli.mode {
-        <span class="kw">crate</span>::cli::Mode::Gui =&gt; {
+        <span class="attr">#[cfg(feature = <span class="string">"gui"</span>)]
+        </span><span class="kw">crate</span>::cli::Mode::Gui =&gt; {
             <span class="kw">let </span>() = <span class="kw">crate</span>::gui::run(cli, config, handle.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
         }
-        <span class="kw">crate</span>::cli::Mode::Tui =&gt; {
-            <span class="kw">let </span>() = <span class="kw">crate</span>::tui::run()<span class="question-mark">?</span>;
+
+        <span class="attr">#[cfg(feature = <span class="string">"tui"</span>)]
+        </span><span class="kw">crate</span>::cli::Mode::Tui =&gt; {
+            <span class="kw">let </span>() = <span class="kw">crate</span>::tui::run(cli, config, handle.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
         <span class="kw">crate</span>::cli::Mode::Test =&gt; {

@@ -68,7 +68,8 @@
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
 <a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::sync::Mutex;
 
 <span class="kw">use </span>futures::StreamExt;
@@ -80,12 +81,13 @@
 <span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::notmuch::NotmuchWorkerHandle;
 <span class="kw">use </span><span class="kw">crate</span>::slint_generatedAppWindow::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::state::AppState;
 
 <span class="kw">mod </span>callbacks;
 <span class="kw">pub mod </span>error;
+<span class="kw">mod </span>state;
 
 <span class="kw">use </span><span class="self">self</span>::error::Error;
+<span class="kw">use </span><span class="self">self</span>::state::AppState;
 
 <span class="kw">pub async fn </span>run(cli: Cli, config: Config, notmuch: NotmuchWorkerHandle) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
     <span class="kw">let </span>app_state = Arc::new(Mutex::new(AppState::default()));

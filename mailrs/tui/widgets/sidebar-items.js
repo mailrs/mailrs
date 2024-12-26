@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["boxes","commander","mbox","message_list_item"]};

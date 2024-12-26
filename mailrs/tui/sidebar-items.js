@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Error"],"fn":["run"]};
+window.SIDEBAR_ITEMS = {"fn":["init_panic_hook","init_tui","restore_tui","run"],"mod":["app","commander","context","error","model","widgets"]};
