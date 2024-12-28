@@ -12,9 +12,6 @@ pub enum AppError {
     #[error("IO Error")]
     Io(#[from] std::io::Error),
 
-    #[error("Internal communication channel closed")]
-    InternalChannelClosed,
-
     #[error("notmuch errored")]
     Notmuch(#[from] crate::error::NotmuchError),
 
