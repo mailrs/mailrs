@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["boxes","commander","mbox","message_list_item"]};
+window.SIDEBAR_ITEMS = {"mod":["boxes","mbox","message_list_item"]};

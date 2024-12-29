@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["mailrs",[["impl Command&lt;<a class=\"struct\" href=\"mailrs/tui/commands/struct.TuiCommandContext.html\" title=\"struct mailrs::tui::commands::TuiCommandContext\">TuiCommandContext</a>&gt; for <a class=\"struct\" href=\"mailrs/tui/commands/next_message/struct.NextMessageCommand.html\" title=\"struct mailrs::tui::commands::next_message::NextMessageCommand\">NextMessageCommand</a>"],["impl Command&lt;<a class=\"struct\" href=\"mailrs/tui/commands/struct.TuiCommandContext.html\" title=\"struct mailrs::tui::commands::TuiCommandContext\">TuiCommandContext</a>&gt; for <a class=\"struct\" href=\"mailrs/tui/commands/prev_message/struct.PrevMessageCommand.html\" title=\"struct mailrs::tui::commands::prev_message::PrevMessageCommand\">PrevMessageCommand</a>"],["impl Command&lt;<a class=\"struct\" href=\"mailrs/tui/commands/struct.TuiCommandContext.html\" title=\"struct mailrs::tui::commands::TuiCommandContext\">TuiCommandContext</a>&gt; for <a class=\"struct\" href=\"mailrs/tui/commands/query/struct.QueryCommand.html\" title=\"struct mailrs::tui::commands::query::QueryCommand\">QueryCommand</a>"],["impl Command&lt;<a class=\"struct\" href=\"mailrs/tui/commands/struct.TuiCommandContext.html\" title=\"struct mailrs::tui::commands::TuiCommandContext\">TuiCommandContext</a>&gt; for <a class=\"struct\" href=\"mailrs/tui/commands/quit/struct.QuitCommand.html\" title=\"struct mailrs::tui::commands::quit::QuitCommand\">QuitCommand</a>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[1447]}

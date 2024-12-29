@@ -177,7 +177,19 @@
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
 <a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>crossterm::event::EventStream;
 <span class="kw">use </span>crossterm::event::KeyCode;
@@ -186,18 +198,21 @@
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>ratatui::prelude::Backend;
 <span class="kw">use </span>ratatui::Terminal;
+<span class="kw">use </span>tui_commander::ui::Ui <span class="kw">as </span>CommanderUi;
+<span class="kw">use </span>tui_commander::Commander;
 
-<span class="kw">use </span><span class="kw">super</span>::commander::Commander;
 <span class="kw">use </span><span class="kw">super</span>::context::TuiContext;
 <span class="kw">use </span><span class="kw">super</span>::error::AppError;
 <span class="kw">use </span><span class="kw">super</span>::widgets::boxes::Boxes;
 <span class="kw">use </span><span class="kw">super</span>::widgets::boxes::BoxesState;
+<span class="kw">use </span><span class="kw">crate</span>::tui::commands::TuiCommandContext;
 
 <span class="attr">#[allow(unused)]
 </span><span class="kw">pub struct </span>App {
-    commander: Commander,
+    commander: Commander&lt;TuiCommandContext&gt;,
+    commander_ui: CommanderUi&lt;TuiCommandContext&gt;,
     boxes: Boxes,
-    command_receiver: tokio::sync::mpsc::Receiver&lt;AppMessage&gt;,
+    command_buffer: <span class="prelude-ty">Option</span>&lt;AppMessage&gt;,
     do_exit: bool,
     current_focus: FocusState,
     boxes_state: BoxesState,
@@ -213,11 +228,16 @@
 
 <span class="kw">impl </span>App {
     <span class="kw">pub fn </span>new(tui_context: TuiContext) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>(command_sender, command_receiver) = tokio::sync::mpsc::channel(<span class="number">1</span>);
-
         <span class="self">Self </span>{
-            commander: Commander::new(command_sender),
-            command_receiver,
+            commander: Commander::builder()
+                .with_case_sensitive(<span class="bool-val">false</span>)
+                .with_command::&lt;<span class="kw">crate</span>::tui::commands::quit::QuitCommand&gt;()
+                .with_command::&lt;<span class="kw">crate</span>::tui::commands::prev_message::PrevMessageCommand&gt;()
+                .with_command::&lt;<span class="kw">crate</span>::tui::commands::next_message::NextMessageCommand&gt;()
+                .with_command::&lt;<span class="kw">crate</span>::tui::commands::query::QueryCommand&gt;()
+                .build(),
+            commander_ui: CommanderUi::default(),
+            command_buffer: <span class="prelude-val">None</span>,
             do_exit: <span class="bool-val">false</span>,
             current_focus: FocusState::None,
             boxes: Boxes::empty(),
@@ -242,51 +262,70 @@
 
             terminal.draw(|frame| <span class="self">self</span>.draw(frame))<span class="question-mark">?</span>;
 
-            <span class="macro">tokio::select!</span> {
+            <span class="kw">let </span>command_to_execute = <span class="macro">tokio::select!</span> {
                 input_event = events.next().fuse() =&gt; {
                     <span class="kw">let </span>input = input_event.unwrap().unwrap();
                     <span class="macro">tracing::trace!</span>(<span class="string">"Event available = {:?}"</span>, input);
-                    <span class="self">self</span>.handle_tui_event(input).<span class="kw">await</span>;
-                }
-            }
+                    <span class="self">self</span>.handle_tui_event(input).<span class="kw">await
+                </span>}
+            };
 
-            <span class="kw">let _ </span>= <span class="self">self
-                </span>.command_receiver
-                .try_recv()
-                .map(<span class="prelude-val">Some</span>)
-                .or_else(|err| <span class="kw">match </span>err {
-                    tokio::sync::mpsc::error::TryRecvError::Empty =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-                    tokio::sync::mpsc::error::TryRecvError::Disconnected =&gt; {
-                        <span class="prelude-val">Err</span>(AppError::InternalChannelClosed)
-                    }
-                })<span class="question-mark">?
-                </span>.map(|m| {
-                    <span class="macro">tracing::debug!</span>(<span class="string">"Received command, handling"</span>);
-                    <span class="self">self</span>.handle_app_message(m)
-                })
-                .transpose()<span class="question-mark">?</span>;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(command) = command_to_execute {
+                <span class="self">self</span>.handle_app_message(command)<span class="question-mark">?</span>;
+            }
         }
     }
 
     <span class="kw">fn </span>draw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, frame: <span class="kw-2">&amp;mut </span>ratatui::Frame&lt;<span class="lifetime">'_</span>&gt;) {
         frame.render_stateful_widget(<span class="kw-2">&amp;mut </span><span class="self">self</span>.boxes, frame.area(), <span class="kw-2">&amp;mut </span><span class="self">self</span>.boxes_state);
-        frame.render_widget(<span class="self">self</span>.commander.ui(), frame.area());
+        frame.render_stateful_widget(<span class="kw-2">&amp;mut </span><span class="self">self</span>.commander_ui, frame.area(), <span class="kw-2">&amp;mut </span><span class="self">self</span>.commander);
     }
 
-    <span class="kw">async fn </span>handle_tui_event(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: crossterm::event::Event) {
+    <span class="kw">async fn </span>handle_tui_event(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: crossterm::event::Event) -&gt; <span class="prelude-ty">Option</span>&lt;AppMessage&gt; {
         <span class="kw">match </span>event {
             ratatui::crossterm::event::Event::Key(key) =&gt; {
                 <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>key, <span class="string">"Event is keypress"</span>);
                 <span class="kw">if </span><span class="self">self</span>.current_focus == FocusState::Commander {
-                    <span class="kw">if </span>key.kind == KeyEventKind::Press &amp;&amp; key.code == KeyCode::Esc {
-                        <span class="macro">tracing::debug!</span>(<span class="string">"Deactivating EX"</span>);
-                        <span class="self">self</span>.current_focus = FocusState::CommandMode;
-                        <span class="self">self</span>.commander.clear();
-                    } <span class="kw">else </span>{
-                        <span class="macro">tracing::debug!</span>(<span class="question-mark">?</span>key, <span class="string">"Sending key to EX"</span>);
-                        <span class="self">self</span>.commander.handle_key_press(key).<span class="kw">await</span>;
-                        <span class="kw">if </span>!<span class="self">self</span>.commander.is_activated() {
-                            <span class="self">self</span>.current_focus = FocusState::CommandMode;
+                    <span class="kw">if </span>key.kind == KeyEventKind::Press {
+                        <span class="kw">match </span>key.code {
+                            KeyCode::Esc =&gt; {
+                                <span class="macro">tracing::debug!</span>(<span class="string">"Deactivating EX"</span>);
+                                <span class="self">self</span>.current_focus = FocusState::CommandMode;
+                                <span class="self">self</span>.commander.reset();
+                            }
+                            KeyCode::Enter =&gt; {
+                                <span class="kw">let </span><span class="kw-2">mut </span>tui_commander_context =
+                                    <span class="kw">crate</span>::tui::commands::TuiCommandContext {
+                                        command_to_execute: <span class="prelude-val">None</span>,
+                                    };
+
+                                <span class="kw">match </span><span class="self">self</span>.commander.execute(<span class="kw-2">&amp;mut </span>tui_commander_context) {
+                                    <span class="prelude-val">Ok</span>(()) =&gt; {
+                                        <span class="macro">tracing::debug!</span>(<span class="string">"Commander context executed successfully"</span>);
+                                    }
+                                    <span class="prelude-val">Err</span>(error) =&gt; {
+                                        <span class="macro">tracing::error!</span>(
+                                            <span class="question-mark">?</span>error,
+                                            <span class="string">"Commander context execution failed"
+                                        </span>);
+                                    }
+                                }
+
+                                <span class="self">self</span>.current_focus = FocusState::CommandMode;
+                                <span class="self">self</span>.commander.reset();
+                                <span class="kw">return </span>tui_commander_context.command_to_execute;
+                            }
+                            <span class="kw">_ </span>=&gt; {
+                                <span class="macro">tracing::debug!</span>(<span class="question-mark">?</span>key, <span class="string">"Forwarding keypress to commander UI"</span>);
+                                <span class="self">self</span>.commander_ui.handle_key_press(key);
+
+                                <span class="macro">tracing::debug!</span>(<span class="question-mark">?</span>key, <span class="string">"Setting commander input"</span>);
+                                <span class="self">self</span>.commander
+                                    .set_input(<span class="self">self</span>.commander_ui.value().to_string());
+                                <span class="kw">if </span>!<span class="self">self</span>.commander.is_active() {
+                                    <span class="self">self</span>.current_focus = FocusState::CommandMode;
+                                }
+                            }
                         }
                     }
                 } <span class="kw">else if </span>key.kind == KeyEventKind::Press {
@@ -294,7 +333,7 @@
                         KeyCode::Char(<span class="string">':'</span>) =&gt; {
                             <span class="macro">tracing::debug!</span>(<span class="string">"Activating EX"</span>);
                             <span class="self">self</span>.current_focus = FocusState::Commander;
-                            <span class="self">self</span>.commander.activate();
+                            <span class="self">self</span>.commander.start();
                         }
 
                         <span class="kw">_ </span>=&gt; {
@@ -307,38 +346,25 @@
                 <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>event, <span class="string">"Unhandled TUI event"</span>);
             }
         }
-    }
+
+        <span class="prelude-val">None
+    </span>}
 
     <span class="kw">fn </span>handle_app_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>, message: AppMessage) -&gt; <span class="prelude-ty">Result</span>&lt;(), AppError&gt; {
-        <span class="kw">use </span><span class="kw">crate</span>::tui::commander::Command::<span class="kw-2">*</span>;
-
         <span class="kw">match </span>message {
-            AppMessage::Shutdown(_message) =&gt; {
-                <span class="self">self</span>.do_exit = <span class="bool-val">true</span>;
-            }
-            AppMessage::Command { command: Quit, .. } =&gt; {
-                <span class="macro">tracing::info!</span>(<span class="string">"Quit Command received"</span>);
+            AppMessage::Quit =&gt; {
                 <span class="self">self</span>.do_exit = <span class="bool-val">true</span>;
             }
 
-            AppMessage::Command {
-                command: NextMessage,
-                ..
-            } =&gt; {
+            AppMessage::NextMessage =&gt; {
                 <span class="macro">tracing::info!</span>(<span class="string">"Next Sidebar Entry command received"</span>);
             }
 
-            AppMessage::Command {
-                command: PrevMessage,
-                ..
-            } =&gt; {
+            AppMessage::PrevMessage =&gt; {
                 <span class="macro">tracing::info!</span>(<span class="string">"Prev Sidebar Entry command received"</span>);
             }
 
-            AppMessage::Command {
-                command: Query,
-                args,
-            } =&gt; {
+            AppMessage::Query(args) =&gt; {
                 <span class="macro">tracing::info!</span>(<span class="question-mark">?</span>args, <span class="string">"Query received"</span>);
             }
         }
@@ -349,11 +375,9 @@
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub enum </span>AppMessage {
-    <span class="attr">#[allow(dead_code)]
-    </span>Shutdown(String),
-    Command {
-        command: <span class="kw">crate</span>::tui::commander::Command,
-        args: Vec&lt;String&gt;,
-    },
+    Quit,
+    PrevMessage,
+    NextMessage,
+    Query(Vec&lt;String&gt;),
 }
 </code></pre></div></section></main></body></html>
