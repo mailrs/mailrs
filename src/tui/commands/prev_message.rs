@@ -15,7 +15,7 @@ impl tui_commander::Command<TuiCommandContext> for PrevMessageCommand {
     where
         Self: Sized,
     {
-        "next"
+        "prev"
     }
 
     fn build_from_command_name_str(
@@ -47,6 +47,6 @@ impl tui_commander::Command<TuiCommandContext> for PrevMessageCommand {
             .into());
         }
         context.command_to_execute = Some(AppMessage::PrevMessage);
-        todo!()
+        Ok(())
     }
 }
