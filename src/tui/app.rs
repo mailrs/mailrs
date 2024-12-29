@@ -20,9 +20,8 @@ use crate::tui::commands::TuiCommandContext;
 pub struct App {
     commander: Commander<TuiCommandContext>,
     commander_ui: CommanderUi<TuiCommandContext>,
-    boxes: Boxes,
-    command_buffer: Option<AppMessage>,
     do_exit: bool,
+    boxes: Boxes,
     current_focus: FocusState,
     boxes_state: BoxesState,
     tui_context: TuiContext,
@@ -46,9 +45,8 @@ impl App {
                 .with_command::<crate::tui::commands::query::QueryCommand>()
                 .build(),
             commander_ui: CommanderUi::default(),
-            command_buffer: None,
-            do_exit: false,
             current_focus: FocusState::None,
+            do_exit: false,
             boxes: Boxes::empty(),
             boxes_state: BoxesState::default(),
             tui_context,
