@@ -1,3 +1,4 @@
+pub mod close;
 pub mod next_message;
 pub mod prev_message;
 pub mod query;

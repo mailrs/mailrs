@@ -43,6 +43,7 @@ impl App {
                 .with_command::<crate::tui::commands::prev_message::PrevMessageCommand>()
                 .with_command::<crate::tui::commands::next_message::NextMessageCommand>()
                 .with_command::<crate::tui::commands::query::QueryCommand>()
+                .with_command::<crate::tui::commands::close::CloseCommand>()
                 .build(),
             commander_ui: CommanderUi::default(),
             current_focus: FocusState::None,
@@ -57,6 +58,12 @@ impl App {
     pub fn add_box(&mut self, bx: Arc<crate::tui::model::MBox>) {
         self.boxes.add_box(bx);
         self.boxes_state.increase_boxes_count()
+    }
+
+    #[inline]
+    pub fn remove_currently_focused_box(&mut self) {
+        self.boxes.remove_index(self.boxes_state.current_index());
+        self.boxes_state.decrease_boxes_count();
     }
 
     pub async fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<(), AppError> {
@@ -78,7 +85,7 @@ impl App {
             };
 
             if let Some(command) = command_to_execute {
-                self.handle_app_message(command)?;
+                self.handle_app_message(command).await?;
             }
         }
     }
@@ -157,7 +164,7 @@ impl App {
         None
     }
 
-    fn handle_app_message(&mut self, message: AppMessage) -> Result<(), AppError> {
+    async fn handle_app_message(&mut self, message: AppMessage) -> Result<(), AppError> {
         match message {
             AppMessage::Quit => {
                 self.do_exit = true;
@@ -165,14 +172,67 @@ impl App {
 
             AppMessage::NextMessage => {
                 tracing::info!("Next Sidebar Entry command received");
+                self.boxes_state.focus_next();
             }
 
             AppMessage::PrevMessage => {
                 tracing::info!("Prev Sidebar Entry command received");
+                self.boxes_state.focus_prev();
             }
 
             AppMessage::Query(args) => {
-                tracing::info!(?args, "Query received");
+                use crate::tui::model::MBox;
+                use crate::tui::model::Message;
+                use crate::tui::model::Tag;
+
+                let query = args.join(" ");
+                tracing::info!(?query, "Query received");
+
+                let messages = self
+                    .tui_context
+                    .notmuch
+                    .create_query(&query)
+                    .search_messages()
+                    .await
+                    .map_err(AppError::from)?
+                    .into_iter()
+                    .map(|message| {
+                        let notmuch = self.tui_context.notmuch.clone();
+
+                        async move {
+                            let tags = notmuch
+                                .clone()
+                                .tags_for_message(&message)
+                                .await?
+                                .unwrap_or_default();
+
+                            tracing::info!(id = ?message.id(), ?tags, "Found message");
+
+                            Ok(Message {
+                                id: message.id().to_string(),
+                                tags: tags
+                                    .into_iter()
+                                    .map(|name| Tag {
+                                        name: name.to_string(),
+                                    })
+                                    .collect::<Vec<Tag>>(),
+                            })
+                        }
+                    })
+                    .collect::<futures::stream::FuturesUnordered<_>>()
+                    .collect::<Vec<Result<Message, crate::notmuch::WorkerError<_>>>>()
+                    .await
+                    .into_iter()
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(AppError::from)?;
+
+                let mbox = MBox::new(query, messages);
+                self.add_box(Arc::new(mbox));
+            }
+
+            AppMessage::Close => {
+                tracing::debug!("Closing current tab");
+                self.remove_currently_focused_box();
             }
         }
 
@@ -186,4 +246,5 @@ pub enum AppMessage {
     PrevMessage,
     NextMessage,
     Query(Vec<String>),
+    Close,
 }
