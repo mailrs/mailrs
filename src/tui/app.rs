@@ -127,6 +127,7 @@ impl App {
 
                                 self.current_focus = FocusState::CommandMode;
                                 self.commander.reset();
+                                self.commander_ui.reset();
                                 return tui_commander_context.command_to_execute;
                             }
                             _ => {
