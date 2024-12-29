@@ -7,18 +7,21 @@ use futures::FutureExt;
 use futures::StreamExt;
 use ratatui::prelude::Backend;
 use ratatui::Terminal;
+use tui_commander::ui::Ui as CommanderUi;
+use tui_commander::Commander;
 
-use super::commander::Commander;
 use super::context::TuiContext;
 use super::error::AppError;
 use super::widgets::boxes::Boxes;
 use super::widgets::boxes::BoxesState;
+use crate::tui::commands::TuiCommandContext;
 
 #[allow(unused)]
 pub struct App {
-    commander: Commander,
+    commander: Commander<TuiCommandContext>,
+    commander_ui: CommanderUi<TuiCommandContext>,
     boxes: Boxes,
-    command_receiver: tokio::sync::mpsc::Receiver<AppMessage>,
+    command_buffer: Option<AppMessage>,
     do_exit: bool,
     current_focus: FocusState,
     boxes_state: BoxesState,
@@ -34,11 +37,16 @@ enum FocusState {
 
 impl App {
     pub fn new(tui_context: TuiContext) -> Self {
-        let (command_sender, command_receiver) = tokio::sync::mpsc::channel(1);
-
         Self {
-            commander: Commander::new(command_sender),
-            command_receiver,
+            commander: Commander::builder()
+                .with_case_sensitive(false)
+                .with_command::<crate::tui::commands::quit::QuitCommand>()
+                .with_command::<crate::tui::commands::prev_message::PrevMessageCommand>()
+                .with_command::<crate::tui::commands::next_message::NextMessageCommand>()
+                .with_command::<crate::tui::commands::query::QueryCommand>()
+                .build(),
+            commander_ui: CommanderUi::default(),
+            command_buffer: None,
             do_exit: false,
             current_focus: FocusState::None,
             boxes: Boxes::empty(),
@@ -63,51 +71,70 @@ impl App {
 
             terminal.draw(|frame| self.draw(frame))?;
 
-            tokio::select! {
+            let command_to_execute = tokio::select! {
                 input_event = events.next().fuse() => {
                     let input = input_event.unwrap().unwrap();
                     tracing::trace!("Event available = {:?}", input);
-                    self.handle_tui_event(input).await;
+                    self.handle_tui_event(input).await
                 }
-            }
+            };
 
-            let _ = self
-                .command_receiver
-                .try_recv()
-                .map(Some)
-                .or_else(|err| match err {
-                    tokio::sync::mpsc::error::TryRecvError::Empty => Ok(None),
-                    tokio::sync::mpsc::error::TryRecvError::Disconnected => {
-                        Err(AppError::InternalChannelClosed)
-                    }
-                })?
-                .map(|m| {
-                    tracing::debug!("Received command, handling");
-                    self.handle_app_message(m)
-                })
-                .transpose()?;
+            if let Some(command) = command_to_execute {
+                self.handle_app_message(command)?;
+            }
         }
     }
 
     fn draw(&mut self, frame: &mut ratatui::Frame<'_>) {
         frame.render_stateful_widget(&mut self.boxes, frame.area(), &mut self.boxes_state);
-        frame.render_widget(self.commander.ui(), frame.area());
+        frame.render_stateful_widget(&mut self.commander_ui, frame.area(), &mut self.commander);
     }
 
-    async fn handle_tui_event(&mut self, event: crossterm::event::Event) {
+    async fn handle_tui_event(&mut self, event: crossterm::event::Event) -> Option<AppMessage> {
         match event {
             ratatui::crossterm::event::Event::Key(key) => {
                 tracing::trace!(?key, "Event is keypress");
                 if self.current_focus == FocusState::Commander {
-                    if key.kind == KeyEventKind::Press && key.code == KeyCode::Esc {
-                        tracing::debug!("Deactivating EX");
-                        self.current_focus = FocusState::CommandMode;
-                        self.commander.clear();
-                    } else {
-                        tracing::debug!(?key, "Sending key to EX");
-                        self.commander.handle_key_press(key).await;
-                        if !self.commander.is_activated() {
-                            self.current_focus = FocusState::CommandMode;
+                    if key.kind == KeyEventKind::Press {
+                        match key.code {
+                            KeyCode::Esc => {
+                                tracing::debug!("Deactivating EX");
+                                self.current_focus = FocusState::CommandMode;
+                                self.commander.reset();
+                            }
+                            KeyCode::Enter => {
+                                let mut tui_commander_context =
+                                    crate::tui::commands::TuiCommandContext {
+                                        command_to_execute: None,
+                                    };
+
+                                match self.commander.execute(&mut tui_commander_context) {
+                                    Ok(()) => {
+                                        tracing::debug!("Commander context executed successfully");
+                                    }
+                                    Err(error) => {
+                                        tracing::error!(
+                                            ?error,
+                                            "Commander context execution failed"
+                                        );
+                                    }
+                                }
+
+                                self.current_focus = FocusState::CommandMode;
+                                self.commander.reset();
+                                return tui_commander_context.command_to_execute;
+                            }
+                            _ => {
+                                tracing::debug!(?key, "Forwarding keypress to commander UI");
+                                self.commander_ui.handle_key_press(key);
+
+                                tracing::debug!(?key, "Setting commander input");
+                                self.commander
+                                    .set_input(self.commander_ui.value().to_string());
+                                if !self.commander.is_active() {
+                                    self.current_focus = FocusState::CommandMode;
+                                }
+                            }
                         }
                     }
                 } else if key.kind == KeyEventKind::Press {
@@ -115,7 +142,7 @@ impl App {
                         KeyCode::Char(':') => {
                             tracing::debug!("Activating EX");
                             self.current_focus = FocusState::Commander;
-                            self.commander.activate();
+                            self.commander.start();
                         }
 
                         _ => {
@@ -128,38 +155,25 @@ impl App {
                 tracing::trace!(?event, "Unhandled TUI event");
             }
         }
+
+        None
     }
 
     fn handle_app_message(&mut self, message: AppMessage) -> Result<(), AppError> {
-        use crate::tui::commander::Command::*;
-
         match message {
-            AppMessage::Shutdown(_message) => {
-                self.do_exit = true;
-            }
-            AppMessage::Command { command: Quit, .. } => {
-                tracing::info!("Quit Command received");
+            AppMessage::Quit => {
                 self.do_exit = true;
             }
 
-            AppMessage::Command {
-                command: NextMessage,
-                ..
-            } => {
+            AppMessage::NextMessage => {
                 tracing::info!("Next Sidebar Entry command received");
             }
 
-            AppMessage::Command {
-                command: PrevMessage,
-                ..
-            } => {
+            AppMessage::PrevMessage => {
                 tracing::info!("Prev Sidebar Entry command received");
             }
 
-            AppMessage::Command {
-                command: Query,
-                args,
-            } => {
+            AppMessage::Query(args) => {
                 tracing::info!(?args, "Query received");
             }
         }
@@ -170,10 +184,8 @@ impl App {
 
 #[derive(Debug)]
 pub enum AppMessage {
-    #[allow(dead_code)]
-    Shutdown(String),
-    Command {
-        command: crate::tui::commander::Command,
-        args: Vec<String>,
-    },
+    Quit,
+    PrevMessage,
+    NextMessage,
+    Query(Vec<String>),
 }
