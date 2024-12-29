@@ -31,7 +31,8 @@ impl tui_commander::Command<TuiCommandContext> for QueryCommand {
     where
         Self: Sized,
     {
-        false // no arguments supported
+        // TODO: Parse notmuch query?
+        true
     }
 
     fn execute(
