@@ -44,7 +44,8 @@
 <a href="#43" id="43">43</a>
 <a href="#44" id="44">44</a>
 <a href="#45" id="45">45</a>
-<a href="#46" id="46">46</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::TuiCommandContext;
+<a href="#46" id="46">46</a>
+<a href="#47" id="47">47</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::TuiCommandContext;
 <span class="kw">use </span><span class="kw">crate</span>::tui::app::AppMessage;
 
 <span class="attr">#[derive(Debug)]
@@ -77,7 +78,8 @@
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
     {
-        <span class="bool-val">false </span><span class="comment">// no arguments supported
+        <span class="comment">// TODO: Parse notmuch query?
+        </span><span class="bool-val">true
     </span>}
 
     <span class="kw">fn </span>execute(

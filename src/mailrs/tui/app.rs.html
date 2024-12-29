@@ -187,9 +187,7 @@
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
+<a href="#189" id="189">189</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>crossterm::event::EventStream;
 <span class="kw">use </span>crossterm::event::KeyCode;
@@ -211,9 +209,8 @@
 </span><span class="kw">pub struct </span>App {
     commander: Commander&lt;TuiCommandContext&gt;,
     commander_ui: CommanderUi&lt;TuiCommandContext&gt;,
-    boxes: Boxes,
-    command_buffer: <span class="prelude-ty">Option</span>&lt;AppMessage&gt;,
     do_exit: bool,
+    boxes: Boxes,
     current_focus: FocusState,
     boxes_state: BoxesState,
     tui_context: TuiContext,
@@ -237,9 +234,8 @@
                 .with_command::&lt;<span class="kw">crate</span>::tui::commands::query::QueryCommand&gt;()
                 .build(),
             commander_ui: CommanderUi::default(),
-            command_buffer: <span class="prelude-val">None</span>,
-            do_exit: <span class="bool-val">false</span>,
             current_focus: FocusState::None,
+            do_exit: <span class="bool-val">false</span>,
             boxes: Boxes::empty(),
             boxes_state: BoxesState::default(),
             tui_context,

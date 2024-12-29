@@ -67,7 +67,7 @@
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
     {
-        <span class="string">"next"
+        <span class="string">"prev"
     </span>}
 
     <span class="kw">fn </span>build_from_command_name_str(
@@ -99,7 +99,7 @@
             .into());
         }
         context.command_to_execute = <span class="prelude-val">Some</span>(AppMessage::PrevMessage);
-        <span class="macro">todo!</span>()
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div></section></main></body></html>
