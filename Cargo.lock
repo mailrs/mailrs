@@ -4834,9 +4834,9 @@ checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 
 [[package]]
 name = "tui-commander"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8794fa766b2eeb0e97788d03f14c7e23f4db1e46fb49de84f42af8c86bbeba25"
+checksum = "884eb096c58b88c7c372756ccf9a4dba76ab5d1990d077206aaf8e95b0b49aca"
 dependencies = [
  "crossterm",
  "downcast-rs",
