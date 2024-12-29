@@ -57,7 +57,8 @@ impl App {
     #[inline]
     pub fn add_box(&mut self, bx: Arc<crate::tui::model::MBox>) {
         self.boxes.add_box(bx);
-        self.boxes_state.increase_boxes_count()
+        self.boxes_state.increase_boxes_count();
+        self.boxes_state.focus_last();
     }
 
     #[inline]

@@ -49,6 +49,11 @@ impl BoxesState {
         self.tab_bar_focus = self.tab_bar_focus.saturating_sub(1);
     }
 
+    #[inline]
+    pub fn focus_last(&mut self) {
+        self.tab_bar_focus = self.box_state.len() - 1;
+    }
+
     pub fn get_current_state_mut(&mut self) -> Option<&mut super::mbox::MBoxState> {
         self.box_state.get_mut(self.tab_bar_focus)
     }
