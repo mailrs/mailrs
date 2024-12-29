@@ -5,9 +5,9 @@ use crate::notmuch::NotmuchWorkerHandle;
 #[allow(unused)]
 #[derive(Debug)]
 pub struct TuiContext {
-    cli: Cli,
-    config: Config,
-    notmuch: NotmuchWorkerHandle,
+    pub cli: Cli,
+    pub config: Config,
+    pub notmuch: NotmuchWorkerHandle,
 }
 
 impl TuiContext {

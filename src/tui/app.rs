@@ -43,6 +43,7 @@ impl App {
                 .with_command::<crate::tui::commands::prev_message::PrevMessageCommand>()
                 .with_command::<crate::tui::commands::next_message::NextMessageCommand>()
                 .with_command::<crate::tui::commands::query::QueryCommand>()
+                .with_command::<crate::tui::commands::close::CloseCommand>()
                 .build(),
             commander_ui: CommanderUi::default(),
             current_focus: FocusState::None,
@@ -56,7 +57,14 @@ impl App {
     #[inline]
     pub fn add_box(&mut self, bx: Arc<crate::tui::model::MBox>) {
         self.boxes.add_box(bx);
-        self.boxes_state.increase_boxes_count()
+        self.boxes_state.increase_boxes_count();
+        self.boxes_state.focus_last();
+    }
+
+    #[inline]
+    pub fn remove_currently_focused_box(&mut self) {
+        self.boxes.remove_index(self.boxes_state.current_index());
+        self.boxes_state.decrease_boxes_count();
     }
 
     pub async fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<(), AppError> {
@@ -78,14 +86,16 @@ impl App {
             };
 
             if let Some(command) = command_to_execute {
-                self.handle_app_message(command)?;
+                self.handle_app_message(command).await?;
             }
         }
     }
 
     fn draw(&mut self, frame: &mut ratatui::Frame<'_>) {
         frame.render_stateful_widget(&mut self.boxes, frame.area(), &mut self.boxes_state);
-        frame.render_stateful_widget(&mut self.commander_ui, frame.area(), &mut self.commander);
+        if self.current_focus == FocusState::Commander {
+            frame.render_stateful_widget(&mut self.commander_ui, frame.area(), &mut self.commander);
+        }
     }
 
     async fn handle_tui_event(&mut self, event: crossterm::event::Event) -> Option<AppMessage> {
@@ -98,7 +108,6 @@ impl App {
                             KeyCode::Esc => {
                                 tracing::debug!("Deactivating EX");
                                 self.current_focus = FocusState::CommandMode;
-                                self.commander.reset();
                             }
                             KeyCode::Enter => {
                                 let mut tui_commander_context =
@@ -119,7 +128,7 @@ impl App {
                                 }
 
                                 self.current_focus = FocusState::CommandMode;
-                                self.commander.reset();
+                                self.commander_ui.reset();
                                 return tui_commander_context.command_to_execute;
                             }
                             _ => {
@@ -129,9 +138,6 @@ impl App {
                                 tracing::debug!(?key, "Setting commander input");
                                 self.commander
                                     .set_input(self.commander_ui.value().to_string());
-                                if !self.commander.is_active() {
-                                    self.current_focus = FocusState::CommandMode;
-                                }
                             }
                         }
                     }
@@ -140,7 +146,6 @@ impl App {
                         KeyCode::Char(':') => {
                             tracing::debug!("Activating EX");
                             self.current_focus = FocusState::Commander;
-                            self.commander.start();
                         }
 
                         _ => {
@@ -157,7 +162,7 @@ impl App {
         None
     }
 
-    fn handle_app_message(&mut self, message: AppMessage) -> Result<(), AppError> {
+    async fn handle_app_message(&mut self, message: AppMessage) -> Result<(), AppError> {
         match message {
             AppMessage::Quit => {
                 self.do_exit = true;
@@ -165,14 +170,67 @@ impl App {
 
             AppMessage::NextMessage => {
                 tracing::info!("Next Sidebar Entry command received");
+                self.boxes_state.focus_next();
             }
 
             AppMessage::PrevMessage => {
                 tracing::info!("Prev Sidebar Entry command received");
+                self.boxes_state.focus_prev();
             }
 
             AppMessage::Query(args) => {
-                tracing::info!(?args, "Query received");
+                use crate::tui::model::MBox;
+                use crate::tui::model::Message;
+                use crate::tui::model::Tag;
+
+                let query = args.join(" ");
+                tracing::info!(?query, "Query received");
+
+                let messages = self
+                    .tui_context
+                    .notmuch
+                    .create_query(&query)
+                    .search_messages()
+                    .await
+                    .map_err(AppError::from)?
+                    .into_iter()
+                    .map(|message| {
+                        let notmuch = self.tui_context.notmuch.clone();
+
+                        async move {
+                            let tags = notmuch
+                                .clone()
+                                .tags_for_message(&message)
+                                .await?
+                                .unwrap_or_default();
+
+                            tracing::info!(id = ?message.id(), ?tags, "Found message");
+
+                            Ok(Message {
+                                id: message.id().to_string(),
+                                tags: tags
+                                    .into_iter()
+                                    .map(|name| Tag {
+                                        name: name.to_string(),
+                                    })
+                                    .collect::<Vec<Tag>>(),
+                            })
+                        }
+                    })
+                    .collect::<futures::stream::FuturesUnordered<_>>()
+                    .collect::<Vec<Result<Message, crate::notmuch::WorkerError<_>>>>()
+                    .await
+                    .into_iter()
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(AppError::from)?;
+
+                let mbox = MBox::new(query, messages);
+                self.add_box(Arc::new(mbox));
+            }
+
+            AppMessage::Close => {
+                tracing::debug!("Closing current tab");
+                self.remove_currently_focused_box();
             }
         }
 
@@ -186,4 +244,5 @@ pub enum AppMessage {
     PrevMessage,
     NextMessage,
     Query(Vec<String>),
+    Close,
 }

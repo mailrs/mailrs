@@ -22,6 +22,10 @@ impl Boxes {
     pub fn add_box(&mut self, bx: Arc<crate::tui::model::MBox>) {
         self.boxes.push(crate::tui::widgets::mbox::MBox::new(bx));
     }
+
+    pub fn remove_index(&mut self, i: usize) {
+        self.boxes.remove(i);
+    }
 }
 
 #[derive(Debug, Default)]
@@ -45,12 +49,26 @@ impl BoxesState {
         self.tab_bar_focus = self.tab_bar_focus.saturating_sub(1);
     }
 
+    #[inline]
+    pub fn focus_last(&mut self) {
+        self.tab_bar_focus = self.box_state.len() - 1;
+    }
+
     pub fn get_current_state_mut(&mut self) -> Option<&mut super::mbox::MBoxState> {
         self.box_state.get_mut(self.tab_bar_focus)
     }
 
     pub(crate) fn increase_boxes_count(&mut self) {
         self.box_state.push(Default::default());
+    }
+
+    pub(crate) fn decrease_boxes_count(&mut self) {
+        self.box_state.remove(self.tab_bar_focus);
+        self.focus_prev();
+    }
+
+    pub(crate) fn current_index(&self) -> usize {
+        self.tab_bar_focus
     }
 }
 

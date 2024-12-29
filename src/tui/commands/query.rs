@@ -27,12 +27,13 @@ impl tui_commander::Command<TuiCommandContext> for QueryCommand {
         Ok(Self)
     }
 
-    fn args_are_valid(_args: &[&str]) -> bool
+    fn args_are_valid(args: &[&str]) -> bool
     where
         Self: Sized,
     {
-        // TODO: Parse notmuch query?
-        true
+        // Simple sanity check
+        tracing::debug!(?args, "Validating arguments");
+        !args.is_empty() && !args.iter().all(|s| s.is_empty())
     }
 
     fn execute(
@@ -40,8 +41,17 @@ impl tui_commander::Command<TuiCommandContext> for QueryCommand {
         arguments: Vec<String>,
         context: &mut TuiCommandContext,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+        if arguments.is_empty() || arguments.iter().all(|s| s.is_empty()) {
+            return Err(Box::new(QueryError::QueryEmpty));
+        }
         // TODO: Parse whether arguments are correct notmuch query?
         context.command_to_execute = Some(AppMessage::Query(arguments));
         Ok(())
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+enum QueryError {
+    #[error("Query is empty")]
+    QueryEmpty,
 }

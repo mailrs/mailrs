@@ -2,20 +2,20 @@ use super::TuiCommandContext;
 use crate::tui::app::AppMessage;
 
 #[derive(Debug)]
-pub struct QuitCommand;
+pub struct CloseCommand;
 
-impl std::fmt::Display for QuitCommand {
+impl std::fmt::Display for CloseCommand {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "quit")
+        write!(f, "close")
     }
 }
 
-impl tui_commander::Command<TuiCommandContext> for QuitCommand {
+impl tui_commander::Command<TuiCommandContext> for CloseCommand {
     fn name() -> &'static str
     where
         Self: Sized,
     {
-        "quit"
+        "close"
     }
 
     fn build_from_command_name_str(
@@ -41,12 +41,12 @@ impl tui_commander::Command<TuiCommandContext> for QuitCommand {
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
         if !arguments.is_empty() {
             return Err(format!(
-                "The 'quit' command does not support arguments: '{}'",
+                "The 'close' command does not support arguments: '{}'",
                 arguments.join(" ")
             )
             .into());
         }
-        context.command_to_execute = Some(AppMessage::Quit);
+        context.command_to_execute = Some(AppMessage::Close);
         Ok(())
     }
 }
