@@ -92,7 +92,9 @@ impl App {
 
     fn draw(&mut self, frame: &mut ratatui::Frame<'_>) {
         frame.render_stateful_widget(&mut self.boxes, frame.area(), &mut self.boxes_state);
-        frame.render_stateful_widget(&mut self.commander_ui, frame.area(), &mut self.commander);
+        if self.current_focus == FocusState::Commander {
+            frame.render_stateful_widget(&mut self.commander_ui, frame.area(), &mut self.commander);
+        }
     }
 
     async fn handle_tui_event(&mut self, event: crossterm::event::Event) -> Option<AppMessage> {
@@ -105,7 +107,6 @@ impl App {
                             KeyCode::Esc => {
                                 tracing::debug!("Deactivating EX");
                                 self.current_focus = FocusState::CommandMode;
-                                self.commander.reset();
                             }
                             KeyCode::Enter => {
                                 let mut tui_commander_context =
@@ -126,7 +127,6 @@ impl App {
                                 }
 
                                 self.current_focus = FocusState::CommandMode;
-                                self.commander.reset();
                                 self.commander_ui.reset();
                                 return tui_commander_context.command_to_execute;
                             }
@@ -137,9 +137,6 @@ impl App {
                                 tracing::debug!(?key, "Setting commander input");
                                 self.commander
                                     .set_input(self.commander_ui.value().to_string());
-                                if !self.commander.is_active() {
-                                    self.current_focus = FocusState::CommandMode;
-                                }
                             }
                         }
                     }
@@ -148,7 +145,6 @@ impl App {
                         KeyCode::Char(':') => {
                             tracing::debug!("Activating EX");
                             self.current_focus = FocusState::Commander;
-                            self.commander.start();
                         }
 
                         _ => {

@@ -4835,7 +4835,7 @@ checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 [[package]]
 name = "tui-commander"
 version = "0.1.1"
-source = "git+https://github.com/matthiasbeyer/tui-commander#bf0130e2b85397fea1038029dc9d7f15cb44cda8"
+source = "git+https://github.com/matthiasbeyer/tui-commander#1575410ab167a2c8bbceca94b57a3062ec447fe3"
 dependencies = [
  "crossterm",
  "downcast-rs",

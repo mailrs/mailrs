@@ -27,11 +27,11 @@ impl tui_commander::Command<TuiCommandContext> for CloseCommand {
         Ok(Self)
     }
 
-    fn args_are_valid(_args: &[&str]) -> bool
+    fn args_are_valid(args: &[&str]) -> bool
     where
         Self: Sized,
     {
-        false // no arguments supported
+        args.is_empty()
     }
 
     fn execute(
