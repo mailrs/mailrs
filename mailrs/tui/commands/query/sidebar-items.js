@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["QueryCommand"]};
+window.SIDEBAR_ITEMS = {"enum":["QueryError"],"struct":["QueryCommand"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["next_message","prev_message","query","quit"],"struct":["TuiCommandContext"]};
+window.SIDEBAR_ITEMS = {"mod":["close","next_message","prev_message","query","quit"],"struct":["TuiCommandContext"]};

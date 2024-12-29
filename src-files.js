@@ -1,3 +1,3 @@
-var srcIndex = new Map(JSON.parse('[["mailrs",["",[["gui",[],["callbacks.rs","error.rs","mod.rs","state.rs"]],["notmuch",[],["error.rs","handle.rs","message.rs","mod.rs","request.rs","tag.rs","worker.rs"]],["tui",[["commands",[],["mod.rs","next_message.rs","prev_message.rs","query.rs","quit.rs"]],["model",[],["mod.rs"]],["widgets",[],["boxes.rs","mbox.rs","message_list_item.rs","mod.rs"]]],["app.rs","context.rs","error.rs","mod.rs"]]],["app.rs","cli.rs","config.rs","error.rs","main.rs"]]]]'));
+var srcIndex = new Map(JSON.parse('[["mailrs",["",[["gui",[],["callbacks.rs","error.rs","mod.rs","state.rs"]],["notmuch",[],["error.rs","handle.rs","message.rs","mod.rs","request.rs","tag.rs","worker.rs"]],["tui",[["commands",[],["close.rs","mod.rs","next_message.rs","prev_message.rs","query.rs","quit.rs"]],["model",[],["mod.rs"]],["widgets",[],["boxes.rs","mbox.rs","message_list_item.rs","mod.rs"]]],["app.rs","context.rs","error.rs","mod.rs"]]],["app.rs","cli.rs","config.rs","error.rs","main.rs"]]]]'));
 createSrcSidebar();
-//{"start":36,"fragment_lengths":[457]}
+//{"start":36,"fragment_lengths":[468]}
