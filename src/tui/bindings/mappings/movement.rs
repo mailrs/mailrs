@@ -5,7 +5,8 @@ crate::map_key_to_function! {
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
-    run: |_app: &mut crate::tui::app::AppState| {
+    run: |app: &mut crate::tui::app::AppState| {
+        app.boxes_state.focus_prev();
         Ok(())
     }
 }
@@ -51,7 +52,8 @@ crate::map_key_to_function! {
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
-    run: |_app: &mut crate::tui::app::AppState| {
+    run: |app: &mut crate::tui::app::AppState| {
+        app.boxes_state.focus_next();
         Ok(())
     }
 }
