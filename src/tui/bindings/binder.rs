@@ -53,6 +53,7 @@ impl<Context, Err> Binder<Context, Err> {
         self.rebind(*old_bindings, new_binding)
     }
 
+    #[allow(clippy::type_complexity)]
     fn find_binding_helper_for_func_name(
         &self,
         name: &str,
