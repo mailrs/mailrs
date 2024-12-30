@@ -46,7 +46,8 @@ impl StatefulWidget for &mut MBox {
         let builder = ListBuilder::new(move |context| {
             let message = boxes.messages.get(context.index).unwrap();
             let mut item = MessageListItem {
-                id: message.id.clone(),
+                from: message.from.clone(),
+                subject: message.subject.clone(),
                 tags: message.tags.iter().map(|t| t.name.to_string()).collect(),
                 style: Style::default(),
             };
