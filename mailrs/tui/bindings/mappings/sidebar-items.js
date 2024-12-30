@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["functionality","movement"],"struct":["DoesNotMatch"],"trait":["KeyToFunctionMapping"]};

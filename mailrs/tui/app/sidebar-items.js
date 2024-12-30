@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["AppMessage","FocusState"],"struct":["App"]};
+window.SIDEBAR_ITEMS = {"enum":["AppMessage","FocusState"],"struct":["App","AppState"]};

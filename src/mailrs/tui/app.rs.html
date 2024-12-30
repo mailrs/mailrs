@@ -246,7 +246,55 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>crossterm::event::EventStream;
 <span class="kw">use </span>crossterm::event::KeyCode;
@@ -258,6 +306,7 @@
 <span class="kw">use </span>tui_commander::ui::Ui <span class="kw">as </span>CommanderUi;
 <span class="kw">use </span>tui_commander::Commander;
 
+<span class="kw">use </span><span class="kw">super</span>::bindings::binder::Binder;
 <span class="kw">use </span><span class="kw">super</span>::context::TuiContext;
 <span class="kw">use </span><span class="kw">super</span>::error::AppError;
 <span class="kw">use </span><span class="kw">super</span>::widgets::boxes::Boxes;
@@ -266,17 +315,22 @@
 
 <span class="attr">#[allow(unused)]
 </span><span class="kw">pub struct </span>App {
+    tui_context: TuiContext,
+    keybindings: Binder&lt;AppState, AppError&gt;,
+    state: AppState,
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>AppState {
     commander: Commander&lt;TuiCommandContext&gt;,
     commander_ui: CommanderUi&lt;TuiCommandContext&gt;,
     do_exit: bool,
     boxes: Boxes,
-    current_focus: FocusState,
-    boxes_state: BoxesState,
-    tui_context: TuiContext,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) current_focus: FocusState,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) boxes_state: BoxesState,
 }
 
 <span class="attr">#[derive(Debug, PartialEq, Eq)]
-</span><span class="kw">enum </span>FocusState {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>FocusState {
     <span class="prelude-val">None</span>,
     Commander,
     CommandMode,
@@ -285,40 +339,54 @@
 <span class="kw">impl </span>App {
     <span class="kw">pub fn </span>new(tui_context: TuiContext) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            commander: Commander::builder()
-                .with_case_sensitive(<span class="bool-val">false</span>)
-                .with_command::&lt;<span class="kw">crate</span>::tui::commands::quit::QuitCommand&gt;()
-                .with_command::&lt;<span class="kw">crate</span>::tui::commands::prev_message::PrevMessageCommand&gt;()
-                .with_command::&lt;<span class="kw">crate</span>::tui::commands::next_message::NextMessageCommand&gt;()
-                .with_command::&lt;<span class="kw">crate</span>::tui::commands::query::QueryCommand&gt;()
-                .with_command::&lt;<span class="kw">crate</span>::tui::commands::close::CloseCommand&gt;()
-                .build(),
-            commander_ui: CommanderUi::default(),
-            current_focus: FocusState::None,
-            do_exit: <span class="bool-val">false</span>,
-            boxes: Boxes::empty(),
-            boxes_state: BoxesState::default(),
             tui_context,
+
+            keybindings: Binder::builder()
+                .with_binding::&lt;<span class="kw">crate</span>::tui::bindings::mappings::MoveLeft&gt;()
+                .with_binding::&lt;<span class="kw">crate</span>::tui::bindings::mappings::MoveUp&gt;()
+                .with_binding::&lt;<span class="kw">crate</span>::tui::bindings::mappings::MoveDown&gt;()
+                .with_binding::&lt;<span class="kw">crate</span>::tui::bindings::mappings::MoveRight&gt;()
+                .with_binding::&lt;<span class="kw">crate</span>::tui::bindings::mappings::ActivateCommander&gt;()
+                .with_binding::&lt;<span class="kw">crate</span>::tui::bindings::mappings::Abort&gt;()
+                .build(),
+
+            state: AppState {
+                commander: Commander::builder()
+                    .with_case_sensitive(<span class="bool-val">false</span>)
+                    .with_command::&lt;<span class="kw">crate</span>::tui::commands::quit::QuitCommand&gt;()
+                    .with_command::&lt;<span class="kw">crate</span>::tui::commands::prev_message::PrevMessageCommand&gt;()
+                    .with_command::&lt;<span class="kw">crate</span>::tui::commands::next_message::NextMessageCommand&gt;()
+                    .with_command::&lt;<span class="kw">crate</span>::tui::commands::query::QueryCommand&gt;()
+                    .with_command::&lt;<span class="kw">crate</span>::tui::commands::close::CloseCommand&gt;()
+                    .build(),
+                commander_ui: CommanderUi::default(),
+                current_focus: FocusState::None,
+                do_exit: <span class="bool-val">false</span>,
+                boxes: Boxes::empty(),
+                boxes_state: BoxesState::default(),
+            },
         }
     }
 
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>add_box(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bx: Arc&lt;<span class="kw">crate</span>::tui::model::MBox&gt;) {
-        <span class="self">self</span>.boxes.add_box(bx);
-        <span class="self">self</span>.boxes_state.increase_boxes_count();
-        <span class="self">self</span>.boxes_state.focus_last();
+        <span class="self">self</span>.state.boxes.add_box(bx);
+        <span class="self">self</span>.state.boxes_state.increase_boxes_count();
+        <span class="self">self</span>.state.boxes_state.focus_last();
     }
 
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>remove_currently_focused_box(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.boxes.remove_index(<span class="self">self</span>.boxes_state.current_index());
-        <span class="self">self</span>.boxes_state.decrease_boxes_count();
+        <span class="self">self</span>.state
+            .boxes
+            .remove_index(<span class="self">self</span>.state.boxes_state.current_index());
+        <span class="self">self</span>.state.boxes_state.decrease_boxes_count();
     }
 
     <span class="kw">pub async fn </span>run(<span class="kw-2">mut </span><span class="self">self</span>, <span class="kw-2">mut </span>terminal: Terminal&lt;<span class="kw">impl </span>Backend&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), AppError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>events = EventStream::new();
         <span class="kw">loop </span>{
-            <span class="kw">if </span><span class="self">self</span>.do_exit {
+            <span class="kw">if </span><span class="self">self</span>.state.do_exit {
                 <span class="macro">tracing::info!</span>(<span class="string">"Shutting down TUI"</span>);
                 <span class="kw">break </span><span class="prelude-val">Ok</span>(());
             }
@@ -340,22 +408,48 @@
     }
 
     <span class="kw">fn </span>draw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, frame: <span class="kw-2">&amp;mut </span>ratatui::Frame&lt;<span class="lifetime">'_</span>&gt;) {
-        frame.render_stateful_widget(<span class="kw-2">&amp;mut </span><span class="self">self</span>.boxes, frame.area(), <span class="kw-2">&amp;mut </span><span class="self">self</span>.boxes_state);
-        <span class="kw">if </span><span class="self">self</span>.current_focus == FocusState::Commander {
-            frame.render_stateful_widget(<span class="kw-2">&amp;mut </span><span class="self">self</span>.commander_ui, frame.area(), <span class="kw-2">&amp;mut </span><span class="self">self</span>.commander);
+        frame.render_stateful_widget(
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.state.boxes,
+            frame.area(),
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.state.boxes_state,
+        );
+        <span class="kw">if </span><span class="self">self</span>.state.current_focus == FocusState::Commander {
+            frame.render_stateful_widget(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.state.commander_ui,
+                frame.area(),
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.state.commander,
+            );
         }
     }
 
     <span class="kw">async fn </span>handle_tui_event(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: crossterm::event::Event) -&gt; <span class="prelude-ty">Option</span>&lt;AppMessage&gt; {
         <span class="kw">match </span>event {
             ratatui::crossterm::event::Event::Key(key) =&gt; {
-                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>key, <span class="string">"Event is keypress"</span>);
-                <span class="kw">if </span><span class="self">self</span>.current_focus == FocusState::Commander {
-                    <span class="kw">if </span>key.kind == KeyEventKind::Press {
-                        <span class="kw">match </span>key.code {
+                <span class="kw">if </span>key.kind == KeyEventKind::Press {
+                    <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>key, <span class="string">"Event is keypress"</span>);
+
+                    <span class="kw">match </span><span class="self">self</span>.state.current_focus {
+                        FocusState::None | FocusState::CommandMode =&gt; {
+                            <span class="kw">match </span><span class="self">self</span>.keybindings.run_binding_for_keycode(
+                                key.code,
+                                key.modifiers,
+                                <span class="kw-2">&amp;mut </span><span class="self">self</span>.state,
+                            ) {
+                                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(())) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(AppMessage::KeyBindingSuccessfull),
+                                <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(error)) =&gt; {
+                                    <span class="kw">return </span><span class="prelude-val">Some</span>(AppMessage::KeyBindingErrored(error))
+                                }
+                                <span class="prelude-val">None </span>=&gt; {
+                                    <span class="comment">// No keybinding found
+                                    </span><span class="kw">return </span><span class="prelude-val">Some</span>(AppMessage::UnboundKey(key));
+                                }
+                            }
+                        }
+
+                        FocusState::Commander =&gt; <span class="kw">match </span>key.code {
                             KeyCode::Esc =&gt; {
                                 <span class="macro">tracing::debug!</span>(<span class="string">"Deactivating EX"</span>);
-                                <span class="self">self</span>.current_focus = FocusState::CommandMode;
+                                <span class="self">self</span>.state.current_focus = FocusState::CommandMode;
                             }
                             KeyCode::Enter =&gt; {
                                 <span class="kw">let </span><span class="kw-2">mut </span>tui_commander_context =
@@ -363,7 +457,7 @@
                                         command_to_execute: <span class="prelude-val">None</span>,
                                     };
 
-                                <span class="kw">match </span><span class="self">self</span>.commander.execute(<span class="kw-2">&amp;mut </span>tui_commander_context) {
+                                <span class="kw">match </span><span class="self">self</span>.state.commander.execute(<span class="kw-2">&amp;mut </span>tui_commander_context) {
                                     <span class="prelude-val">Ok</span>(()) =&gt; {
                                         <span class="macro">tracing::debug!</span>(<span class="string">"Commander context executed successfully"</span>);
                                     }
@@ -375,30 +469,20 @@
                                     }
                                 }
 
-                                <span class="self">self</span>.current_focus = FocusState::CommandMode;
-                                <span class="self">self</span>.commander_ui.reset();
+                                <span class="self">self</span>.state.current_focus = FocusState::CommandMode;
+                                <span class="self">self</span>.state.commander_ui.reset();
                                 <span class="kw">return </span>tui_commander_context.command_to_execute;
                             }
                             <span class="kw">_ </span>=&gt; {
                                 <span class="macro">tracing::debug!</span>(<span class="question-mark">?</span>key, <span class="string">"Forwarding keypress to commander UI"</span>);
-                                <span class="self">self</span>.commander_ui.handle_key_press(key);
+                                <span class="self">self</span>.state.commander_ui.handle_key_press(key);
 
                                 <span class="macro">tracing::debug!</span>(<span class="question-mark">?</span>key, <span class="string">"Setting commander input"</span>);
-                                <span class="self">self</span>.commander
-                                    .set_input(<span class="self">self</span>.commander_ui.value().to_string());
+                                <span class="self">self</span>.state
+                                    .commander
+                                    .set_input(<span class="self">self</span>.state.commander_ui.value().to_string());
                             }
-                        }
-                    }
-                } <span class="kw">else if </span>key.kind == KeyEventKind::Press {
-                    <span class="kw">match </span>key.code {
-                        KeyCode::Char(<span class="string">':'</span>) =&gt; {
-                            <span class="macro">tracing::debug!</span>(<span class="string">"Activating EX"</span>);
-                            <span class="self">self</span>.current_focus = FocusState::Commander;
-                        }
-
-                        <span class="kw">_ </span>=&gt; {
-                            <span class="macro">tracing::debug!</span>(key = <span class="question-mark">?</span>key.code, <span class="string">"Unhandled key press"</span>);
-                        }
+                        },
                     }
                 }
             }
@@ -413,17 +497,17 @@
     <span class="kw">async fn </span>handle_app_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>, message: AppMessage) -&gt; <span class="prelude-ty">Result</span>&lt;(), AppError&gt; {
         <span class="kw">match </span>message {
             AppMessage::Quit =&gt; {
-                <span class="self">self</span>.do_exit = <span class="bool-val">true</span>;
+                <span class="self">self</span>.state.do_exit = <span class="bool-val">true</span>;
             }
 
             AppMessage::NextMessage =&gt; {
                 <span class="macro">tracing::info!</span>(<span class="string">"Next Sidebar Entry command received"</span>);
-                <span class="self">self</span>.boxes_state.focus_next();
+                <span class="self">self</span>.state.boxes_state.focus_next();
             }
 
             AppMessage::PrevMessage =&gt; {
                 <span class="macro">tracing::info!</span>(<span class="string">"Prev Sidebar Entry command received"</span>);
-                <span class="self">self</span>.boxes_state.focus_prev();
+                <span class="self">self</span>.state.boxes_state.focus_prev();
             }
 
             AppMessage::Query(args) =&gt; {
@@ -480,6 +564,15 @@
                 <span class="macro">tracing::debug!</span>(<span class="string">"Closing current tab"</span>);
                 <span class="self">self</span>.remove_currently_focused_box();
             }
+            AppMessage::KeyBindingSuccessfull =&gt; {
+                <span class="macro">tracing::debug!</span>(<span class="string">"Keybinding executed successfully"</span>);
+            }
+            AppMessage::KeyBindingErrored(error) =&gt; {
+                <span class="macro">tracing::error!</span>(<span class="question-mark">?</span>error, <span class="string">"Keybinding failed"</span>);
+            }
+            AppMessage::UnboundKey(key) =&gt; {
+                <span class="macro">tracing::error!</span>(<span class="question-mark">?</span>key, <span class="string">"Unbound key"</span>);
+            }
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -493,5 +586,8 @@
     NextMessage,
     Query(Vec&lt;String&gt;),
     Close,
+    KeyBindingSuccessfull,
+    KeyBindingErrored(AppError),
+    UnboundKey(crossterm::event::KeyEvent),
 }
 </code></pre></div></section></main></body></html>
