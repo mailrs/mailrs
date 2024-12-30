@@ -10,6 +10,7 @@ use ratatui::Terminal;
 use tui_commander::ui::Ui as CommanderUi;
 use tui_commander::Commander;
 
+use super::bindings::binder::Binder;
 use super::context::TuiContext;
 use super::error::AppError;
 use super::widgets::boxes::Boxes;
@@ -18,17 +19,22 @@ use crate::tui::commands::TuiCommandContext;
 
 #[allow(unused)]
 pub struct App {
+    tui_context: TuiContext,
+    keybindings: Binder<AppState, AppError>,
+    state: AppState,
+}
+
+pub(crate) struct AppState {
     commander: Commander<TuiCommandContext>,
     commander_ui: CommanderUi<TuiCommandContext>,
     do_exit: bool,
     boxes: Boxes,
-    current_focus: FocusState,
-    boxes_state: BoxesState,
-    tui_context: TuiContext,
+    pub(crate) current_focus: FocusState,
+    pub(crate) boxes_state: BoxesState,
 }
 
 #[derive(Debug, PartialEq, Eq)]
-enum FocusState {
+pub(crate) enum FocusState {
     None,
     Commander,
     CommandMode,
@@ -37,40 +43,54 @@ enum FocusState {
 impl App {
     pub fn new(tui_context: TuiContext) -> Self {
         Self {
-            commander: Commander::builder()
-                .with_case_sensitive(false)
-                .with_command::<crate::tui::commands::quit::QuitCommand>()
-                .with_command::<crate::tui::commands::prev_message::PrevMessageCommand>()
-                .with_command::<crate::tui::commands::next_message::NextMessageCommand>()
-                .with_command::<crate::tui::commands::query::QueryCommand>()
-                .with_command::<crate::tui::commands::close::CloseCommand>()
-                .build(),
-            commander_ui: CommanderUi::default(),
-            current_focus: FocusState::None,
-            do_exit: false,
-            boxes: Boxes::empty(),
-            boxes_state: BoxesState::default(),
             tui_context,
+
+            keybindings: Binder::builder()
+                .with_binding::<crate::tui::bindings::mappings::MoveLeft>()
+                .with_binding::<crate::tui::bindings::mappings::MoveUp>()
+                .with_binding::<crate::tui::bindings::mappings::MoveDown>()
+                .with_binding::<crate::tui::bindings::mappings::MoveRight>()
+                .with_binding::<crate::tui::bindings::mappings::ActivateCommander>()
+                .with_binding::<crate::tui::bindings::mappings::Abort>()
+                .build(),
+
+            state: AppState {
+                commander: Commander::builder()
+                    .with_case_sensitive(false)
+                    .with_command::<crate::tui::commands::quit::QuitCommand>()
+                    .with_command::<crate::tui::commands::prev_message::PrevMessageCommand>()
+                    .with_command::<crate::tui::commands::next_message::NextMessageCommand>()
+                    .with_command::<crate::tui::commands::query::QueryCommand>()
+                    .with_command::<crate::tui::commands::close::CloseCommand>()
+                    .build(),
+                commander_ui: CommanderUi::default(),
+                current_focus: FocusState::None,
+                do_exit: false,
+                boxes: Boxes::empty(),
+                boxes_state: BoxesState::default(),
+            },
         }
     }
 
     #[inline]
     pub fn add_box(&mut self, bx: Arc<crate::tui::model::MBox>) {
-        self.boxes.add_box(bx);
-        self.boxes_state.increase_boxes_count();
-        self.boxes_state.focus_last();
+        self.state.boxes.add_box(bx);
+        self.state.boxes_state.increase_boxes_count();
+        self.state.boxes_state.focus_last();
     }
 
     #[inline]
     pub fn remove_currently_focused_box(&mut self) {
-        self.boxes.remove_index(self.boxes_state.current_index());
-        self.boxes_state.decrease_boxes_count();
+        self.state
+            .boxes
+            .remove_index(self.state.boxes_state.current_index());
+        self.state.boxes_state.decrease_boxes_count();
     }
 
     pub async fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<(), AppError> {
         let mut events = EventStream::new();
         loop {
-            if self.do_exit {
+            if self.state.do_exit {
                 tracing::info!("Shutting down TUI");
                 break Ok(());
             }
@@ -92,22 +112,48 @@ impl App {
     }
 
     fn draw(&mut self, frame: &mut ratatui::Frame<'_>) {
-        frame.render_stateful_widget(&mut self.boxes, frame.area(), &mut self.boxes_state);
-        if self.current_focus == FocusState::Commander {
-            frame.render_stateful_widget(&mut self.commander_ui, frame.area(), &mut self.commander);
+        frame.render_stateful_widget(
+            &mut self.state.boxes,
+            frame.area(),
+            &mut self.state.boxes_state,
+        );
+        if self.state.current_focus == FocusState::Commander {
+            frame.render_stateful_widget(
+                &mut self.state.commander_ui,
+                frame.area(),
+                &mut self.state.commander,
+            );
         }
     }
 
     async fn handle_tui_event(&mut self, event: crossterm::event::Event) -> Option<AppMessage> {
         match event {
             ratatui::crossterm::event::Event::Key(key) => {
-                tracing::trace!(?key, "Event is keypress");
-                if self.current_focus == FocusState::Commander {
-                    if key.kind == KeyEventKind::Press {
-                        match key.code {
+                if key.kind == KeyEventKind::Press {
+                    tracing::trace!(?key, "Event is keypress");
+
+                    match self.state.current_focus {
+                        FocusState::None | FocusState::CommandMode => {
+                            match self.keybindings.run_binding_for_keycode(
+                                key.code,
+                                key.modifiers,
+                                &mut self.state,
+                            ) {
+                                Some(Ok(())) => return Some(AppMessage::KeyBindingSuccessfull),
+                                Some(Err(error)) => {
+                                    return Some(AppMessage::KeyBindingErrored(error))
+                                }
+                                None => {
+                                    // No keybinding found
+                                    return Some(AppMessage::UnboundKey(key));
+                                }
+                            }
+                        }
+
+                        FocusState::Commander => match key.code {
                             KeyCode::Esc => {
                                 tracing::debug!("Deactivating EX");
-                                self.current_focus = FocusState::CommandMode;
+                                self.state.current_focus = FocusState::CommandMode;
                             }
                             KeyCode::Enter => {
                                 let mut tui_commander_context =
@@ -115,7 +161,7 @@ impl App {
                                         command_to_execute: None,
                                     };
 
-                                match self.commander.execute(&mut tui_commander_context) {
+                                match self.state.commander.execute(&mut tui_commander_context) {
                                     Ok(()) => {
                                         tracing::debug!("Commander context executed successfully");
                                     }
@@ -127,30 +173,20 @@ impl App {
                                     }
                                 }
 
-                                self.current_focus = FocusState::CommandMode;
-                                self.commander_ui.reset();
+                                self.state.current_focus = FocusState::CommandMode;
+                                self.state.commander_ui.reset();
                                 return tui_commander_context.command_to_execute;
                             }
                             _ => {
                                 tracing::debug!(?key, "Forwarding keypress to commander UI");
-                                self.commander_ui.handle_key_press(key);
+                                self.state.commander_ui.handle_key_press(key);
 
                                 tracing::debug!(?key, "Setting commander input");
-                                self.commander
-                                    .set_input(self.commander_ui.value().to_string());
+                                self.state
+                                    .commander
+                                    .set_input(self.state.commander_ui.value().to_string());
                             }
-                        }
-                    }
-                } else if key.kind == KeyEventKind::Press {
-                    match key.code {
-                        KeyCode::Char(':') => {
-                            tracing::debug!("Activating EX");
-                            self.current_focus = FocusState::Commander;
-                        }
-
-                        _ => {
-                            tracing::debug!(key = ?key.code, "Unhandled key press");
-                        }
+                        },
                     }
                 }
             }
@@ -165,17 +201,17 @@ impl App {
     async fn handle_app_message(&mut self, message: AppMessage) -> Result<(), AppError> {
         match message {
             AppMessage::Quit => {
-                self.do_exit = true;
+                self.state.do_exit = true;
             }
 
             AppMessage::NextMessage => {
                 tracing::info!("Next Sidebar Entry command received");
-                self.boxes_state.focus_next();
+                self.state.boxes_state.focus_next();
             }
 
             AppMessage::PrevMessage => {
                 tracing::info!("Prev Sidebar Entry command received");
-                self.boxes_state.focus_prev();
+                self.state.boxes_state.focus_prev();
             }
 
             AppMessage::Query(args) => {
@@ -232,6 +268,15 @@ impl App {
                 tracing::debug!("Closing current tab");
                 self.remove_currently_focused_box();
             }
+            AppMessage::KeyBindingSuccessfull => {
+                tracing::debug!("Keybinding executed successfully");
+            }
+            AppMessage::KeyBindingErrored(error) => {
+                tracing::error!(?error, "Keybinding failed");
+            }
+            AppMessage::UnboundKey(key) => {
+                tracing::error!(?key, "Unbound key");
+            }
         }
 
         Ok(())
@@ -245,4 +290,7 @@ pub enum AppMessage {
     NextMessage,
     Query(Vec<String>),
     Close,
+    KeyBindingSuccessfull,
+    KeyBindingErrored(AppError),
+    UnboundKey(crossterm::event::KeyEvent),
 }

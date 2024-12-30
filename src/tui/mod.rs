@@ -11,6 +11,7 @@ use crate::config::Config;
 use crate::notmuch::NotmuchWorkerHandle;
 
 mod app;
+mod bindings;
 mod commands;
 mod context;
 pub mod error;

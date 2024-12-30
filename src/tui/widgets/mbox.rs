@@ -29,6 +29,18 @@ pub struct MBoxState {
     list_state: ListState,
 }
 
+impl MBoxState {
+    #[inline]
+    pub fn next(&mut self) {
+        self.list_state.next()
+    }
+
+    #[inline]
+    pub fn prev(&mut self) {
+        self.list_state.previous()
+    }
+}
+
 impl StatefulWidget for &mut MBox {
     type State = MBoxState;
 
