@@ -17,7 +17,12 @@ crate::map_key_to_function! {
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
-    run: |_app: &mut crate::tui::app::AppState| {
+    run: |app: &mut crate::tui::app::AppState| {
+        let Some(mbox_state) = app.boxes_state.get_current_state_mut() else {
+            return Ok(())
+        };
+
+        mbox_state.next();
         Ok(())
     }
 }
@@ -29,7 +34,12 @@ crate::map_key_to_function! {
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
-    run: |_app: &mut crate::tui::app::AppState| {
+    run: |app: &mut crate::tui::app::AppState| {
+        let Some(mbox_state) = app.boxes_state.get_current_state_mut() else {
+            return Ok(())
+        };
+
+        mbox_state.prev();
         Ok(())
     }
 }

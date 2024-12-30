@@ -30,7 +30,7 @@ pub(crate) struct AppState {
     do_exit: bool,
     boxes: Boxes,
     pub(crate) current_focus: FocusState,
-    boxes_state: BoxesState,
+    pub(crate) boxes_state: BoxesState,
 }
 
 #[derive(Debug, PartialEq, Eq)]
