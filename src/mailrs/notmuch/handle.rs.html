@@ -83,7 +83,7 @@
     <span class="kw">pub</span>(<span class="kw">super</span>) sender: NotmuchRequestSender,
 }
 
-<span class="kw">async fn </span>send_and_recv&lt;Res&gt;(
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">async fn </span>send_and_recv&lt;Res&gt;(
     sender: <span class="kw-2">&amp;</span>NotmuchRequestSender,
     (request, recv): (Request, tokio::sync::oneshot::Receiver&lt;Res&gt;),
 ) -&gt; <span class="prelude-ty">Result</span>&lt;Res, WorkerError&lt;NotmuchError&gt;&gt;

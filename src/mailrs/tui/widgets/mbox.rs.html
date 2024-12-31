@@ -87,7 +87,8 @@
 <a href="#86" id="86">86</a>
 <a href="#87" id="87">87</a>
 <a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>ratatui::style::Color;
 <span class="kw">use </span>ratatui::style::Style;
@@ -147,7 +148,8 @@
         <span class="kw">let </span>builder = ListBuilder::new(<span class="kw">move </span>|context| {
             <span class="kw">let </span>message = boxes.messages.get(context.index).unwrap();
             <span class="kw">let </span><span class="kw-2">mut </span>item = MessageListItem {
-                id: message.id.clone(),
+                from: message.from.clone(),
+                subject: message.subject.clone(),
                 tags: message.tags.iter().map(|t| t.name.to_string()).collect(),
                 style: Style::default(),
             };
