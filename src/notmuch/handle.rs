@@ -10,7 +10,7 @@ pub struct NotmuchWorkerHandle {
     pub(super) sender: NotmuchRequestSender,
 }
 
-async fn send_and_recv<Res>(
+pub(super) async fn send_and_recv<Res>(
     sender: &NotmuchRequestSender,
     (request, recv): (Request, tokio::sync::oneshot::Receiver<Res>),
 ) -> Result<Res, WorkerError<NotmuchError>>

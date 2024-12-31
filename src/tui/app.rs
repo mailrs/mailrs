@@ -240,10 +240,36 @@ impl App {
                                 .await?
                                 .unwrap_or_default();
 
+                            let from = match message.header("From").await {
+                                Ok(someornone) => someornone,
+                                Err(error) => {
+                                    tracing::error!(
+                                        ?error,
+                                        id = message.id(),
+                                        "Failed to fetch 'From' header for message"
+                                    );
+                                    None
+                                }
+                            };
+
+                            let subject = match message.header("Subject").await {
+                                Ok(someornone) => someornone,
+                                Err(error) => {
+                                    tracing::error!(
+                                        ?error,
+                                        id = message.id(),
+                                        "Failed to fetch 'Subject' header for message"
+                                    );
+                                    None
+                                }
+                            };
+
                             tracing::info!(id = ?message.id(), ?tags, "Found message");
 
                             Ok(Message {
                                 id: message.id().to_string(),
+                                from,
+                                subject,
                                 tags: tags
                                     .into_iter()
                                     .map(|name| Tag {

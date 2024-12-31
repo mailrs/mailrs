@@ -72,7 +72,26 @@ impl NotmuchWorker {
                         Ok(msgs) => {
                             let messages = msgs
                                 .into_iter()
-                                .map(|m| super::message::Message::new(m.id().to_string(), m.date()))
+                                .map(|m| {
+                                    let date =
+                                        match time::OffsetDateTime::from_unix_timestamp(m.date()) {
+                                            Ok(dt) => Some(dt),
+                                            Err(error) => {
+                                                tracing::warn!(
+                                                    timestamp = m.date(),
+                                                    ?error,
+                                                    "Failed to parse timestamp"
+                                                );
+                                                None
+                                            }
+                                        };
+
+                                    super::message::Message::new(
+                                        m.id().to_string(),
+                                        date,
+                                        self.handle(),
+                                    )
+                                })
                                 .collect();
 
                             sender.send(Ok(messages)).map_err(|_| WorkerError::Send)?;
@@ -103,6 +122,52 @@ impl NotmuchWorker {
 
                     let tags = tags.map(super::tag::Tag::new).collect();
                     sender.send(Ok(Some(tags))).map_err(|_| WorkerError::Send)?;
+                }
+
+                Request::FileNamesForMessage { message_id, sender } => {
+                    let filenames = match self.database.find_message(&message_id) {
+                        Ok(Some(msg)) => msg.filenames().collect(),
+                        Ok(None) => {
+                            sender.send(Ok(None)).map_err(|_| WorkerError::Send)?;
+                            continue;
+                        }
+                        Err(e) => {
+                            sender
+                                .send(Err(NotmuchError::from(e)))
+                                .map_err(|_| WorkerError::Send)?;
+                            continue;
+                        }
+                    };
+
+                    sender
+                        .send(Ok(Some(filenames)))
+                        .map_err(|_| WorkerError::Send)?;
+                }
+
+                Request::HeaderForMessage {
+                    message_id,
+                    header,
+                    sender,
+                } => {
+                    let header_value = match self.database.find_message(&message_id) {
+                        Ok(Some(msg)) => match msg.header(&header) {
+                            Ok(Some(s)) => Ok(Some(s.to_string())),
+                            Ok(None) => Ok(None),
+                            Err(e) => Err(e.into()),
+                        },
+                        Ok(None) => {
+                            sender.send(Ok(None)).map_err(|_| WorkerError::Send)?;
+                            continue;
+                        }
+                        Err(e) => {
+                            sender
+                                .send(Err(NotmuchError::from(e)))
+                                .map_err(|_| WorkerError::Send)?;
+                            continue;
+                        }
+                    };
+
+                    sender.send(header_value).map_err(|_| WorkerError::Send)?;
                 }
             }
 

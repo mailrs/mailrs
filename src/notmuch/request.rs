@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use super::message::Message;
 use super::tag::Tag;
 use crate::error::NotmuchError;
@@ -14,6 +16,15 @@ pub enum Request {
     TagsForMessage {
         message_id: String,
         sender: tokio::sync::oneshot::Sender<Result<Option<Vec<Tag>>, NotmuchError>>,
+    },
+    FileNamesForMessage {
+        message_id: String,
+        sender: tokio::sync::oneshot::Sender<Result<Option<Vec<PathBuf>>, NotmuchError>>,
+    },
+    HeaderForMessage {
+        message_id: String,
+        header: String,
+        sender: tokio::sync::oneshot::Sender<Result<Option<String>, NotmuchError>>,
     },
 }
 
@@ -33,6 +44,32 @@ impl Request {
         (
             Self::TagsForMessage {
                 message_id: message_id.to_string(),
+                sender,
+            },
+            recv,
+        )
+    }
+
+    pub fn file_names_for_message(message_id: &str) -> (Self, ResultRecv<Option<Vec<PathBuf>>>) {
+        let (sender, recv) = tokio::sync::oneshot::channel();
+        (
+            Self::FileNamesForMessage {
+                message_id: message_id.to_string(),
+                sender,
+            },
+            recv,
+        )
+    }
+
+    pub fn header_for_message(
+        message_id: &str,
+        header: &str,
+    ) -> (Self, ResultRecv<Option<String>>) {
+        let (sender, recv) = tokio::sync::oneshot::channel();
+        (
+            Self::HeaderForMessage {
+                message_id: message_id.to_string(),
+                header: header.to_string(),
                 sender,
             },
             recv,

@@ -13,6 +13,8 @@ impl MBox {
 #[derive(Debug)]
 pub struct Message {
     pub id: String,
+    pub from: Option<String>,
+    pub subject: Option<String>,
     pub tags: Vec<Tag>,
     // pub body: String,
 }

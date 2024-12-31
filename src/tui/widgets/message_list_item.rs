@@ -6,7 +6,8 @@ use ratatui::text::Text;
 use ratatui::widgets::Widget;
 
 pub struct MessageListItem {
-    pub id: String,
+    pub subject: Option<String>,
+    pub from: Option<String>,
     pub tags: Vec<String>,
     pub style: Style,
 }
@@ -16,10 +17,30 @@ impl Widget for MessageListItem {
     where
         Self: Sized,
     {
-        let [id, tag_list] =
-            Layout::horizontal([Constraint::Percentage(80), Constraint::Length(25)]).areas(area);
+        let [from_area, subject_area, tag_list] = Layout::horizontal([
+            Constraint::Percentage(30),
+            Constraint::Percentage(50),
+            Constraint::Length(25),
+        ])
+        .areas(area);
 
-        Text::from(self.id).style(self.style).render(id, buf);
+        if let Some(subject) = self.subject {
+            Text::from(subject)
+                .style(self.style)
+                .render(subject_area, buf)
+        } else {
+            Text::from("<no subject>")
+                .style(self.style)
+                .render(subject_area, buf)
+        };
+
+        if let Some(from) = self.from {
+            Text::from(from).style(self.style).render(from_area, buf)
+        } else {
+            Text::from("<no from>")
+                .style(self.style)
+                .render(from_area, buf)
+        };
 
         Text::from(self.tags.join(", "))
             .style(self.style.italic())
