@@ -15,6 +15,7 @@ mod bindings;
 mod commands;
 mod context;
 pub mod error;
+mod jobserver;
 mod model;
 mod widgets;
 
@@ -100,8 +101,7 @@ pub async fn run(
 
     let mut app = self::app::App::new(tui_context);
     app.add_box(Arc::new(initial_box));
-    let res = app.run(terminal).await;
-
+    let res = app.run(terminal);
     restore_tui()?;
     res.map_err(self::error::Error::from)
 }
