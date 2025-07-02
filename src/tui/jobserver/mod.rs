@@ -20,6 +20,10 @@ impl JobServer {
         }
         None
     }
+
+    pub fn progress_states(&mut self) -> Vec<u8> {
+        self.jobs.iter_mut().map(|j| j.progress_state()).collect()
+    }
 }
 
 pub trait Job: Send + Sync + 'static {

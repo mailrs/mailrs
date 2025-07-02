@@ -2,6 +2,8 @@ use std::sync::Arc;
 
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
+use ratatui::layout::Constraint;
+use ratatui::layout::Layout;
 use ratatui::prelude::Backend;
 use ratatui::Terminal;
 use tui_commander::ui::Ui as CommanderUi;
@@ -30,6 +32,7 @@ pub(crate) struct AppState {
     boxes: Boxes,
     pub(crate) current_focus: FocusState,
     pub(crate) boxes_state: BoxesState,
+    pub jobs_progress: Vec<u8>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -67,6 +70,7 @@ impl App {
                 do_exit: false,
                 boxes: Boxes::empty(),
                 boxes_state: BoxesState::default(),
+                jobs_progress: Vec::new(),
             },
             jobserver: JobServer::default(),
         }
@@ -98,6 +102,7 @@ impl App {
                 ready_job.finalize(&mut self);
             }
 
+            self.state.jobs_progress = self.jobserver.progress_states();
             terminal.draw(|frame| self.draw(frame))?;
 
             match crossterm::event::poll(std::time::Duration::from_millis(50)) {
@@ -121,11 +126,28 @@ impl App {
     }
 
     fn draw(&mut self, frame: &mut ratatui::Frame<'_>) {
-        frame.render_stateful_widget(
-            &mut self.state.boxes,
-            frame.area(),
-            &mut self.state.boxes_state,
-        );
+        if self.state.jobs_progress.is_empty() {
+            frame.render_stateful_widget(
+                &mut self.state.boxes,
+                frame.area(),
+                &mut self.state.boxes_state,
+            );
+        } else {
+            let [boxes_area, progress_area] =
+                Layout::vertical([Constraint::Fill(1), Constraint::Length(1)])
+                    .flex(ratatui::layout::Flex::Start)
+                    .areas(frame.area());
+
+            frame.render_stateful_widget(
+                &mut self.state.boxes,
+                boxes_area,
+                &mut self.state.boxes_state,
+            );
+
+            let constraint = Constraint::from_lengths(self.state.jobs_progress.iter().map(|_| 1));
+            let _layout = Layout::vertical(constraint).split(progress_area);
+            // TODO: Fill 'layout' with progress bars, one for each self.state.jobs_progress
+        }
         if self.state.current_focus == FocusState::Commander {
             frame.render_stateful_widget(
                 &mut self.state.commander_ui,

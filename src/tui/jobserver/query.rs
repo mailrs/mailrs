@@ -11,7 +11,7 @@ use crate::tui::model::Message;
 use crate::tui::model::Tag;
 
 pub struct QueryJob {
-    job: JoinHandle<Result<(), AppError>>,
+    _job: JoinHandle<Result<(), AppError>>,
     state_recv: tokio::sync::mpsc::Receiver<QueryJobState>,
     latest_state: QueryJobState,
 }
@@ -113,7 +113,7 @@ impl QueryJob {
         };
 
         Self {
-            job: tokio::task::spawn(job),
+            _job: tokio::task::spawn(job),
             state_recv,
             latest_state: QueryJobState::Started,
         }
