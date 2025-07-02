@@ -57,24 +57,27 @@ fn setup_logging(cli: &crate::cli::Cli) -> Guards {
         (None, None)
     };
 
-    let subscriber = tracing_subscriber::registry::Registry::default()
-        .with(tracing_subscriber::fmt::layer().with_filter(env_filter));
-
     if let Some(file_logger) = file_logger {
-        let subscriber = subscriber.with(
-            tracing_subscriber::fmt::Layer::new()
-                .with_target(true)
-                .with_level(true)
-                .with_writer(file_logger),
-        );
+        let subscriber = tracing_subscriber::registry::Registry::default()
+            .with(tracing_subscriber::fmt::layer().with_filter(env_filter))
+            .with(
+                tracing_subscriber::fmt::Layer::new()
+                    .with_target(true)
+                    .with_level(true)
+                    .with_writer(file_logger),
+            );
 
         if let Err(e) = tracing::subscriber::set_global_default(subscriber) {
             eprintln!("Failed to set global logging subscriber: {:?}", e);
             std::process::exit(1)
         }
-    } else if let Err(e) = tracing::subscriber::set_global_default(subscriber) {
-        eprintln!("Failed to set global logging subscriber: {:?}", e);
-        std::process::exit(1)
+    } else {
+        let subscriber = tracing_subscriber::registry::Registry::default()
+            .with(tracing_subscriber::fmt::layer().with_filter(env_filter));
+        if let Err(e) = tracing::subscriber::set_global_default(subscriber) {
+            eprintln!("Failed to set global logging subscriber: {:?}", e);
+            std::process::exit(1)
+        }
     }
 
     Guards {
