@@ -103,7 +103,10 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a></pre></div><pre class="rust"><code><span class="comment">// Prevent console window in addition to Slint window in Windows release builds when, e.g.,
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a></pre></div><pre class="rust"><code><span class="comment">// Prevent console window in addition to Slint window in Windows release builds when, e.g.,
 // starting the app via file manager. Ignored on other platforms.
 </span><span class="attr">#![cfg_attr(not(debug_assertions), windows_subsystem = <span class="string">"windows"</span>)]
 
@@ -162,24 +165,27 @@
         (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
     };
 
-    <span class="kw">let </span>subscriber = tracing_subscriber::registry::Registry::default()
-        .with(tracing_subscriber::fmt::layer().with_filter(env_filter));
-
     <span class="kw">if let </span><span class="prelude-val">Some</span>(file_logger) = file_logger {
-        <span class="kw">let </span>subscriber = subscriber.with(
-            tracing_subscriber::fmt::Layer::new()
-                .with_target(<span class="bool-val">true</span>)
-                .with_level(<span class="bool-val">true</span>)
-                .with_writer(file_logger),
-        );
+        <span class="kw">let </span>subscriber = tracing_subscriber::registry::Registry::default()
+            .with(tracing_subscriber::fmt::layer().with_filter(env_filter))
+            .with(
+                tracing_subscriber::fmt::Layer::new()
+                    .with_target(<span class="bool-val">true</span>)
+                    .with_level(<span class="bool-val">true</span>)
+                    .with_writer(file_logger),
+            );
 
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = tracing::subscriber::set_global_default(subscriber) {
             <span class="macro">eprintln!</span>(<span class="string">"Failed to set global logging subscriber: {:?}"</span>, e);
             std::process::exit(<span class="number">1</span>)
         }
-    } <span class="kw">else if let </span><span class="prelude-val">Err</span>(e) = tracing::subscriber::set_global_default(subscriber) {
-        <span class="macro">eprintln!</span>(<span class="string">"Failed to set global logging subscriber: {:?}"</span>, e);
-        std::process::exit(<span class="number">1</span>)
+    } <span class="kw">else </span>{
+        <span class="kw">let </span>subscriber = tracing_subscriber::registry::Registry::default()
+            .with(tracing_subscriber::fmt::layer().with_filter(env_filter));
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = tracing::subscriber::set_global_default(subscriber) {
+            <span class="macro">eprintln!</span>(<span class="string">"Failed to set global logging subscriber: {:?}"</span>, e);
+            std::process::exit(<span class="number">1</span>)
+        }
     }
 
     Guards {
