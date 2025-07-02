@@ -227,10 +227,11 @@ impl App {
                 let query = args.join(" ");
                 tracing::info!(?query, "Query received");
 
-                self.jobserver.add_job(crate::tui::jobserver::QueryJob::new(
-                    query,
-                    self.tui_context.notmuch.clone(),
-                ));
+                self.jobserver
+                    .add_job(crate::tui::jobserver::query::QueryJob::new(
+                        query,
+                        self.tui_context.notmuch.clone(),
+                    ));
             }
 
             AppMessage::Close => {

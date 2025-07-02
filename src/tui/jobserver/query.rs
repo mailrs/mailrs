@@ -3,39 +3,12 @@ use std::sync::Arc;
 use futures::StreamExt;
 use tokio::task::JoinHandle;
 
-use super::app::App;
-use super::error::AppError;
 use crate::notmuch::NotmuchWorkerHandle;
+use crate::tui::app::App;
+use crate::tui::error::AppError;
 use crate::tui::model::MBox;
 use crate::tui::model::Message;
 use crate::tui::model::Tag;
-
-#[derive(Default)]
-pub struct JobServer {
-    jobs: Vec<Box<dyn Job>>,
-}
-
-impl JobServer {
-    pub fn add_job<J: Job>(&mut self, job: J) {
-        self.jobs.push(Box::new(job));
-    }
-
-    pub fn get_next_ready_job(&mut self) -> Option<Box<dyn Job>> {
-        // TODO: Don't do the simple implementation here
-        //
-        if self.jobs.first_mut().map(|j| j.ready()).unwrap_or(false) {
-            return self.jobs.pop();
-        }
-        None
-    }
-}
-
-pub trait Job: Send + Sync + 'static {
-    fn progress_state(&mut self) -> u8;
-    fn ready(&mut self) -> bool;
-
-    fn finalize(&mut self, app: &mut App);
-}
 
 pub struct QueryJob {
     job: JoinHandle<Result<(), AppError>>,
@@ -157,7 +130,7 @@ impl QueryJob {
     }
 }
 
-impl Job for QueryJob {
+impl super::Job for QueryJob {
     fn progress_state(&mut self) -> u8 {
         self.update();
 
