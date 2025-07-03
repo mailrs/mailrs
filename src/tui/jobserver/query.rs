@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use futures::StreamExt;
-use tokio::task::JoinHandle;
 
 use crate::notmuch::NotmuchWorkerHandle;
 use crate::tui::app::App;
@@ -11,7 +10,6 @@ use crate::tui::model::Message;
 use crate::tui::model::Tag;
 
 pub struct QueryJob {
-    _job: JoinHandle<Result<(), AppError>>,
     state_recv: tokio::sync::mpsc::Receiver<QueryJobState>,
     latest_state: QueryJobState,
 }
@@ -28,6 +26,10 @@ impl QueryJob {
         let (state_sender, state_recv) = tokio::sync::mpsc::channel(1);
 
         let job = async move {
+            tracing::info!("Starting job: Processing notmuch query");
+            let span = tracing::debug_span!("notmuch_query_processing");
+            span.record("query", &query);
+
             let messages = notmuch
                 .create_query(&query)
                 .search_messages()
@@ -35,18 +37,27 @@ impl QueryJob {
                 .map_err(AppError::from)?;
 
             let messages_len = messages.len();
+            span.record("message_count", messages_len);
+            tracing::debug!(?query, n = messages_len, "Found messages");
 
             let messages = messages
                 .into_iter()
-                .map(|message| {
+                .zip(std::iter::repeat(&span))
+                .map(|(message, span)| {
                     let notmuch = notmuch.clone();
+                    let message_span = tracing::debug_span!(parent: span, "message_processing");
+                    message_span.record("id", message.id());
 
                     async move {
+                        tracing::trace!(parent: &message_span, ?message, "Processing message from query");
                         let tags = notmuch
                             .clone()
                             .tags_for_message(&message)
                             .await?
                             .unwrap_or_default();
+
+                        message_span.record("tags", tracing::field::debug(&tags));
+                        tracing::trace!(parent: &message_span, ?tags, "Found tags");
 
                         let from = match message.header("From").await {
                             Ok(someornone) => someornone,
@@ -59,6 +70,7 @@ impl QueryJob {
                                 None
                             }
                         };
+                        message_span.record("from", &from);
 
                         let subject = match message.header("Subject").await {
                             Ok(someornone) => someornone,
@@ -71,9 +83,9 @@ impl QueryJob {
                                 None
                             }
                         };
+                        message_span.record("subject", &subject);
 
-                        tracing::info!(id = ?message.id(), ?tags, "Found message");
-
+                        tracing::debug!(id = message.id(), "Constructed message");
                         Ok(Message {
                             id: message.id().to_string(),
                             from,
@@ -93,6 +105,7 @@ impl QueryJob {
                 .into_iter()
                 .enumerate()
                 .inspect(|(i, _)| {
+                    tracing::trace!(i, "Reporting progress");
                     if let Err(error) = state_sender
                         .blocking_send(QueryJobState::Progress((messages_len / 100 * i) as u8))
                     {
@@ -103,17 +116,20 @@ impl QueryJob {
                 .collect::<Result<Vec<Message>, _>>()
                 .map_err(AppError::from)?;
 
+            tracing::debug!(parent: &span, "Constructing MBox");
             let mbox = MBox::new(query, messages);
 
-            if let Err(error) = state_sender.blocking_send(QueryJobState::Finished(mbox)) {
+            tracing::debug!(parent: &span, "Propagating MBox");
+            if let Err(error) = state_sender.send(QueryJobState::Finished(mbox)).await {
                 tracing::warn!(?error, "Failed to send mbox to channel");
             }
 
-            Ok(())
+            Result::<(), AppError>::Ok(())
         };
 
+        tokio::task::spawn(job);
+
         Self {
-            _job: tokio::task::spawn(job),
             state_recv,
             latest_state: QueryJobState::Started,
         }
@@ -124,6 +140,7 @@ impl QueryJob {
             Ok(state) => self.latest_state = state,
             Err(tokio::sync::mpsc::error::TryRecvError::Empty) => {}
             Err(tokio::sync::mpsc::error::TryRecvError::Disconnected) => {
+                tracing::warn!("Internal channel disconnected");
                 // ?
             }
         }

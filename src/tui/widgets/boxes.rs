@@ -110,7 +110,6 @@ impl StatefulWidget for &mut Boxes {
             .zip(state.get_current_state_mut())
             .next()
         {
-            tracing::debug!("Rendering box");
             bx.render(message_list, buf, state);
         } else {
             tracing::debug!("Rendering no box, none there");

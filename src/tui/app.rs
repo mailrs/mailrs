@@ -93,6 +93,7 @@ impl App {
 
     pub fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<(), AppError> {
         loop {
+            tracing::trace!(do_exit = self.state.do_exit, jobserver = ?self.jobserver, "Iterating");
             if self.state.do_exit {
                 tracing::info!("Shutting down TUI");
                 break Ok(());
@@ -107,17 +108,15 @@ impl App {
 
             match crossterm::event::poll(std::time::Duration::from_millis(50)) {
                 Ok(true) => {
-                    tracing::debug!("Polling resulted in found event");
+                    tracing::trace!("Polling resulted in found event");
                     let event = crossterm::event::read()?;
                     tracing::debug!(?event, "Found event");
                     if let Some(command) = self.handle_tui_event(event) {
                         self.handle_app_message(command)?;
                     }
-                    tracing::debug!("Event handled");
+                    tracing::trace!("Event handled");
                 }
-                Ok(false) => {
-                    tracing::trace!("Polling resulted in no event");
-                }
+                Ok(false) => (),
                 Err(error) => {
                     tracing::warn!(?error, "Polling failed");
                 }
@@ -145,8 +144,21 @@ impl App {
             );
 
             let constraint = Constraint::from_lengths(self.state.jobs_progress.iter().map(|_| 1));
-            let _layout = Layout::vertical(constraint).split(progress_area);
-            // TODO: Fill 'layout' with progress bars, one for each self.state.jobs_progress
+            let layout = Layout::vertical(constraint).split(progress_area);
+
+            self.state.jobs_progress.iter().zip(layout.iter()).for_each(
+                |(percent, progress_area)| {
+                    let widget = ratatui::widgets::Gauge::default()
+                        .block(ratatui::widgets::Block::default().title("task"))
+                        .gauge_style((
+                            ratatui::style::Color::White,
+                            ratatui::style::Modifier::ITALIC,
+                        ))
+                        .percent(*percent as u16);
+
+                    frame.render_widget(widget, *progress_area);
+                },
+            );
         }
         if self.state.current_focus == FocusState::Commander {
             frame.render_stateful_widget(
@@ -249,6 +261,7 @@ impl App {
                 let query = args.join(" ");
                 tracing::info!(?query, "Query received");
 
+                tracing::debug!("Sending QueryJob to jobserver");
                 self.jobserver
                     .add_job(crate::tui::jobserver::query::QueryJob::new(
                         query,

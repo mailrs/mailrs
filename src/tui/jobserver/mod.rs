@@ -7,6 +7,14 @@ pub struct JobServer {
     jobs: Vec<Box<dyn Job>>,
 }
 
+impl std::fmt::Debug for JobServer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JobServer")
+            .field("jobs", &format!("... ({} jobs)", self.jobs.len()))
+            .finish_non_exhaustive()
+    }
+}
+
 impl JobServer {
     pub fn add_job<J: Job>(&mut self, job: J) {
         self.jobs.push(Box::new(job));
@@ -18,6 +26,8 @@ impl JobServer {
         if self.jobs.first_mut().map(|j| j.ready()).unwrap_or(false) {
             return self.jobs.pop();
         }
+
+        tracing::trace!("No job ready");
         None
     }
 
