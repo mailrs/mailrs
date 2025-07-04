@@ -1,4 +1,5 @@
 pub mod binder;
+pub mod focus;
 pub mod keycode;
 pub mod mappings;
 
