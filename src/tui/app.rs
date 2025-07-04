@@ -61,7 +61,6 @@ impl App {
 
             keybindings: {
                 use crate::tui::bindings::mappings::commander;
-                use crate::tui::bindings::mappings::functionality;
                 use crate::tui::bindings::mappings::logger;
                 use crate::tui::bindings::mappings::movement;
 
@@ -69,7 +68,6 @@ impl App {
                     .with_binding::<commander::ActivateCommander>()
                     .with_binding::<commander::DeactivateCommander>()
                     .with_binding::<commander::RunCommander>()
-                    .with_binding::<functionality::Abort>()
                     .with_binding::<logger::ShowLogger>()
                     .with_binding::<movement::MoveDown>()
                     .with_binding::<movement::MoveLeft>()

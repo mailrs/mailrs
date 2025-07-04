@@ -1,5 +1,4 @@
 pub mod commander;
-pub mod functionality;
 pub mod logger;
 pub mod movement;
 
