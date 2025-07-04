@@ -1,14 +1,16 @@
+use crate::tui::focus::Focus;
+
 crate::map_key_to_function! {
     name: ActivateCommander,
     display: "start_commander",
     DEFAULT_KEY: crossterm::event::KeyCode::Char(':'),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: None,
+    REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         tracing::debug!("Activating EX");
-        app.current_focus = Some(crate::tui::focus::Focus::Commander);
+        app.current_focus = Focus::Commander;
         Ok(None)
     }
 }
@@ -18,12 +20,12 @@ crate::map_key_to_function! {
     display: "stop_commander",
     DEFAULT_KEY: crossterm::event::KeyCode::Esc,
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: Some(crate::tui::focus::Focus::Commander),
+    REQUIRED_FOCUS: crate::tui::focus::Focus::Commander,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         tracing::debug!("Deactivating EX");
-        app.current_focus = None;
+        app.current_focus = Focus::Box;
         Ok(None)
     }
 }
@@ -33,7 +35,7 @@ crate::map_key_to_function! {
     display: "commander::run",
     DEFAULT_KEY: crossterm::event::KeyCode::Enter,
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: Some(crate::tui::focus::Focus::Commander),
+    REQUIRED_FOCUS: crate::tui::focus::Focus::Commander,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
@@ -56,7 +58,7 @@ crate::map_key_to_function! {
             }
         }
 
-        app.current_focus = None;
+        app.current_focus = Focus::Box;
         app.commander_ui.reset();
 
         Ok(tui_commander_context.command_to_execute)

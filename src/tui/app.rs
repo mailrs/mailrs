@@ -33,7 +33,7 @@ pub(crate) struct AppState {
     do_exit: bool,
     boxes: Boxes,
     pub(crate) show_logger: bool,
-    pub(crate) current_focus: Option<Focus>,
+    pub(crate) current_focus: Focus,
     pub(crate) boxes_state: BoxesState,
     pub(crate) logger_state: LoggerState,
 }
@@ -75,7 +75,7 @@ impl App {
                     .build(),
                 commander_ui: CommanderUi::default(),
                 show_logger: false,
-                current_focus: None,
+                current_focus: Focus::Box,
                 do_exit: false,
                 boxes: Boxes::empty(),
                 boxes_state: BoxesState::default(),
@@ -143,7 +143,7 @@ impl App {
             main_area,
             &mut self.state.boxes_state,
         );
-        if self.state.current_focus == Some(Focus::Commander) {
+        if self.state.current_focus == Focus::Commander {
             frame.render_stateful_widget(
                 &mut self.state.commander_ui,
                 main_area,
@@ -171,7 +171,7 @@ impl App {
                         Some(Ok(opt_app_message)) => return opt_app_message,
                         Some(Err(error)) => return Some(AppMessage::KeyBindingErrored(error)),
                         None => {
-                            if self.state.current_focus == Some(Focus::Commander) {
+                            if self.state.current_focus == Focus::Commander {
                                 tracing::debug!(?key, "Forwarding keypress to commander UI");
                                 self.state.commander_ui.handle_key_press(key);
 

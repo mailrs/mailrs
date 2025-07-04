@@ -5,7 +5,7 @@ crate::map_key_to_function! {
     display: "next_mail",
     DEFAULT_KEY: crossterm::event::KeyCode::Char('j'),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: Some(Focus::Box),
+    REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
@@ -22,7 +22,7 @@ crate::map_key_to_function! {
     display: "prev_mail",
     DEFAULT_KEY: crossterm::event::KeyCode::Char('k'),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: Some(Focus::Box),
+    REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
@@ -39,7 +39,7 @@ crate::map_key_to_function! {
     display: "next_box",
     DEFAULT_KEY: crossterm::event::KeyCode::Char('l'),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: Some(Focus::Box),
+    REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
@@ -54,7 +54,7 @@ crate::map_key_to_function! {
     display: "prev_box",
     DEFAULT_KEY: crossterm::event::KeyCode::Char('h'),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: Some(Focus::Box),
+    REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {

@@ -16,7 +16,7 @@ struct BindingHelper<Context, Err> {
 
 #[derive(Default)]
 pub struct Binder<Context, Err> {
-    mapping: HashMap<(KeyCode, KeyModifiers, Option<Focus>), BindingHelper<Context, Err>>,
+    mapping: HashMap<(KeyCode, KeyModifiers, Focus), BindingHelper<Context, Err>>,
 }
 
 impl Binder<crate::tui::app::AppState, crate::tui::error::AppError> {
@@ -57,7 +57,7 @@ impl<Context, Err> Binder<Context, Err> {
 
     pub fn run_binding_for_keycode(
         &self,
-        current_focus: Option<Focus>,
+        current_focus: Focus,
         keycode: KeyCode,
         modifiers: KeyModifiers,
         context: &mut Context,
@@ -91,7 +91,7 @@ impl<Context, Err> Binder<Context, Err> {
 
     pub fn rebind(
         &mut self,
-        focus: Option<Focus>,
+        focus: Focus,
         old: (KeyCode, KeyModifiers),
         new: (KeyCode, KeyModifiers),
     ) -> Option<()> {
@@ -115,7 +115,7 @@ impl<Context, Err> Binder<Context, Err> {
         &self,
         name: &str,
     ) -> Option<(
-        &(KeyCode, KeyModifiers, Option<Focus>),
+        &(KeyCode, KeyModifiers, Focus),
         &BindingHelper<Context, Err>,
     )> {
         self.mapping.iter().find(|(_, helper)| helper.name == name)

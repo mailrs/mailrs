@@ -3,7 +3,7 @@ crate::map_key_to_function! {
     display: "show_logger",
     DEFAULT_KEY: crossterm::event::KeyCode::Char('l'),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::CONTROL,
-    REQUIRED_FOCUS: None,
+    REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
