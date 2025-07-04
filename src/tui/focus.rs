@@ -2,5 +2,4 @@
 pub enum Focus {
     Commander,
     Box,
-    Message,
 }
