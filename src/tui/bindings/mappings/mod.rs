@@ -77,4 +77,6 @@ macro_rules! map_key_to_function {
         }
     };
 }
+
+#[allow(unused_imports)]
 pub use crate::map_key_to_function;
