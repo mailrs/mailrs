@@ -7,7 +7,7 @@ pub trait KeyToFunctionMapping<Context> {
     const DEFAULT_MODIFIER: crossterm::event::KeyModifiers;
     const NAME: &'static str;
 
-    const REQUIRED_FOCUS: Option<super::focus::Focus>;
+    const REQUIRED_FOCUS: Option<crate::tui::focus::Focus>;
 
     type Error;
 
@@ -40,7 +40,7 @@ macro_rules! map_key_to_function {
             const DEFAULT_KEY: crossterm::event::KeyCode = $key;
             const DEFAULT_MODIFIER: crossterm::event::KeyModifiers = $modif;
             const NAME: &'static str = $display;
-            const REQUIRED_FOCUS: Option<$crate::tui::bindings::focus::Focus> = $focus;
+            const REQUIRED_FOCUS: Option<$crate::tui::focus::Focus> = $focus;
             type Error = $errty;
 
             fn run(

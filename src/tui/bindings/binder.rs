@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyModifiers;
 
-use crate::tui::bindings::focus::Focus;
 use crate::tui::bindings::mappings::KeyToFunctionMapping;
+use crate::tui::focus::Focus;
 
 type BindingFn<Context, Err> =
     Box<dyn Fn(&mut Context) -> Result<Option<crate::tui::app::AppMessage>, Err>>;

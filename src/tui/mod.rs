@@ -15,6 +15,7 @@ mod bindings;
 mod commands;
 mod context;
 pub mod error;
+mod focus;
 mod model;
 mod widgets;
 

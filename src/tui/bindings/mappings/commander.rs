@@ -8,7 +8,7 @@ crate::map_key_to_function! {
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         tracing::debug!("Activating EX");
-        app.current_focus = Some(crate::tui::bindings::focus::Focus::Commander);
+        app.current_focus = Some(crate::tui::focus::Focus::Commander);
         Ok(None)
     }
 }
@@ -18,7 +18,7 @@ crate::map_key_to_function! {
     display: "stop_commander",
     DEFAULT_KEY: crossterm::event::KeyCode::Esc,
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: Some(crate::tui::bindings::focus::Focus::Commander),
+    REQUIRED_FOCUS: Some(crate::tui::focus::Focus::Commander),
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
@@ -33,7 +33,7 @@ crate::map_key_to_function! {
     display: "commander::run",
     DEFAULT_KEY: crossterm::event::KeyCode::Enter,
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
-    REQUIRED_FOCUS: Some(crate::tui::bindings::focus::Focus::Commander),
+    REQUIRED_FOCUS: Some(crate::tui::focus::Focus::Commander),
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {

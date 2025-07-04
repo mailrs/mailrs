@@ -16,8 +16,8 @@ use super::context::TuiContext;
 use super::error::AppError;
 use super::widgets::boxes::Boxes;
 use super::widgets::boxes::BoxesState;
-use crate::tui::bindings::focus::Focus;
 use crate::tui::commands::TuiCommandContext;
+use crate::tui::focus::Focus;
 use crate::tui::widgets::logger::LoggerState;
 
 #[allow(unused)]
