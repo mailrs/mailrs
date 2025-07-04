@@ -44,11 +44,11 @@ fn setup_logging(cli: &crate::cli::Cli) -> Guards {
 
     let (file_layer, guard) = if let Some(path) = cli.logfile.as_ref() {
         let Some(dir) = path.parent() else {
-            eprintln!("Path has no parent: {}, exiting", path);
+            eprintln!("Path has no parent: {path}, exiting");
             std::process::exit(1);
         };
         let Some(filename) = path.file_name() else {
-            eprintln!("Path has no file name: {}, exiting", path);
+            eprintln!("Path has no file name: {path}, exiting");
             std::process::exit(1);
         };
 
