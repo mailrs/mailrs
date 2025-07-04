@@ -5,15 +5,14 @@ pub mod mappings;
 #[cfg(test)]
 mod tests {
     use crate::tui::bindings::binder::Binder;
-    use crate::tui::bindings::mappings::map_key_to_function;
-    use crate::tui::bindings::mappings::MoveLeft;
+    use crate::tui::focus::Focus;
 
     #[derive(Debug, serde::Deserialize)]
     #[serde(untagged)]
     #[cfg_attr(test, derive(PartialEq))]
     pub enum Binding {
         #[serde(rename = "move_left")]
-        MoveLeft(MoveLeft),
+        MoveLeft(super::mappings::movement::MoveLeft),
     }
 
     #[derive(Debug, serde::Deserialize)]
@@ -44,30 +43,33 @@ mod tests {
             KeyBinding {
                 key: crate::tui::bindings::keycode::KeyCode::Char('h'),
                 modifier: None,
-                fun: Binding::MoveLeft(MoveLeft),
+                fun: Binding::MoveLeft(crate::tui::bindings::mappings::movement::MoveLeft),
             },
         )
     }
 
     #[test]
     fn test_binder() {
-        map_key_to_function! {
+        crate::map_key_to_function! {
             name: DummyMoveLeft,
             display: "move_left",
             DEFAULT_KEY: crossterm::event::KeyCode::Char('h'),
             DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+            REQUIRED_FOCUS: Focus::Box,
             Error: crate::tui::error::AppError,
             context: bool,
             run: |b: &mut bool| {
                 *b = true;
-                Ok(())
+                Ok(None)
             }
         }
 
-        let binder = Binder::builder().with_binding::<DummyMoveLeft>().build();
+        let binder =
+            Binder::<bool, crate::tui::error::AppError>::new().with_binding::<DummyMoveLeft>();
 
         let mut context = false;
         let result = binder.run_binding_for_keycode(
+            Focus::Box,
             crossterm::event::KeyCode::Char('h'),
             crossterm::event::KeyModifiers::NONE,
             &mut context,
@@ -80,20 +82,22 @@ mod tests {
 
     #[test]
     fn test_binder_rebind() {
-        map_key_to_function! {
+        crate::map_key_to_function! {
             name: DummyMoveLeft,
             display: "move_left",
             DEFAULT_KEY: crossterm::event::KeyCode::Char('h'),
             DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+            REQUIRED_FOCUS: Focus::Box,
             Error: crate::tui::error::AppError,
             context: bool,
             run: |b: &mut bool| {
                 *b = true;
-                Ok(())
+                Ok(None)
             }
         }
 
-        let mut binder = Binder::builder().with_binding::<DummyMoveLeft>().build();
+        let mut binder =
+            Binder::<bool, crate::tui::error::AppError>::new().with_binding::<DummyMoveLeft>();
         let rebind_res = binder.rebind_func_by_name(
             "move_left",
             (
@@ -105,6 +109,7 @@ mod tests {
 
         let mut context = false;
         let result = binder.run_binding_for_keycode(
+            Focus::Box,
             crossterm::event::KeyCode::Char('h'),
             crossterm::event::KeyModifiers::NONE,
             &mut context,
@@ -116,6 +121,7 @@ mod tests {
         );
 
         let result = binder.run_binding_for_keycode(
+            Focus::Box,
             crossterm::event::KeyCode::Char('l'),
             crossterm::event::KeyModifiers::NONE,
             &mut context,

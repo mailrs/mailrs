@@ -19,7 +19,6 @@ mod tui;
 
 use clap::Parser;
 use miette::IntoDiagnostic;
-use tracing::level_filters::LevelFilter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::EnvFilter;
@@ -33,12 +32,14 @@ struct Guards {
 }
 
 fn setup_logging(cli: &crate::cli::Cli) -> Guards {
-    let mut env_filter = EnvFilter::from_default_env();
+    let mut file_filter = EnvFilter::from_default_env();
+    let mut tui_filter = EnvFilter::from_default_env();
 
     if let Some(log_level) = cli.verbosity.tracing_level() {
         let level_filter = tracing::metadata::LevelFilter::from_level(log_level);
         let directive = tracing_subscriber::filter::Directive::from(level_filter);
-        env_filter = env_filter.add_directive(directive);
+        tui_filter = tui_filter.add_directive(directive.clone());
+        file_filter = file_filter.add_directive(directive);
     }
 
     let (file_layer, guard) = if let Some(path) = cli.logfile.as_ref() {
@@ -61,11 +62,7 @@ fn setup_logging(cli: &crate::cli::Cli) -> Guards {
             .with_line_number(true)
             .with_target(false)
             .with_ansi(false)
-            .with_filter(
-                EnvFilter::builder()
-                    .with_default_directive(LevelFilter::INFO.into())
-                    .from_env_lossy(),
-            );
+            .with_filter(file_filter);
 
         (Some(file_layer), Some(guard))
     } else {
@@ -90,7 +87,7 @@ fn setup_logging(cli: &crate::cli::Cli) -> Guards {
         std::process::exit(1);
     }
 
-    let tui_layer = tui_logger::TuiTracingSubscriberLayer.with_filter(env_filter);
+    let tui_layer = tui_logger::TuiTracingSubscriberLayer.with_filter(tui_filter);
 
     if let Err(error) = tracing_subscriber::registry()
         .with(file_layer)

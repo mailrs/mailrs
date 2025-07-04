@@ -1,18 +1,18 @@
-mod functionality;
-mod logger;
-mod movement;
-pub use self::functionality::*;
-pub use self::logger::*;
-pub use self::movement::*;
+pub mod commander;
+pub mod logger;
+pub mod mbox;
+pub mod movement;
 
 pub trait KeyToFunctionMapping<Context> {
     const DEFAULT_KEY: crossterm::event::KeyCode;
     const DEFAULT_MODIFIER: crossterm::event::KeyModifiers;
     const NAME: &'static str;
 
+    const REQUIRED_FOCUS: crate::tui::focus::Focus;
+
     type Error;
 
-    fn run(app: &mut Context) -> Result<(), Self::Error>;
+    fn run(app: &mut Context) -> Result<Option<crate::tui::app::AppMessage>, Self::Error>;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -29,6 +29,7 @@ macro_rules! map_key_to_function {
         display: $display:literal,
         DEFAULT_KEY: $key:expr,
         DEFAULT_MODIFIER: $modif:expr,
+        REQUIRED_FOCUS: $focus:expr,
         Error: $errty:ty,
         context: $context:ty,
         run: $fun:expr
@@ -40,9 +41,12 @@ macro_rules! map_key_to_function {
             const DEFAULT_KEY: crossterm::event::KeyCode = $key;
             const DEFAULT_MODIFIER: crossterm::event::KeyModifiers = $modif;
             const NAME: &'static str = $display;
+            const REQUIRED_FOCUS: $crate::tui::focus::Focus = $focus;
             type Error = $errty;
 
-            fn run(app: &mut $context) -> Result<(), Self::Error> {
+            fn run(
+                app: &mut $context,
+            ) -> Result<Option<$crate::tui::app::AppMessage>, Self::Error> {
                 $fun(app)
             }
         }
@@ -73,4 +77,6 @@ macro_rules! map_key_to_function {
         }
     };
 }
+
+#[allow(unused_imports)]
 pub use crate::map_key_to_function;
