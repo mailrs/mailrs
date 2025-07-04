@@ -102,92 +102,71 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>crossterm::event::KeyCode;
 <span class="kw">use </span>crossterm::event::KeyModifiers;
 
 <span class="kw">use </span><span class="kw">crate</span>::tui::bindings::mappings::KeyToFunctionMapping;
+<span class="kw">use </span><span class="kw">crate</span>::tui::focus::Focus;
 
-<span class="kw">type </span>BindingFn&lt;Context, <span class="prelude-val">Err</span>&gt; = Box&lt;<span class="kw">dyn </span>Fn(<span class="kw-2">&amp;mut </span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="prelude-val">Err</span>&gt;&gt;;
+<span class="kw">type </span>BindingFn&lt;Context, <span class="prelude-val">Err</span>&gt; =
+    Box&lt;<span class="kw">dyn </span>Fn(<span class="kw-2">&amp;mut </span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tui::app::AppMessage&gt;, <span class="prelude-val">Err</span>&gt;&gt;;
 
 <span class="kw">struct </span>BindingHelper&lt;Context, <span class="prelude-val">Err</span>&gt; {
     name: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
     func: BindingFn&lt;Context, <span class="prelude-val">Err</span>&gt;,
 }
 
-<span class="kw">pub struct </span>Binder&lt;Context, <span class="prelude-val">Err</span>&gt; {
-    mapping: HashMap&lt;(KeyCode, KeyModifiers), BindingHelper&lt;Context, <span class="prelude-val">Err</span>&gt;&gt;,
+<span class="attr">#[derive(Default)]
+</span><span class="kw">pub struct </span>Binder&lt;Context, <span class="prelude-val">Err</span>&gt; {
+    mapping: HashMap&lt;(KeyCode, KeyModifiers, Focus), BindingHelper&lt;Context, <span class="prelude-val">Err</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;Context, <span class="prelude-val">Err</span>&gt; Binder&lt;Context, <span class="prelude-val">Err</span>&gt; {
-    <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>builder() -&gt; BinderBuilder&lt;Context, <span class="prelude-val">Err</span>&gt; {
-        BinderBuilder {
+<span class="kw">impl</span>&lt;State&gt; Binder&lt;State, <span class="kw">crate</span>::tui::error::AppError&gt; {
+    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
             mapping: HashMap::new(),
         }
     }
-
-    <span class="kw">pub fn </span>run_binding_for_keycode(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        keycode: KeyCode,
-        modifiers: KeyModifiers,
-        context: <span class="kw-2">&amp;mut </span>Context,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="prelude-val">Err</span>&gt;&gt; {
-        <span class="kw">let </span>helper = <span class="self">self</span>.mapping.get(<span class="kw-2">&amp;</span>(keycode, modifiers))<span class="question-mark">?</span>;
-        <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>keycode, <span class="question-mark">?</span>modifiers, name = helper.name, <span class="string">"Running binding"</span>);
-        <span class="prelude-val">Some</span>((helper.func)(context))
-    }
-
-    <span class="kw">pub fn </span>rebind(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        old: (KeyCode, KeyModifiers),
-        new: (KeyCode, KeyModifiers),
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
-        <span class="kw">let </span>binding = <span class="self">self</span>.mapping.remove(<span class="kw-2">&amp;</span>old)<span class="question-mark">?</span>;
-        <span class="self">self</span>.mapping.insert(new, binding);
-        <span class="prelude-val">Some</span>(())
-    }
-
-    <span class="kw">pub fn </span>rebind_func_by_name(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        name: <span class="kw-2">&amp;</span>str,
-        new_binding: (KeyCode, KeyModifiers),
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
-        <span class="kw">let </span>(old_bindings, _helper) = <span class="self">self</span>.find_binding_helper_for_func_name(name)<span class="question-mark">?</span>;
-        <span class="self">self</span>.rebind(<span class="kw-2">*</span>old_bindings, new_binding)
-    }
-
-    <span class="attr">#[allow(clippy::type_complexity)]
-    </span><span class="kw">fn </span>find_binding_helper_for_func_name(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        name: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span>(KeyCode, KeyModifiers), <span class="kw-2">&amp;</span>BindingHelper&lt;Context, <span class="prelude-val">Err</span>&gt;)&gt; {
-        <span class="self">self</span>.mapping.iter().find(|(<span class="kw">_</span>, helper)| helper.name == name)
-    }
 }
 
-<span class="kw">pub struct </span>BinderBuilder&lt;Context, <span class="prelude-val">Err</span>&gt; {
-    mapping: HashMap&lt;(KeyCode, KeyModifiers), BindingHelper&lt;Context, <span class="prelude-val">Err</span>&gt;&gt;,
-}
-
-<span class="kw">impl</span>&lt;Context, <span class="prelude-val">Err</span>&gt; BinderBuilder&lt;Context, <span class="prelude-val">Err</span>&gt;
-<span class="kw">where
-    </span>Context: <span class="lifetime">'static</span>,
-{
+<span class="kw">impl</span>&lt;Context, <span class="prelude-val">Err</span>&gt; Binder&lt;Context, <span class="prelude-val">Err</span>&gt; {
     <span class="kw">pub fn </span>with_binding&lt;B&gt;(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self
     </span><span class="kw">where
         </span>B: KeyToFunctionMapping&lt;Context, Error = <span class="prelude-val">Err</span>&gt; + <span class="lifetime">'static</span>,
+        Context: <span class="lifetime">'static</span>,
         <span class="prelude-val">Err</span>: <span class="lifetime">'static</span>,
     {
-        <span class="kw">fn </span>run_binding&lt;B, Context, <span class="prelude-val">Err</span>&gt;(app: <span class="kw-2">&amp;mut </span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="prelude-val">Err</span>&gt;
+        <span class="kw">fn </span>run_binding&lt;B, Context, <span class="prelude-val">Err</span>&gt;(
+            app: <span class="kw-2">&amp;mut </span>Context,
+        ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tui::app::AppMessage&gt;, <span class="prelude-val">Err</span>&gt;
         <span class="kw">where
             </span>B: KeyToFunctionMapping&lt;Context, Error = <span class="prelude-val">Err</span>&gt;,
         {
             B::run(app)
         }
 
-        <span class="kw">let </span>keys = (B::DEFAULT_KEY, B::DEFAULT_MODIFIER);
+        <span class="kw">let </span>keys = (B::DEFAULT_KEY, B::DEFAULT_MODIFIER, B::REQUIRED_FOCUS);
 
         <span class="self">self</span>.mapping.insert(
             keys,
@@ -199,11 +178,70 @@
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>build(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; Binder&lt;Context, <span class="prelude-val">Err</span>&gt; {
-        <span class="self">self</span>.mapping.shrink_to_fit();
-        Binder {
-            mapping: <span class="self">self</span>.mapping,
-        }
+    <span class="kw">pub fn </span>run_binding_for_keycode(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        current_focus: Focus,
+        keycode: KeyCode,
+        modifiers: KeyModifiers,
+        context: <span class="kw-2">&amp;mut </span>Context,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tui::app::AppMessage&gt;, <span class="prelude-val">Err</span>&gt;&gt; {
+        <span class="macro">tracing::trace!</span>(
+            <span class="question-mark">?</span>keycode,
+            <span class="question-mark">?</span>modifiers,
+            <span class="question-mark">?</span>current_focus,
+            <span class="string">"Trying to find keybinding"
+        </span>);
+
+        <span class="kw">let </span><span class="prelude-val">Some</span>(helper) = <span class="self">self</span>.mapping.get(<span class="kw-2">&amp;</span>(keycode, modifiers, current_focus)) <span class="kw">else </span>{
+            <span class="macro">tracing::warn!</span>(
+                <span class="question-mark">?</span>keycode,
+                <span class="question-mark">?</span>modifiers,
+                <span class="question-mark">?</span>current_focus,
+                <span class="string">"Failed to find keybinding"
+            </span>);
+            <span class="kw">return </span><span class="prelude-val">None</span>;
+        };
+
+        <span class="macro">tracing::trace!</span>(
+            <span class="question-mark">?</span>keycode,
+            <span class="question-mark">?</span>modifiers,
+            <span class="question-mark">?</span>current_focus,
+            name = helper.name,
+            <span class="string">"Running binding"
+        </span>);
+        <span class="prelude-val">Some</span>((helper.func)(context))
+    }
+
+    <span class="kw">pub fn </span>rebind(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        focus: Focus,
+        old: (KeyCode, KeyModifiers),
+        new: (KeyCode, KeyModifiers),
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
+        <span class="kw">let </span>binding = <span class="self">self</span>.mapping.remove(<span class="kw-2">&amp;</span>(old.<span class="number">0</span>, old.<span class="number">1</span>, focus))<span class="question-mark">?</span>;
+        <span class="self">self</span>.mapping.insert((new.<span class="number">0</span>, new.<span class="number">1</span>, focus), binding);
+        <span class="prelude-val">Some</span>(())
+    }
+
+    <span class="kw">pub fn </span>rebind_func_by_name(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        name: <span class="kw-2">&amp;</span>str,
+        new_binding: (KeyCode, KeyModifiers),
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
+        <span class="kw">let </span>((keycode, modifiers, focus), _helper) =
+            <span class="self">self</span>.find_binding_helper_for_func_name(name)<span class="question-mark">?</span>;
+        <span class="self">self</span>.rebind(<span class="kw-2">*</span>focus, (<span class="kw-2">*</span>keycode, <span class="kw-2">*</span>modifiers), new_binding)
+    }
+
+    <span class="attr">#[allow(clippy::type_complexity)]
+    </span><span class="kw">fn </span>find_binding_helper_for_func_name(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        name: <span class="kw-2">&amp;</span>str,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;(
+        <span class="kw-2">&amp;</span>(KeyCode, KeyModifiers, Focus),
+        <span class="kw-2">&amp;</span>BindingHelper&lt;Context, <span class="prelude-val">Err</span>&gt;,
+    )&gt; {
+        <span class="self">self</span>.mapping.iter().find(|(<span class="kw">_</span>, helper)| helper.name == name)
     }
 }
 </code></pre></div></section></main></body></html>

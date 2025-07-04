@@ -74,21 +74,27 @@
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a></pre></div><pre class="rust"><code><span class="kw">mod </span>functionality;
-<span class="kw">mod </span>logger;
-<span class="kw">mod </span>movement;
-<span class="kw">pub use </span><span class="self">self</span>::functionality::<span class="kw-2">*</span>;
-<span class="kw">pub use </span><span class="self">self</span>::logger::<span class="kw-2">*</span>;
-<span class="kw">pub use </span><span class="self">self</span>::movement::<span class="kw-2">*</span>;
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a></pre></div><pre class="rust"><code><span class="kw">pub mod </span>commander;
+<span class="kw">pub mod </span>logger;
+<span class="kw">pub mod </span>mbox;
+<span class="kw">pub mod </span>movement;
 
 <span class="kw">pub trait </span>KeyToFunctionMapping&lt;Context&gt; {
     <span class="kw">const </span>DEFAULT_KEY: crossterm::event::KeyCode;
     <span class="kw">const </span>DEFAULT_MODIFIER: crossterm::event::KeyModifiers;
     <span class="kw">const </span>NAME: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
 
+    <span class="kw">const </span>REQUIRED_FOCUS: <span class="kw">crate</span>::tui::focus::Focus;
+
     <span class="kw">type </span>Error;
 
-    <span class="kw">fn </span>run(app: <span class="kw-2">&amp;mut </span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
+    <span class="kw">fn </span>run(app: <span class="kw-2">&amp;mut </span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tui::app::AppMessage&gt;, <span class="self">Self</span>::Error&gt;;
 }
 
 <span class="attr">#[derive(Debug, thiserror::Error)]
@@ -105,6 +111,7 @@
         display: <span class="macro-nonterminal">$display</span>:literal,
         DEFAULT_KEY: <span class="macro-nonterminal">$key</span>:expr,
         DEFAULT_MODIFIER: <span class="macro-nonterminal">$modif</span>:expr,
+        REQUIRED_FOCUS: <span class="macro-nonterminal">$focus</span>:expr,
         Error: <span class="macro-nonterminal">$errty</span>:ty,
         context: <span class="macro-nonterminal">$context</span>:ty,
         run: <span class="macro-nonterminal">$fun</span>:expr
@@ -116,9 +123,12 @@
             <span class="kw">const </span>DEFAULT_KEY: crossterm::event::KeyCode = <span class="macro-nonterminal">$key</span>;
             <span class="kw">const </span>DEFAULT_MODIFIER: crossterm::event::KeyModifiers = <span class="macro-nonterminal">$modif</span>;
             <span class="kw">const </span>NAME: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="macro-nonterminal">$display</span>;
+            <span class="kw">const </span>REQUIRED_FOCUS: <span class="macro-nonterminal">$crate::tui::focus::Focus </span>= <span class="macro-nonterminal">$focus</span>;
             <span class="kw">type </span>Error = <span class="macro-nonterminal">$errty</span>;
 
-            <span class="kw">fn </span>run(app: <span class="kw-2">&amp;mut </span><span class="macro-nonterminal">$context</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
+            <span class="kw">fn </span>run(
+                app: <span class="kw-2">&amp;mut </span><span class="macro-nonterminal">$context</span>,
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$crate::tui::app::AppMessage</span>&gt;, <span class="self">Self</span>::Error&gt; {
                 <span class="macro-nonterminal">$fun</span>(app)
             }
         }
@@ -149,5 +159,7 @@
         }
     };
 }
-<span class="kw">pub use </span><span class="kw">crate</span>::map_key_to_function;
+
+<span class="attr">#[allow(unused_imports)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::map_key_to_function;
 </code></pre></div></section></main></body></html>

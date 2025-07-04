@@ -57,16 +57,21 @@
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
 <a href="#58" id="58">58</a>
-<a href="#59" id="59">59</a></pre></div><pre class="rust"><code><span class="macro">crate::map_key_to_function!</span> {
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a></pre></div><pre class="rust"><code><span class="macro">crate::map_key_to_function!</span> {
     name: MoveLeft,
     display: <span class="string">"move_left"</span>,
     DEFAULT_KEY: crossterm::event::KeyCode::Char(<span class="string">'h'</span>),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    REQUIRED_FOCUS: <span class="kw">crate</span>::tui::focus::Focus::Box,
     Error: <span class="kw">crate</span>::tui::error::AppError,
     context: <span class="kw">crate</span>::tui::app::AppState,
     run: |app: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::tui::app::AppState| {
         app.boxes_state.focus_prev();
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
     }
 }
 
@@ -75,15 +80,16 @@
     display: <span class="string">"move_down"</span>,
     DEFAULT_KEY: crossterm::event::KeyCode::Char(<span class="string">'j'</span>),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    REQUIRED_FOCUS: <span class="kw">crate</span>::tui::focus::Focus::Box,
     Error: <span class="kw">crate</span>::tui::error::AppError,
     context: <span class="kw">crate</span>::tui::app::AppState,
     run: |app: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::tui::app::AppState| {
         <span class="kw">let </span><span class="prelude-val">Some</span>(mbox_state) = app.boxes_state.get_current_state_mut() <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(())
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
         };
 
         mbox_state.next();
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
     }
 }
 
@@ -92,15 +98,16 @@
     display: <span class="string">"move_up"</span>,
     DEFAULT_KEY: crossterm::event::KeyCode::Char(<span class="string">'k'</span>),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    REQUIRED_FOCUS: <span class="kw">crate</span>::tui::focus::Focus::Box,
     Error: <span class="kw">crate</span>::tui::error::AppError,
     context: <span class="kw">crate</span>::tui::app::AppState,
     run: |app: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::tui::app::AppState| {
         <span class="kw">let </span><span class="prelude-val">Some</span>(mbox_state) = app.boxes_state.get_current_state_mut() <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(())
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
         };
 
         mbox_state.prev();
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
     }
 }
 
@@ -109,11 +116,12 @@
     display: <span class="string">"move_right"</span>,
     DEFAULT_KEY: crossterm::event::KeyCode::Char(<span class="string">'l'</span>),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    REQUIRED_FOCUS: <span class="kw">crate</span>::tui::focus::Focus::Box,
     Error: <span class="kw">crate</span>::tui::error::AppError,
     context: <span class="kw">crate</span>::tui::app::AppState,
     run: |app: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::tui::app::AppState| {
         app.boxes_state.focus_next();
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
     }
 }
 </code></pre></div></section></main></body></html>

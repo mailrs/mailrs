@@ -126,22 +126,27 @@
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a></pre></div><pre class="rust"><code><span class="kw">pub mod </span>binder;
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a></pre></div><pre class="rust"><code><span class="kw">pub mod </span>binder;
 <span class="kw">pub mod </span>keycode;
 <span class="kw">pub mod </span>mappings;
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">crate</span>::tui::bindings::binder::Binder;
-    <span class="kw">use </span><span class="kw">crate</span>::tui::bindings::mappings::map_key_to_function;
-    <span class="kw">use </span><span class="kw">crate</span>::tui::bindings::mappings::MoveLeft;
+    <span class="kw">use </span><span class="kw">crate</span>::tui::focus::Focus;
 
     <span class="attr">#[derive(Debug, serde::Deserialize)]
     #[serde(untagged)]
     #[cfg_attr(test, derive(PartialEq))]
     </span><span class="kw">pub enum </span>Binding {
         <span class="attr">#[serde(rename = <span class="string">"move_left"</span>)]
-        </span>MoveLeft(MoveLeft),
+        </span>MoveLeft(<span class="kw">super</span>::mappings::movement::MoveLeft),
     }
 
     <span class="attr">#[derive(Debug, serde::Deserialize)]
@@ -172,30 +177,33 @@
             KeyBinding {
                 key: <span class="kw">crate</span>::tui::bindings::keycode::KeyCode::Char(<span class="string">'h'</span>),
                 modifier: <span class="prelude-val">None</span>,
-                fun: Binding::MoveLeft(MoveLeft),
+                fun: Binding::MoveLeft(<span class="kw">crate</span>::tui::bindings::mappings::movement::MoveLeft),
             },
         )
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_binder() {
-        <span class="macro">map_key_to_function!</span> {
+        <span class="macro">crate::map_key_to_function!</span> {
             name: DummyMoveLeft,
             display: <span class="string">"move_left"</span>,
             DEFAULT_KEY: crossterm::event::KeyCode::Char(<span class="string">'h'</span>),
             DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+            REQUIRED_FOCUS: Focus::Box,
             Error: <span class="kw">crate</span>::tui::error::AppError,
             context: bool,
             run: |b: <span class="kw-2">&amp;mut </span>bool| {
                 <span class="kw-2">*</span>b = <span class="bool-val">true</span>;
-                <span class="prelude-val">Ok</span>(())
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
             }
         }
 
-        <span class="kw">let </span>binder = Binder::builder().with_binding::&lt;DummyMoveLeft&gt;().build();
+        <span class="kw">let </span>binder =
+            Binder::&lt;bool, <span class="kw">crate</span>::tui::error::AppError&gt;::new().with_binding::&lt;DummyMoveLeft&gt;();
 
         <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="bool-val">false</span>;
         <span class="kw">let </span>result = binder.run_binding_for_keycode(
+            Focus::Box,
             crossterm::event::KeyCode::Char(<span class="string">'h'</span>),
             crossterm::event::KeyModifiers::NONE,
             <span class="kw-2">&amp;mut </span>context,
@@ -208,20 +216,22 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_binder_rebind() {
-        <span class="macro">map_key_to_function!</span> {
+        <span class="macro">crate::map_key_to_function!</span> {
             name: DummyMoveLeft,
             display: <span class="string">"move_left"</span>,
             DEFAULT_KEY: crossterm::event::KeyCode::Char(<span class="string">'h'</span>),
             DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+            REQUIRED_FOCUS: Focus::Box,
             Error: <span class="kw">crate</span>::tui::error::AppError,
             context: bool,
             run: |b: <span class="kw-2">&amp;mut </span>bool| {
                 <span class="kw-2">*</span>b = <span class="bool-val">true</span>;
-                <span class="prelude-val">Ok</span>(())
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
             }
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>binder = Binder::builder().with_binding::&lt;DummyMoveLeft&gt;().build();
+        <span class="kw">let </span><span class="kw-2">mut </span>binder =
+            Binder::&lt;bool, <span class="kw">crate</span>::tui::error::AppError&gt;::new().with_binding::&lt;DummyMoveLeft&gt;();
         <span class="kw">let </span>rebind_res = binder.rebind_func_by_name(
             <span class="string">"move_left"</span>,
             (
@@ -233,6 +243,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="bool-val">false</span>;
         <span class="kw">let </span>result = binder.run_binding_for_keycode(
+            Focus::Box,
             crossterm::event::KeyCode::Char(<span class="string">'h'</span>),
             crossterm::event::KeyModifiers::NONE,
             <span class="kw-2">&amp;mut </span>context,
@@ -244,6 +255,7 @@
         </span>);
 
         <span class="kw">let </span>result = binder.run_binding_for_keycode(
+            Focus::Box,
             crossterm::event::KeyCode::Char(<span class="string">'l'</span>),
             crossterm::event::KeyModifiers::NONE,
             <span class="kw-2">&amp;mut </span>context,

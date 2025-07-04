@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["functionality","logger","movement"],"struct":["DoesNotMatch"],"trait":["KeyToFunctionMapping"]};
+window.SIDEBAR_ITEMS = {"mod":["commander","logger","mbox","movement"],"struct":["DoesNotMatch"],"trait":["KeyToFunctionMapping"]};

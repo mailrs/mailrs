@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["init_panic_hook","init_tui","restore_tui","run"],"mod":["app","bindings","commands","context","error","model","widgets"]};
+window.SIDEBAR_ITEMS = {"fn":["init_panic_hook","init_tui","restore_tui","run"],"mod":["app","bindings","commands","context","error","focus","model","widgets"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Binder","BinderBuilder","BindingHelper"],"type":["BindingFn"]};
+window.SIDEBAR_ITEMS = {"struct":["Binder","BindingHelper"],"type":["BindingFn"]};

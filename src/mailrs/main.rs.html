@@ -124,10 +124,7 @@
 <a href="#123" id="123">123</a>
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a></pre></div><pre class="rust"><code><span class="comment">// Prevent console window in addition to Slint window in Windows release builds when, e.g.,
+<a href="#126" id="126">126</a></pre></div><pre class="rust"><code><span class="comment">// Prevent console window in addition to Slint window in Windows release builds when, e.g.,
 // starting the app via file manager. Ignored on other platforms.
 </span><span class="attr">#![cfg_attr(not(debug_assertions), windows_subsystem = <span class="string">"windows"</span>)]
 
@@ -148,7 +145,6 @@
 
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>miette::IntoDiagnostic;
-<span class="kw">use </span>tracing::level_filters::LevelFilter;
 <span class="kw">use </span>tracing_subscriber::layer::SubscriberExt;
 <span class="kw">use </span>tracing_subscriber::util::SubscriberInitExt;
 <span class="kw">use </span>tracing_subscriber::EnvFilter;
@@ -162,12 +158,14 @@
 }
 
 <span class="kw">fn </span>setup_logging(cli: <span class="kw-2">&amp;</span><span class="kw">crate</span>::cli::Cli) -&gt; Guards {
-    <span class="kw">let </span><span class="kw-2">mut </span>env_filter = EnvFilter::from_default_env();
+    <span class="kw">let </span><span class="kw-2">mut </span>file_filter = EnvFilter::from_default_env();
+    <span class="kw">let </span><span class="kw-2">mut </span>tui_filter = EnvFilter::from_default_env();
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(log_level) = cli.verbosity.tracing_level() {
         <span class="kw">let </span>level_filter = tracing::metadata::LevelFilter::from_level(log_level);
         <span class="kw">let </span>directive = tracing_subscriber::filter::Directive::from(level_filter);
-        env_filter = env_filter.add_directive(directive);
+        tui_filter = tui_filter.add_directive(directive.clone());
+        file_filter = file_filter.add_directive(directive);
     }
 
     <span class="kw">let </span>(file_layer, guard) = <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = cli.logfile.as_ref() {
@@ -190,11 +188,7 @@
             .with_line_number(<span class="bool-val">true</span>)
             .with_target(<span class="bool-val">false</span>)
             .with_ansi(<span class="bool-val">false</span>)
-            .with_filter(
-                EnvFilter::builder()
-                    .with_default_directive(LevelFilter::INFO.into())
-                    .from_env_lossy(),
-            );
+            .with_filter(file_filter);
 
         (<span class="prelude-val">Some</span>(file_layer), <span class="prelude-val">Some</span>(guard))
     } <span class="kw">else </span>{
@@ -219,7 +213,7 @@
         std::process::exit(<span class="number">1</span>);
     }
 
-    <span class="kw">let </span>tui_layer = tui_logger::TuiTracingSubscriberLayer.with_filter(env_filter);
+    <span class="kw">let </span>tui_layer = tui_logger::TuiTracingSubscriberLayer.with_filter(tui_filter);
 
     <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = tracing_subscriber::registry()
         .with(file_layer)

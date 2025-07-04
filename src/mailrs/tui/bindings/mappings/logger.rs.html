@@ -12,18 +12,20 @@
 <a href="#11" id="11">11</a>
 <a href="#12" id="12">12</a>
 <a href="#13" id="13">13</a>
-<a href="#14" id="14">14</a></pre></div><pre class="rust"><code><span class="macro">crate::map_key_to_function!</span> {
+<a href="#14" id="14">14</a>
+<a href="#15" id="15">15</a></pre></div><pre class="rust"><code><span class="macro">crate::map_key_to_function!</span> {
     name: ShowLogger,
     display: <span class="string">"show_logger"</span>,
     DEFAULT_KEY: crossterm::event::KeyCode::Char(<span class="string">'l'</span>),
     DEFAULT_MODIFIER: crossterm::event::KeyModifiers::CONTROL,
+    REQUIRED_FOCUS: <span class="kw">crate</span>::tui::focus::Focus::Box,
     Error: <span class="kw">crate</span>::tui::error::AppError,
     context: <span class="kw">crate</span>::tui::app::AppState,
     run: |app: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::tui::app::AppState| {
         <span class="macro">tracing::debug!</span>(<span class="string">"Toggle logger"</span>);
         app.show_logger = !app.show_logger;
 
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
     }
 }
 </code></pre></div></section></main></body></html>
