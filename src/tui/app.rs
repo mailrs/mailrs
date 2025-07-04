@@ -75,7 +75,7 @@ impl App {
                 do_exit: false,
                 boxes: Boxes::empty(),
                 boxes_state: BoxesState::default(),
-                logger_state: LoggerState::new(),
+                logger_state: LoggerState::new(tracing::level_filters::LevelFilter::current()),
             },
         }
     }

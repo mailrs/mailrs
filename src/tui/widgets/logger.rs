@@ -17,9 +17,18 @@ pub struct LoggerState {
 }
 
 impl LoggerState {
-    pub fn new() -> Self {
+    pub fn new(level_filter: tracing::level_filters::LevelFilter) -> Self {
         Self {
-            state: TuiWidgetState::new().set_default_display_level(log::LevelFilter::Debug),
+            state: TuiWidgetState::new().set_default_display_level(
+                match level_filter.into_level() {
+                    Some(tracing::Level::TRACE) => log::LevelFilter::Trace,
+                    Some(tracing::Level::DEBUG) => log::LevelFilter::Debug,
+                    Some(tracing::Level::INFO) => log::LevelFilter::Info,
+                    Some(tracing::Level::WARN) => log::LevelFilter::Warn,
+                    Some(tracing::Level::ERROR) => log::LevelFilter::Error,
+                    None => log::LevelFilter::Info,
+                },
+            ),
         }
     }
 }
