@@ -46,6 +46,7 @@ impl App {
             keybindings: {
                 use crate::tui::bindings::mappings::commander;
                 use crate::tui::bindings::mappings::logger;
+                use crate::tui::bindings::mappings::mbox;
                 use crate::tui::bindings::mappings::movement;
 
                 Binder::new()
@@ -57,6 +58,10 @@ impl App {
                     .with_binding::<movement::MoveLeft>()
                     .with_binding::<movement::MoveRight>()
                     .with_binding::<movement::MoveUp>()
+                    .with_binding::<mbox::NextMail>()
+                    .with_binding::<mbox::PrevMail>()
+                    .with_binding::<mbox::NextBox>()
+                    .with_binding::<mbox::PrevBox>()
             },
 
             state: AppState {

@@ -1,5 +1,6 @@
 pub mod commander;
 pub mod logger;
+pub mod mbox;
 pub mod movement;
 
 pub trait KeyToFunctionMapping<Context> {
