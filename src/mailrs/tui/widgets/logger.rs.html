@@ -51,7 +51,16 @@
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
-<a href="#53" id="53">53</a></pre></div><pre class="rust"><code><span class="kw">use </span>ratatui::buffer::Buffer;
+<a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a></pre></div><pre class="rust"><code><span class="kw">use </span>ratatui::buffer::Buffer;
 <span class="kw">use </span>ratatui::layout::Rect;
 <span class="kw">use </span>ratatui::style::Color;
 <span class="kw">use </span>ratatui::style::Style;
@@ -70,9 +79,18 @@
 }
 
 <span class="kw">impl </span>LoggerState {
-    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(level_filter: tracing::level_filters::LevelFilter) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            state: TuiWidgetState::new().set_default_display_level(log::LevelFilter::Debug),
+            state: TuiWidgetState::new().set_default_display_level(
+                <span class="kw">match </span>level_filter.into_level() {
+                    <span class="prelude-val">Some</span>(tracing::Level::TRACE) =&gt; log::LevelFilter::Trace,
+                    <span class="prelude-val">Some</span>(tracing::Level::DEBUG) =&gt; log::LevelFilter::Debug,
+                    <span class="prelude-val">Some</span>(tracing::Level::INFO) =&gt; log::LevelFilter::Info,
+                    <span class="prelude-val">Some</span>(tracing::Level::WARN) =&gt; log::LevelFilter::Warn,
+                    <span class="prelude-val">Some</span>(tracing::Level::ERROR) =&gt; log::LevelFilter::Error,
+                    <span class="prelude-val">None </span>=&gt; log::LevelFilter::Info,
+                },
+            ),
         }
     }
 }
