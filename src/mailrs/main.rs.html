@@ -106,7 +106,28 @@
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a></pre></div><pre class="rust"><code><span class="comment">// Prevent console window in addition to Slint window in Windows release builds when, e.g.,
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a></pre></div><pre class="rust"><code><span class="comment">// Prevent console window in addition to Slint window in Windows release builds when, e.g.,
 // starting the app via file manager. Ignored on other platforms.
 </span><span class="attr">#![cfg_attr(not(debug_assertions), windows_subsystem = <span class="string">"windows"</span>)]
 
@@ -127,7 +148,9 @@
 
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>miette::IntoDiagnostic;
+<span class="kw">use </span>tracing::level_filters::LevelFilter;
 <span class="kw">use </span>tracing_subscriber::layer::SubscriberExt;
+<span class="kw">use </span>tracing_subscriber::util::SubscriberInitExt;
 <span class="kw">use </span>tracing_subscriber::EnvFilter;
 <span class="kw">use </span>tracing_subscriber::Layer;
 
@@ -147,7 +170,7 @@
         env_filter = env_filter.add_directive(directive);
     }
 
-    <span class="kw">let </span>(file_logger, guard) = <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = cli.logfile.as_ref() {
+    <span class="kw">let </span>(file_layer, guard) = <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = cli.logfile.as_ref() {
         <span class="kw">let </span><span class="prelude-val">Some</span>(dir) = path.parent() <span class="kw">else </span>{
             <span class="macro">eprintln!</span>(<span class="string">"Path has no parent: {}, exiting"</span>, path);
             std::process::exit(<span class="number">1</span>);
@@ -160,32 +183,51 @@
         <span class="kw">let </span>file_appender = tracing_appender::rolling::never(dir, filename);
 
         <span class="kw">let </span>(logger, guard) = tracing_appender::non_blocking(file_appender);
-        (<span class="prelude-val">Some</span>(logger), <span class="prelude-val">Some</span>(guard))
+
+        <span class="kw">let </span>file_layer = tracing_subscriber::fmt::layer()
+            .with_writer(logger)
+            .with_file(<span class="bool-val">true</span>)
+            .with_line_number(<span class="bool-val">true</span>)
+            .with_target(<span class="bool-val">false</span>)
+            .with_ansi(<span class="bool-val">false</span>)
+            .with_filter(
+                EnvFilter::builder()
+                    .with_default_directive(LevelFilter::INFO.into())
+                    .from_env_lossy(),
+            );
+
+        (<span class="prelude-val">Some</span>(file_layer), <span class="prelude-val">Some</span>(guard))
     } <span class="kw">else </span>{
         (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
     };
 
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(file_logger) = file_logger {
-        <span class="kw">let </span>subscriber = tracing_subscriber::registry::Registry::default()
-            .with(tracing_subscriber::fmt::layer().with_filter(env_filter))
-            .with(
-                tracing_subscriber::fmt::Layer::new()
-                    .with_target(<span class="bool-val">true</span>)
-                    .with_level(<span class="bool-val">true</span>)
-                    .with_writer(file_logger),
-            );
+    <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = tui_logger::init_logger({
+        <span class="kw">let </span>level = cli
+            .verbosity
+            .tracing_level()
+            .unwrap_or(tracing::Level::INFO);
 
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = tracing::subscriber::set_global_default(subscriber) {
-            <span class="macro">eprintln!</span>(<span class="string">"Failed to set global logging subscriber: {:?}"</span>, e);
-            std::process::exit(<span class="number">1</span>)
+        <span class="kw">match </span>level {
+            tracing::Level::TRACE =&gt; log::LevelFilter::Trace,
+            tracing::Level::DEBUG =&gt; log::LevelFilter::Debug,
+            tracing::Level::INFO =&gt; log::LevelFilter::Info,
+            tracing::Level::WARN =&gt; log::LevelFilter::Warn,
+            tracing::Level::ERROR =&gt; log::LevelFilter::Error,
         }
-    } <span class="kw">else </span>{
-        <span class="kw">let </span>subscriber = tracing_subscriber::registry::Registry::default()
-            .with(tracing_subscriber::fmt::layer().with_filter(env_filter));
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = tracing::subscriber::set_global_default(subscriber) {
-            <span class="macro">eprintln!</span>(<span class="string">"Failed to set global logging subscriber: {:?}"</span>, e);
-            std::process::exit(<span class="number">1</span>)
-        }
+    }) {
+        <span class="macro">eprintln!</span>(<span class="string">"Failed to initialize TUI logger: {error:?}"</span>);
+        std::process::exit(<span class="number">1</span>);
+    }
+
+    <span class="kw">let </span>tui_layer = tui_logger::TuiTracingSubscriberLayer.with_filter(env_filter);
+
+    <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = tracing_subscriber::registry()
+        .with(file_layer)
+        .with(tui_layer)
+        .try_init()
+    {
+        <span class="macro">eprintln!</span>(<span class="string">"Failed to initialize logging: {error:?}"</span>);
+        std::process::exit(<span class="number">1</span>)
     }
 
     Guards {

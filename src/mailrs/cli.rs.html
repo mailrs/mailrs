@@ -41,7 +41,7 @@
 #[command(version, about)]
 </span><span class="kw">pub struct </span>Cli {
     <span class="attr">#[clap(flatten)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) verbosity: clap_verbosity_flag::Verbosity,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) verbosity: clap_verbosity_flag::Verbosity&lt;clap_verbosity_flag::InfoLevel&gt;,
 
     <span class="doccomment">/// A file path to write logs to
     </span><span class="attr">#[clap(long, short)]

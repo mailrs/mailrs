@@ -101,7 +101,8 @@
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>crossterm::event::KeyCode;
 <span class="kw">use </span>crossterm::event::KeyModifiers;
@@ -134,6 +135,7 @@
         context: <span class="kw-2">&amp;mut </span>Context,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="prelude-val">Err</span>&gt;&gt; {
         <span class="kw">let </span>helper = <span class="self">self</span>.mapping.get(<span class="kw-2">&amp;</span>(keycode, modifiers))<span class="question-mark">?</span>;
+        <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>keycode, <span class="question-mark">?</span>modifiers, name = helper.name, <span class="string">"Running binding"</span>);
         <span class="prelude-val">Some</span>((helper.func)(context))
     }
 
