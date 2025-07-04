@@ -8,7 +8,7 @@ crate::map_key_to_function! {
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         tracing::debug!("Activating EX");
-        app.current_focus = crate::tui::app::FocusState::Commander;
+        app.current_focus = Some(crate::tui::bindings::focus::Focus::Commander);
         Ok(None)
     }
 }
@@ -23,7 +23,7 @@ crate::map_key_to_function! {
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         tracing::debug!("Deactivating EX");
-        app.current_focus = crate::tui::app::FocusState::CommandMode;
+        app.current_focus = None;
         Ok(None)
     }
 }
@@ -56,7 +56,7 @@ crate::map_key_to_function! {
             }
         }
 
-        app.current_focus = crate::tui::app::FocusState::CommandMode;
+        app.current_focus = None;
         app.commander_ui.reset();
 
         Ok(tui_commander_context.command_to_execute)

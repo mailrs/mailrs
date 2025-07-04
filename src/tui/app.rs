@@ -16,6 +16,7 @@ use super::context::TuiContext;
 use super::error::AppError;
 use super::widgets::boxes::Boxes;
 use super::widgets::boxes::BoxesState;
+use crate::tui::bindings::focus::Focus;
 use crate::tui::commands::TuiCommandContext;
 use crate::tui::widgets::logger::LoggerState;
 
@@ -32,26 +33,9 @@ pub(crate) struct AppState {
     do_exit: bool,
     boxes: Boxes,
     pub(crate) show_logger: bool,
-    pub(crate) current_focus: FocusState,
+    pub(crate) current_focus: Option<Focus>,
     pub(crate) boxes_state: BoxesState,
     pub(crate) logger_state: LoggerState,
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub(crate) enum FocusState {
-    None,
-    Commander,
-    CommandMode,
-}
-
-impl From<FocusState> for Option<super::bindings::focus::Focus> {
-    fn from(value: FocusState) -> Self {
-        match value {
-            FocusState::None => None,
-            FocusState::Commander => Some(super::bindings::focus::Focus::Commander),
-            FocusState::CommandMode => Some(super::bindings::focus::Focus::Box),
-        }
-    }
 }
 
 impl App {
@@ -86,7 +70,7 @@ impl App {
                     .build(),
                 commander_ui: CommanderUi::default(),
                 show_logger: false,
-                current_focus: FocusState::None,
+                current_focus: None,
                 do_exit: false,
                 boxes: Boxes::empty(),
                 boxes_state: BoxesState::default(),
@@ -154,7 +138,7 @@ impl App {
             main_area,
             &mut self.state.boxes_state,
         );
-        if self.state.current_focus == FocusState::Commander {
+        if self.state.current_focus == Some(Focus::Commander) {
             frame.render_stateful_widget(
                 &mut self.state.commander_ui,
                 main_area,
@@ -174,7 +158,7 @@ impl App {
                     );
 
                     match self.keybindings.run_binding_for_keycode(
-                        self.state.current_focus.into(),
+                        self.state.current_focus,
                         key.code,
                         key.modifiers,
                         &mut self.state,
@@ -182,7 +166,7 @@ impl App {
                         Some(Ok(opt_app_message)) => return opt_app_message,
                         Some(Err(error)) => return Some(AppMessage::KeyBindingErrored(error)),
                         None => {
-                            if self.state.current_focus == FocusState::Commander {
+                            if self.state.current_focus == Some(Focus::Commander) {
                                 tracing::debug!(?key, "Forwarding keypress to commander UI");
                                 self.state.commander_ui.handle_key_press(key);
 
