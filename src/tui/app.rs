@@ -5,6 +5,8 @@ use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
 use futures::FutureExt;
 use futures::StreamExt;
+use ratatui::layout::Constraint;
+use ratatui::layout::Layout;
 use ratatui::prelude::Backend;
 use ratatui::Terminal;
 use tui_commander::ui::Ui as CommanderUi;
@@ -16,6 +18,7 @@ use super::error::AppError;
 use super::widgets::boxes::Boxes;
 use super::widgets::boxes::BoxesState;
 use crate::tui::commands::TuiCommandContext;
+use crate::tui::widgets::logger::LoggerState;
 
 #[allow(unused)]
 pub struct App {
@@ -29,8 +32,10 @@ pub(crate) struct AppState {
     commander_ui: CommanderUi<TuiCommandContext>,
     do_exit: bool,
     boxes: Boxes,
+    pub(crate) show_logger: bool,
     pub(crate) current_focus: FocusState,
     pub(crate) boxes_state: BoxesState,
+    pub(crate) logger_state: LoggerState,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -52,6 +57,7 @@ impl App {
                 .with_binding::<crate::tui::bindings::mappings::MoveRight>()
                 .with_binding::<crate::tui::bindings::mappings::ActivateCommander>()
                 .with_binding::<crate::tui::bindings::mappings::Abort>()
+                .with_binding::<crate::tui::bindings::mappings::ShowLogger>()
                 .build(),
 
             state: AppState {
@@ -64,10 +70,12 @@ impl App {
                     .with_command::<crate::tui::commands::close::CloseCommand>()
                     .build(),
                 commander_ui: CommanderUi::default(),
+                show_logger: false,
                 current_focus: FocusState::None,
                 do_exit: false,
                 boxes: Boxes::empty(),
                 boxes_state: BoxesState::default(),
+                logger_state: LoggerState::new(),
             },
         }
     }
@@ -112,15 +120,30 @@ impl App {
     }
 
     fn draw(&mut self, frame: &mut ratatui::Frame<'_>) {
+        let main_area = if self.state.show_logger {
+            let [main_area, logger_area] =
+                Layout::vertical([Constraint::Percentage(70), Constraint::Percentage(30)])
+                    .areas(frame.area());
+
+            frame.render_stateful_widget(
+                super::widgets::logger::Logger,
+                logger_area,
+                &mut self.state.logger_state,
+            );
+            main_area
+        } else {
+            frame.area()
+        };
+
         frame.render_stateful_widget(
             &mut self.state.boxes,
-            frame.area(),
+            main_area,
             &mut self.state.boxes_state,
         );
         if self.state.current_focus == FocusState::Commander {
             frame.render_stateful_widget(
                 &mut self.state.commander_ui,
-                frame.area(),
+                main_area,
                 &mut self.state.commander,
             );
         }

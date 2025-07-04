@@ -1,6 +1,8 @@
 mod functionality;
+mod logger;
 mod movement;
 pub use self::functionality::*;
+pub use self::logger::*;
 pub use self::movement::*;
 
 pub trait KeyToFunctionMapping<Context> {
