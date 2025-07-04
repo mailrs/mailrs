@@ -19,7 +19,9 @@ mod tui;
 
 use clap::Parser;
 use miette::IntoDiagnostic;
+use tracing::level_filters::LevelFilter;
 use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Layer;
 
@@ -39,7 +41,7 @@ fn setup_logging(cli: &crate::cli::Cli) -> Guards {
         env_filter = env_filter.add_directive(directive);
     }
 
-    let (file_logger, guard) = if let Some(path) = cli.logfile.as_ref() {
+    let (file_layer, guard) = if let Some(path) = cli.logfile.as_ref() {
         let Some(dir) = path.parent() else {
             eprintln!("Path has no parent: {}, exiting", path);
             std::process::exit(1);
@@ -52,32 +54,51 @@ fn setup_logging(cli: &crate::cli::Cli) -> Guards {
         let file_appender = tracing_appender::rolling::never(dir, filename);
 
         let (logger, guard) = tracing_appender::non_blocking(file_appender);
-        (Some(logger), Some(guard))
+
+        let file_layer = tracing_subscriber::fmt::layer()
+            .with_writer(logger)
+            .with_file(true)
+            .with_line_number(true)
+            .with_target(false)
+            .with_ansi(false)
+            .with_filter(
+                EnvFilter::builder()
+                    .with_default_directive(LevelFilter::INFO.into())
+                    .from_env_lossy(),
+            );
+
+        (Some(file_layer), Some(guard))
     } else {
         (None, None)
     };
 
-    if let Some(file_logger) = file_logger {
-        let subscriber = tracing_subscriber::registry::Registry::default()
-            .with(tracing_subscriber::fmt::layer().with_filter(env_filter))
-            .with(
-                tracing_subscriber::fmt::Layer::new()
-                    .with_target(true)
-                    .with_level(true)
-                    .with_writer(file_logger),
-            );
+    if let Err(error) = tui_logger::init_logger({
+        let level = cli
+            .verbosity
+            .tracing_level()
+            .unwrap_or(tracing::Level::INFO);
 
-        if let Err(e) = tracing::subscriber::set_global_default(subscriber) {
-            eprintln!("Failed to set global logging subscriber: {:?}", e);
-            std::process::exit(1)
+        match level {
+            tracing::Level::TRACE => log::LevelFilter::Trace,
+            tracing::Level::DEBUG => log::LevelFilter::Debug,
+            tracing::Level::INFO => log::LevelFilter::Info,
+            tracing::Level::WARN => log::LevelFilter::Warn,
+            tracing::Level::ERROR => log::LevelFilter::Error,
         }
-    } else {
-        let subscriber = tracing_subscriber::registry::Registry::default()
-            .with(tracing_subscriber::fmt::layer().with_filter(env_filter));
-        if let Err(e) = tracing::subscriber::set_global_default(subscriber) {
-            eprintln!("Failed to set global logging subscriber: {:?}", e);
-            std::process::exit(1)
-        }
+    }) {
+        eprintln!("Failed to initialize TUI logger: {error:?}");
+        std::process::exit(1);
+    }
+
+    let tui_layer = tui_logger::TuiTracingSubscriberLayer.with_filter(env_filter);
+
+    if let Err(error) = tracing_subscriber::registry()
+        .with(file_layer)
+        .with(tui_layer)
+        .try_init()
+    {
+        eprintln!("Failed to initialize logging: {error:?}");
+        std::process::exit(1)
     }
 
     Guards {

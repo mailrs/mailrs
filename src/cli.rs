@@ -4,7 +4,7 @@ use clap::Parser;
 #[command(version, about)]
 pub struct Cli {
     #[clap(flatten)]
-    pub(crate) verbosity: clap_verbosity_flag::Verbosity,
+    pub(crate) verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 
     /// A file path to write logs to
     #[clap(long, short)]

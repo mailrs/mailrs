@@ -31,6 +31,7 @@ impl<Context, Err> Binder<Context, Err> {
         context: &mut Context,
     ) -> Option<Result<(), Err>> {
         let helper = self.mapping.get(&(keycode, modifiers))?;
+        tracing::trace!(?keycode, ?modifiers, name = helper.name, "Running binding");
         Some((helper.func)(context))
     }
 

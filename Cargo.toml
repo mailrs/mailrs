@@ -26,11 +26,15 @@ time = "0.3.41"
 tokio = { version = "1.45.1", features = ["rt", "macros", "fs", "sync"] }
 toml = "0.8.23"
 tracing = "0.1.41"
+log = "0.4"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 tui-commander.git = "https://github.com/matthiasbeyer/tui-commander"
 tui-input = { version = "0.12.1", optional = true }
 tui-widget-list = { version = "0.13.2", optional = true }
+tui-logger =  {version = "0.17.3", default-features = false, features = [
+  "tracing-support",
+] }
 xdg = "2.5.2"
 
 [build-dependencies]
