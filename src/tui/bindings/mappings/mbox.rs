@@ -63,3 +63,39 @@ crate::map_key_to_function! {
         Ok(None)
     }
 }
+
+crate::map_key_to_function! {
+    name: OpenMessage,
+    display: "open_mail",
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Enter,
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
+    REQUIRED_FOCUS: Focus::Box,
+    Error: crate::tui::error::AppError,
+    context: crate::tui::app::AppState,
+    run: |app: &mut crate::tui::app::AppState| {
+        if let Some(mbox_state) = app.boxes_state.get_current_state_mut() {
+            tracing::debug!("Open message");
+            mbox_state.show_current_message();
+            app.current_focus = Focus::Message;
+        }
+        Ok(None)
+    }
+}
+
+crate::map_key_to_function! {
+    name: CloseMessage,
+    display: "close_mail",
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Esc,
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
+    REQUIRED_FOCUS: Focus::Message,
+    Error: crate::tui::error::AppError,
+    context: crate::tui::app::AppState,
+    run: |app: &mut crate::tui::app::AppState| {
+        if let Some(mbox_state) = app.boxes_state.get_current_state_mut() {
+            tracing::debug!("Close message");
+            mbox_state.hide_message();
+            app.current_focus = Focus::Box;
+        }
+        Ok(None)
+    }
+}
