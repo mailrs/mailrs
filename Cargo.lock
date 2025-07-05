@@ -1285,7 +1285,6 @@ checksum = "829d955a0bb380ef178a640b91779e3987da38c9aea133b20614cfed8cdea9c6"
 dependencies = [
  "bitflags 2.9.1",
  "crossterm_winapi",
- "futures-core",
  "mio",
  "parking_lot",
  "rustix 0.38.44",
@@ -1304,6 +1303,7 @@ dependencies = [
  "crossterm_winapi",
  "derive_more",
  "document-features",
+ "futures-core",
  "mio",
  "parking_lot",
  "rustix 1.0.7",
@@ -1706,7 +1706,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "778e2ac28f6c47af28e4907f13ffd1e1ddbd400980a9abd7c8df189bf578a5ad"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -3223,6 +3223,7 @@ dependencies = [
  "camino",
  "clap",
  "clap-verbosity-flag",
+ "crossterm 0.29.0",
  "derive_more",
  "enum-iterator",
  "futures",
@@ -3243,7 +3244,7 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "tui-commander",
- "tui-input",
+ "tui-input 0.12.1 (git+https://github.com/matthiasbeyer/tui-input?branch=dont-depend-on-alpha-ratatui)",
  "tui-logger",
  "tui-widget-list",
  "xdg",
@@ -4744,7 +4745,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.4.15",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -4757,7 +4758,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.9.4",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5353,7 +5354,7 @@ dependencies = [
  "getrandom 0.3.3",
  "once_cell",
  "rustix 1.0.7",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5769,15 +5770,14 @@ dependencies = [
 
 [[package]]
 name = "tui-commander"
-version = "0.2.0"
-source = "git+https://github.com/matthiasbeyer/tui-commander#d2f7787ad3c200034395f55119a8ed65ef8c8028"
+version = "0.2.1"
+source = "git+https://github.com/matthiasbeyer/tui-commander?branch=remove-direct-crossterm#6627bc07fc1f3496d80c16477c3619be864f4aba"
 dependencies = [
- "crossterm 0.28.1",
  "downcast-rs 2.0.1",
  "nucleo-matcher",
  "ratatui 0.29.0",
  "thiserror 2.0.12",
- "tui-input",
+ "tui-input 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -5787,6 +5787,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dce25d24adf2c5350c57426f25cf12bc767455a6d9202be155458fc768ea1268"
 dependencies = [
  "ratatui 0.30.0-alpha.5",
+ "unicode-width 0.2.0",
+]
+
+[[package]]
+name = "tui-input"
+version = "0.12.1"
+source = "git+https://github.com/matthiasbeyer/tui-input?branch=dont-depend-on-alpha-ratatui#dbccf4eba8b16d34a420a91c3aca6fae623082d3"
+dependencies = [
+ "ratatui 0.29.0",
  "unicode-width 0.2.0",
 ]
 
