@@ -4,7 +4,7 @@ use super::message::Message;
 use super::tag::Tag;
 use crate::error::Error;
 
-pub type ResultRecv<Res> = tokio::sync::oneshot::Receiver<Result<Res, Error>>;
+pub type ResultRecv<Res, Error = crate::error::Error> = tokio::sync::oneshot::Receiver<Result<Res, Error>>;
 
 #[derive(Debug)]
 pub enum Request {
@@ -25,6 +25,10 @@ pub enum Request {
         message_id: String,
         header: String,
         sender: tokio::sync::oneshot::Sender<Result<Option<String>, Error>>,
+    },
+    ContentForMessage {
+        message_id: String,
+        sender: tokio::sync::oneshot::Sender<Result<Option<String>, ApplicationError>>,
     },
 }
 
@@ -70,6 +74,19 @@ impl Request {
             Self::HeaderForMessage {
                 message_id: message_id.to_string(),
                 header: header.to_string(),
+                sender,
+            },
+            recv,
+        )
+    }
+
+    pub fn content_for_message(
+        message_id: &str,
+    ) -> (Self, ResultRecv<Option<String>, ApplicationError>) {
+        let (sender, recv) = tokio::sync::oneshot::channel();
+        (
+            Self::ContentForMessage {
+                message_id: message_id.to_string(),
                 sender,
             },
             recv,

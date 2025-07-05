@@ -168,6 +168,38 @@ impl NotmuchWorker {
 
                     sender.send(header_value).map_err(|_| Error::WorkerSend)?;
                 }
+
+                Request::ContentForMessage { message_id, sender } => {
+                    let message_content = match self.database.find_message(&message_id) {
+                        Ok(Some(msg)) => {
+                            if !msg.filename().exists() {
+                                Ok(None)
+                            } else {
+                                std::fs::read_to_string(msg.filename())
+                                    .map_err(|source| WorkerError::<()>::NoFile {
+                                        source,
+                                        path: msg.filename().to_path_buf(),
+                                    })
+                                    .map_err(ApplicationError::from)
+                                    .map(Some)
+                            }
+                        }
+                        Ok(None) => {
+                            sender.send(Ok(None)).map_err(|_| WorkerError::Send)?;
+                            continue;
+                        }
+                        Err(e) => {
+                            sender
+                                .send(Err(ApplicationError::from(NotmuchError::from(e))))
+                                .map_err(|_| WorkerError::Send)?;
+                            continue;
+                        }
+                    };
+
+                    sender
+                        .send(message_content)
+                        .map_err(|_| WorkerError::Send)?;
+                }
             }
 
             let processing_time =
