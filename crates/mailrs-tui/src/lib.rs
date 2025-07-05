@@ -115,9 +115,9 @@ pub async fn run(
 
     let tui_context = self::context::TuiContext::new(notmuch);
 
-    let mut app = self::app::App::new(tui_context);
-    app.add_box(Arc::new(initial_box));
-    let res = app.run(terminal).await;
+    let res = self::app::App::new(Arc::new(initial_box), tui_context)
+        .run(terminal)
+        .await;
 
     restore_tui()?;
     res
