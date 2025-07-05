@@ -30,7 +30,6 @@ pub(crate) struct AppState {
     pub(crate) commander: Commander<TuiCommandContext>,
     pub(crate) commander_ui: CommanderUi<TuiCommandContext>,
     do_exit: bool,
-    boxes: Boxes,
     pub(crate) show_logger: bool,
     pub(crate) current_focus: Focus,
     pub(crate) boxes_state: BoxesState,
@@ -38,7 +37,7 @@ pub(crate) struct AppState {
 }
 
 impl App {
-    pub fn new(tui_context: TuiContext) -> Self {
+    pub fn new(initial_box: Arc<crate::tui::model::MBox>, tui_context: TuiContext) -> Self {
         Self {
             tui_context,
 
@@ -61,6 +60,8 @@ impl App {
                     .with_binding::<mbox::PrevMail>()
                     .with_binding::<mbox::NextBox>()
                     .with_binding::<mbox::PrevBox>()
+                    .with_binding::<mbox::OpenMessage>()
+                    .with_binding::<mbox::CloseMessage>()
             },
 
             state: AppState {
@@ -76,8 +77,7 @@ impl App {
                 show_logger: false,
                 current_focus: Focus::Box,
                 do_exit: false,
-                boxes: Boxes::empty(),
-                boxes_state: BoxesState::default(),
+                boxes_state: BoxesState::new(initial_box),
                 logger_state: LoggerState::new(tracing::level_filters::LevelFilter::current()),
             },
         }
@@ -85,17 +85,13 @@ impl App {
 
     #[inline]
     pub fn add_box(&mut self, bx: Arc<crate::model::MBox>) {
-        self.state.boxes.add_box(bx);
-        self.state.boxes_state.increase_boxes_count();
+        self.state.boxes_state.add_box(bx);
         self.state.boxes_state.focus_last();
     }
 
     #[inline]
     pub fn remove_currently_focused_box(&mut self) {
-        self.state
-            .boxes
-            .remove_index(self.state.boxes_state.current_index());
-        self.state.boxes_state.decrease_boxes_count();
+        self.state.boxes_state.remove_current_box();
     }
 
     pub async fn run(
@@ -141,7 +137,7 @@ impl App {
         };
 
         frame.render_stateful_widget(
-            &mut self.state.boxes,
+            &mut super::widgets::boxes::Boxes,
             main_area,
             &mut self.state.boxes_state,
         );
