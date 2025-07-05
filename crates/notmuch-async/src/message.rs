@@ -45,4 +45,23 @@ impl Message {
         )
         .await?
     }
+
+    pub async fn content(&self) -> Result<Option<String>, crate::error::Error> {
+        let pathes = super::handle::send_and_recv(
+            &self.worker_handle.sender,
+            Request::file_names_for_message(self.id()),
+        )
+        .await??;
+
+        for path in pathes.into_iter().flatten() {
+            if path.exists() {
+                return tokio::fs::read_to_string(path.clone())
+                    .await
+                    .map(Some)
+                    .map_err(crate::error::Error::from);
+            }
+        }
+
+        Ok(None)
+    }
 }
