@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use crossterm::event::EventStream;
-use crossterm::event::KeyEventKind;
 use futures::FutureExt;
 use futures::StreamExt;
+use ratatui::crossterm::event::EventStream;
+use ratatui::crossterm::event::KeyEventKind;
 use ratatui::layout::Constraint;
 use ratatui::layout::Layout;
 use ratatui::prelude::Backend;
@@ -152,7 +152,10 @@ impl App {
         }
     }
 
-    async fn handle_tui_event(&mut self, event: crossterm::event::Event) -> Option<AppMessage> {
+    async fn handle_tui_event(
+        &mut self,
+        event: ratatui::crossterm::event::Event,
+    ) -> Option<AppMessage> {
         match event {
             ratatui::crossterm::event::Event::Key(key) => {
                 if key.kind == KeyEventKind::Press {
@@ -311,5 +314,5 @@ pub enum AppMessage {
     Query(Vec<String>),
     Close,
     KeyBindingErrored(AppError),
-    UnboundKey(crossterm::event::KeyEvent),
+    UnboundKey(ratatui::crossterm::event::KeyEvent),
 }

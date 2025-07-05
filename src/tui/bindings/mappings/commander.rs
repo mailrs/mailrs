@@ -3,8 +3,8 @@ use crate::tui::focus::Focus;
 crate::map_key_to_function! {
     name: ActivateCommander,
     display: "start_commander",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char(':'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char(':'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
@@ -18,8 +18,8 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: DeactivateCommander,
     display: "stop_commander",
-    DEFAULT_KEY: crossterm::event::KeyCode::Esc,
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Esc,
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Commander,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
@@ -33,8 +33,8 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: RunCommander,
     display: "commander::run",
-    DEFAULT_KEY: crossterm::event::KeyCode::Enter,
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Enter,
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Commander,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,

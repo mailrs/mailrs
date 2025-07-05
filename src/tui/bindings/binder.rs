@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use crossterm::event::KeyCode;
-use crossterm::event::KeyModifiers;
+use ratatui::crossterm::event::KeyCode;
+use ratatui::crossterm::event::KeyModifiers;
 
 use crate::tui::bindings::mappings::KeyToFunctionMapping;
 use crate::tui::focus::Focus;

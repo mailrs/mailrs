@@ -75,125 +75,125 @@ impl<'de> serde::Deserialize<'de> for KeyCode {
     }
 }
 
-impl From<KeyCode> for crossterm::event::KeyCode {
+impl From<KeyCode> for ratatui::crossterm::event::KeyCode {
     fn from(value: KeyCode) -> Self {
         match value {
-            KeyCode::Backspace => crossterm::event::KeyCode::Backspace,
-            KeyCode::Enter => crossterm::event::KeyCode::Enter,
-            KeyCode::Left => crossterm::event::KeyCode::Left,
-            KeyCode::Right => crossterm::event::KeyCode::Right,
-            KeyCode::Up => crossterm::event::KeyCode::Up,
-            KeyCode::Down => crossterm::event::KeyCode::Down,
-            KeyCode::Home => crossterm::event::KeyCode::Home,
-            KeyCode::End => crossterm::event::KeyCode::End,
-            KeyCode::PageUp => crossterm::event::KeyCode::PageUp,
-            KeyCode::PageDown => crossterm::event::KeyCode::PageDown,
-            KeyCode::Tab => crossterm::event::KeyCode::Tab,
-            KeyCode::BackTab => crossterm::event::KeyCode::BackTab,
-            KeyCode::Delete => crossterm::event::KeyCode::Delete,
-            KeyCode::Insert => crossterm::event::KeyCode::Insert,
-            KeyCode::F1 => crossterm::event::KeyCode::F(1),
-            KeyCode::F2 => crossterm::event::KeyCode::F(2),
-            KeyCode::F3 => crossterm::event::KeyCode::F(3),
-            KeyCode::F4 => crossterm::event::KeyCode::F(4),
-            KeyCode::F5 => crossterm::event::KeyCode::F(5),
-            KeyCode::F6 => crossterm::event::KeyCode::F(6),
-            KeyCode::F7 => crossterm::event::KeyCode::F(7),
-            KeyCode::F8 => crossterm::event::KeyCode::F(8),
-            KeyCode::F9 => crossterm::event::KeyCode::F(9),
-            KeyCode::F10 => crossterm::event::KeyCode::F(10),
-            KeyCode::F11 => crossterm::event::KeyCode::F(11),
-            KeyCode::F12 => crossterm::event::KeyCode::F(12),
-            KeyCode::Char(chr) => crossterm::event::KeyCode::Char(chr),
-            KeyCode::Null => crossterm::event::KeyCode::Null,
-            KeyCode::Esc => crossterm::event::KeyCode::Esc,
-            KeyCode::CapsLock => crossterm::event::KeyCode::CapsLock,
-            KeyCode::ScrollLock => crossterm::event::KeyCode::ScrollLock,
-            KeyCode::NumLock => crossterm::event::KeyCode::NumLock,
-            KeyCode::PrintScreen => crossterm::event::KeyCode::PrintScreen,
-            KeyCode::Pause => crossterm::event::KeyCode::Pause,
-            KeyCode::Menu => crossterm::event::KeyCode::Menu,
-            KeyCode::KeypadBegin => crossterm::event::KeyCode::KeypadBegin,
-            KeyCode::MediaPlay => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::Play)
-            }
-            KeyCode::MediaPause => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::Pause)
-            }
-            KeyCode::MediaPlayPause => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::PlayPause)
-            }
-            KeyCode::MediaReverse => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::Reverse)
-            }
-            KeyCode::MediaStop => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::Stop)
-            }
-            KeyCode::MediaFastForward => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::FastForward)
-            }
-            KeyCode::MediaRewind => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::Rewind)
-            }
-            KeyCode::MediaTrackNext => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::TrackNext)
-            }
-            KeyCode::MediaTrackPrevious => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::TrackPrevious)
-            }
-            KeyCode::MediaRecord => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::Record)
-            }
-            KeyCode::MediaLowerVolume => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::LowerVolume)
-            }
-            KeyCode::MediaRaiseVolume => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::RaiseVolume)
-            }
-            KeyCode::MediaMuteVolume => {
-                crossterm::event::KeyCode::Media(crossterm::event::MediaKeyCode::MuteVolume)
-            }
-            KeyCode::ModifierLeftShift => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::LeftShift)
-            }
-            KeyCode::ModifierLeftControl => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::LeftControl)
-            }
-            KeyCode::ModifierLeftAlt => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::LeftAlt)
-            }
-            KeyCode::ModifierLeftSuper => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::LeftSuper)
-            }
-            KeyCode::ModifierLeftHyper => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::LeftHyper)
-            }
-            KeyCode::ModifierLeftMeta => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::LeftMeta)
-            }
-            KeyCode::ModifierRightShift => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::RightShift)
-            }
-            KeyCode::ModifierRightControl => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::RightControl)
-            }
-            KeyCode::ModifierRightAlt => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::RightAlt)
-            }
-            KeyCode::ModifierRightSuper => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::RightSuper)
-            }
-            KeyCode::ModifierRightHyper => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::RightHyper)
-            }
-            KeyCode::ModifierRightMeta => {
-                crossterm::event::KeyCode::Modifier(crossterm::event::ModifierKeyCode::RightMeta)
-            }
-            KeyCode::ModifierIsoLevel3Shift => crossterm::event::KeyCode::Modifier(
-                crossterm::event::ModifierKeyCode::IsoLevel3Shift,
+            KeyCode::Backspace => ratatui::crossterm::event::KeyCode::Backspace,
+            KeyCode::Enter => ratatui::crossterm::event::KeyCode::Enter,
+            KeyCode::Left => ratatui::crossterm::event::KeyCode::Left,
+            KeyCode::Right => ratatui::crossterm::event::KeyCode::Right,
+            KeyCode::Up => ratatui::crossterm::event::KeyCode::Up,
+            KeyCode::Down => ratatui::crossterm::event::KeyCode::Down,
+            KeyCode::Home => ratatui::crossterm::event::KeyCode::Home,
+            KeyCode::End => ratatui::crossterm::event::KeyCode::End,
+            KeyCode::PageUp => ratatui::crossterm::event::KeyCode::PageUp,
+            KeyCode::PageDown => ratatui::crossterm::event::KeyCode::PageDown,
+            KeyCode::Tab => ratatui::crossterm::event::KeyCode::Tab,
+            KeyCode::BackTab => ratatui::crossterm::event::KeyCode::BackTab,
+            KeyCode::Delete => ratatui::crossterm::event::KeyCode::Delete,
+            KeyCode::Insert => ratatui::crossterm::event::KeyCode::Insert,
+            KeyCode::F1 => ratatui::crossterm::event::KeyCode::F(1),
+            KeyCode::F2 => ratatui::crossterm::event::KeyCode::F(2),
+            KeyCode::F3 => ratatui::crossterm::event::KeyCode::F(3),
+            KeyCode::F4 => ratatui::crossterm::event::KeyCode::F(4),
+            KeyCode::F5 => ratatui::crossterm::event::KeyCode::F(5),
+            KeyCode::F6 => ratatui::crossterm::event::KeyCode::F(6),
+            KeyCode::F7 => ratatui::crossterm::event::KeyCode::F(7),
+            KeyCode::F8 => ratatui::crossterm::event::KeyCode::F(8),
+            KeyCode::F9 => ratatui::crossterm::event::KeyCode::F(9),
+            KeyCode::F10 => ratatui::crossterm::event::KeyCode::F(10),
+            KeyCode::F11 => ratatui::crossterm::event::KeyCode::F(11),
+            KeyCode::F12 => ratatui::crossterm::event::KeyCode::F(12),
+            KeyCode::Char(chr) => ratatui::crossterm::event::KeyCode::Char(chr),
+            KeyCode::Null => ratatui::crossterm::event::KeyCode::Null,
+            KeyCode::Esc => ratatui::crossterm::event::KeyCode::Esc,
+            KeyCode::CapsLock => ratatui::crossterm::event::KeyCode::CapsLock,
+            KeyCode::ScrollLock => ratatui::crossterm::event::KeyCode::ScrollLock,
+            KeyCode::NumLock => ratatui::crossterm::event::KeyCode::NumLock,
+            KeyCode::PrintScreen => ratatui::crossterm::event::KeyCode::PrintScreen,
+            KeyCode::Pause => ratatui::crossterm::event::KeyCode::Pause,
+            KeyCode::Menu => ratatui::crossterm::event::KeyCode::Menu,
+            KeyCode::KeypadBegin => ratatui::crossterm::event::KeyCode::KeypadBegin,
+            KeyCode::MediaPlay => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::Play,
             ),
-            KeyCode::ModifierIsoLevel5Shift => crossterm::event::KeyCode::Modifier(
-                crossterm::event::ModifierKeyCode::IsoLevel5Shift,
+            KeyCode::MediaPause => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::Pause,
+            ),
+            KeyCode::MediaPlayPause => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::PlayPause,
+            ),
+            KeyCode::MediaReverse => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::Reverse,
+            ),
+            KeyCode::MediaStop => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::Stop,
+            ),
+            KeyCode::MediaFastForward => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::FastForward,
+            ),
+            KeyCode::MediaRewind => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::Rewind,
+            ),
+            KeyCode::MediaTrackNext => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::TrackNext,
+            ),
+            KeyCode::MediaTrackPrevious => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::TrackPrevious,
+            ),
+            KeyCode::MediaRecord => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::Record,
+            ),
+            KeyCode::MediaLowerVolume => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::LowerVolume,
+            ),
+            KeyCode::MediaRaiseVolume => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::RaiseVolume,
+            ),
+            KeyCode::MediaMuteVolume => ratatui::crossterm::event::KeyCode::Media(
+                ratatui::crossterm::event::MediaKeyCode::MuteVolume,
+            ),
+            KeyCode::ModifierLeftShift => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::LeftShift,
+            ),
+            KeyCode::ModifierLeftControl => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::LeftControl,
+            ),
+            KeyCode::ModifierLeftAlt => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::LeftAlt,
+            ),
+            KeyCode::ModifierLeftSuper => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::LeftSuper,
+            ),
+            KeyCode::ModifierLeftHyper => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::LeftHyper,
+            ),
+            KeyCode::ModifierLeftMeta => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::LeftMeta,
+            ),
+            KeyCode::ModifierRightShift => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::RightShift,
+            ),
+            KeyCode::ModifierRightControl => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::RightControl,
+            ),
+            KeyCode::ModifierRightAlt => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::RightAlt,
+            ),
+            KeyCode::ModifierRightSuper => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::RightSuper,
+            ),
+            KeyCode::ModifierRightHyper => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::RightHyper,
+            ),
+            KeyCode::ModifierRightMeta => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::RightMeta,
+            ),
+            KeyCode::ModifierIsoLevel3Shift => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::IsoLevel3Shift,
+            ),
+            KeyCode::ModifierIsoLevel5Shift => ratatui::crossterm::event::KeyCode::Modifier(
+                ratatui::crossterm::event::ModifierKeyCode::IsoLevel5Shift,
             ),
         }
     }

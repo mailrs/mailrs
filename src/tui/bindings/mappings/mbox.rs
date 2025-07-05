@@ -3,8 +3,8 @@ use crate::tui::focus::Focus;
 crate::map_key_to_function! {
     name: NextMail,
     display: "next_mail",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char('j'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('j'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
@@ -20,8 +20,8 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: PrevMail,
     display: "prev_mail",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char('k'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('k'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
@@ -37,8 +37,8 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: NextBox,
     display: "next_box",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char('l'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('l'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
@@ -52,8 +52,8 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: PrevBox,
     display: "prev_box",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char('h'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('h'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,

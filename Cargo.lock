@@ -578,9 +578,6 @@ name = "bitflags"
 version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c8214115b7bf84099f1309324e63141d4c5d7cc26862f97a0a857dbefe165bd"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "block"
@@ -1223,7 +1220,6 @@ dependencies = [
  "mio",
  "parking_lot",
  "rustix",
- "serde",
  "signal-hook",
  "signal-hook-mio",
  "winapi",
@@ -3063,7 +3059,6 @@ dependencies = [
  "camino",
  "clap",
  "clap-verbosity-flag",
- "crossterm",
  "derive_more 2.0.1",
  "enum-iterator",
  "futures",

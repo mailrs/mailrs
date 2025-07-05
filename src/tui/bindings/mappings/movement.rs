@@ -1,8 +1,8 @@
 crate::map_key_to_function! {
     name: MoveLeft,
     display: "move_left",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char('h'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('h'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
@@ -15,8 +15,8 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: MoveDown,
     display: "move_down",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char('j'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('j'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
@@ -33,8 +33,8 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: MoveUp,
     display: "move_up",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char('k'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('k'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
@@ -51,8 +51,8 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: MoveRight,
     display: "move_right",
-    DEFAULT_KEY: crossterm::event::KeyCode::Char('l'),
-    DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('l'),
+    DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
     Error: crate::tui::error::AppError,
     context: crate::tui::app::AppState,
