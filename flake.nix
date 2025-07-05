@@ -200,6 +200,7 @@
 
             pkgs.notmuch
             pkgs.cargo-insta
+            unstable.cargo-outdated
             pkgs.cargo-deny
             pkgs.gitlint
             pkgs.statix
