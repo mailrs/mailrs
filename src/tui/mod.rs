@@ -108,8 +108,11 @@ pub async fn run(
 }
 
 fn init_tui() -> std::io::Result<ratatui::Terminal<impl ratatui::prelude::Backend>> {
-    crossterm::terminal::enable_raw_mode()?;
-    crossterm::execute!(std::io::stdout(), crossterm::terminal::EnterAlternateScreen)?;
+    ratatui::crossterm::terminal::enable_raw_mode()?;
+    ratatui::crossterm::execute!(
+        std::io::stdout(),
+        ratatui::crossterm::terminal::EnterAlternateScreen
+    )?;
     ratatui::Terminal::new(ratatui::prelude::CrosstermBackend::new(std::io::stdout()))
 }
 
@@ -123,7 +126,10 @@ fn init_panic_hook() {
 }
 
 fn restore_tui() -> std::io::Result<()> {
-    crossterm::terminal::disable_raw_mode()?;
-    crossterm::execute!(std::io::stdout(), crossterm::terminal::LeaveAlternateScreen)?;
+    ratatui::crossterm::terminal::disable_raw_mode()?;
+    ratatui::crossterm::execute!(
+        std::io::stdout(),
+        ratatui::crossterm::terminal::LeaveAlternateScreen
+    )?;
     Ok(())
 }

@@ -53,8 +53,8 @@ mod tests {
         crate::map_key_to_function! {
             name: DummyMoveLeft,
             display: "move_left",
-            DEFAULT_KEY: crossterm::event::KeyCode::Char('h'),
-            DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+            DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('h'),
+            DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
             REQUIRED_FOCUS: Focus::Box,
             Error: crate::tui::error::AppError,
             context: bool,
@@ -70,8 +70,8 @@ mod tests {
         let mut context = false;
         let result = binder.run_binding_for_keycode(
             Focus::Box,
-            crossterm::event::KeyCode::Char('h'),
-            crossterm::event::KeyModifiers::NONE,
+            ratatui::crossterm::event::KeyCode::Char('h'),
+            ratatui::crossterm::event::KeyModifiers::NONE,
             &mut context,
         );
         assert!(result.is_some());
@@ -85,8 +85,8 @@ mod tests {
         crate::map_key_to_function! {
             name: DummyMoveLeft,
             display: "move_left",
-            DEFAULT_KEY: crossterm::event::KeyCode::Char('h'),
-            DEFAULT_MODIFIER: crossterm::event::KeyModifiers::NONE,
+            DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('h'),
+            DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
             REQUIRED_FOCUS: Focus::Box,
             Error: crate::tui::error::AppError,
             context: bool,
@@ -101,8 +101,8 @@ mod tests {
         let rebind_res = binder.rebind_func_by_name(
             "move_left",
             (
-                crossterm::event::KeyCode::Char('l'),
-                crossterm::event::KeyModifiers::NONE,
+                ratatui::crossterm::event::KeyCode::Char('l'),
+                ratatui::crossterm::event::KeyModifiers::NONE,
             ),
         );
         assert!(rebind_res.is_some());
@@ -110,8 +110,8 @@ mod tests {
         let mut context = false;
         let result = binder.run_binding_for_keycode(
             Focus::Box,
-            crossterm::event::KeyCode::Char('h'),
-            crossterm::event::KeyModifiers::NONE,
+            ratatui::crossterm::event::KeyCode::Char('h'),
+            ratatui::crossterm::event::KeyModifiers::NONE,
             &mut context,
         );
         assert!(result.is_none());
@@ -122,8 +122,8 @@ mod tests {
 
         let result = binder.run_binding_for_keycode(
             Focus::Box,
-            crossterm::event::KeyCode::Char('l'),
-            crossterm::event::KeyModifiers::NONE,
+            ratatui::crossterm::event::KeyCode::Char('l'),
+            ratatui::crossterm::event::KeyModifiers::NONE,
             &mut context,
         );
         assert!(result.is_some());

@@ -4,8 +4,8 @@ pub mod mbox;
 pub mod movement;
 
 pub trait KeyToFunctionMapping<Context> {
-    const DEFAULT_KEY: crossterm::event::KeyCode;
-    const DEFAULT_MODIFIER: crossterm::event::KeyModifiers;
+    const DEFAULT_KEY: ratatui::crossterm::event::KeyCode;
+    const DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers;
     const NAME: &'static str;
 
     const REQUIRED_FOCUS: crate::tui::focus::Focus;
@@ -38,8 +38,8 @@ macro_rules! map_key_to_function {
         #[cfg_attr(test, derive(PartialEq))]
         pub struct $name;
         impl $crate::tui::bindings::mappings::KeyToFunctionMapping<$context> for $name {
-            const DEFAULT_KEY: crossterm::event::KeyCode = $key;
-            const DEFAULT_MODIFIER: crossterm::event::KeyModifiers = $modif;
+            const DEFAULT_KEY: ratatui::crossterm::event::KeyCode = $key;
+            const DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers = $modif;
             const NAME: &'static str = $display;
             const REQUIRED_FOCUS: $crate::tui::focus::Focus = $focus;
             type Error = $errty;
