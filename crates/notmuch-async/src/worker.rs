@@ -1,6 +1,6 @@
-use super::NotmuchWorkerHandle;
-use super::Request;
 use crate::error::Error;
+use crate::handle::NotmuchWorkerHandle;
+use crate::request::Request;
 
 pub type NotmuchRequestSender = tokio::sync::mpsc::Sender<Request>;
 pub type NotmuchRequestReceiver = tokio::sync::mpsc::Receiver<Request>;

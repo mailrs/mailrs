@@ -1,8 +1,8 @@
-use super::message::Message;
-use super::tag::Tag;
-use super::worker::NotmuchRequestSender;
-use super::Request;
 use crate::error::Error;
+use crate::message::Message;
+use crate::request::Request;
+use crate::tag::Tag;
+use crate::worker::NotmuchRequestSender;
 
 #[derive(Clone)]
 pub struct NotmuchWorkerHandle {

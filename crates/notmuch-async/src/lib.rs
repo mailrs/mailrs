@@ -7,5 +7,4 @@ pub mod tag;
 mod worker;
 
 pub use self::handle::NotmuchWorkerHandle;
-pub use self::request::Request;
 pub use self::worker::NotmuchWorker;
