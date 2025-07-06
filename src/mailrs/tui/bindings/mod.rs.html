@@ -56,7 +56,7 @@
 <a href=#56 id=56 data-nosnippet>56</a>            DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char(<span class="string">'h'</span>),
 <a href=#57 id=57 data-nosnippet>57</a>            DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
 <a href=#58 id=58 data-nosnippet>58</a>            REQUIRED_FOCUS: Focus::Box,
-<a href=#59 id=59 data-nosnippet>59</a>            Error: <span class="kw">crate</span>::tui::error::AppError,
+<a href=#59 id=59 data-nosnippet>59</a>            Error: <span class="kw">crate</span>::tui::error::Error,
 <a href=#60 id=60 data-nosnippet>60</a>            context: bool,
 <a href=#61 id=61 data-nosnippet>61</a>            run: |b: <span class="kw-2">&amp;mut </span>bool| {
 <a href=#62 id=62 data-nosnippet>62</a>                <span class="kw-2">*</span>b = <span class="bool-val">true</span>;
@@ -65,7 +65,7 @@
 <a href=#65 id=65 data-nosnippet>65</a>        }
 <a href=#66 id=66 data-nosnippet>66</a>
 <a href=#67 id=67 data-nosnippet>67</a>        <span class="kw">let </span>binder =
-<a href=#68 id=68 data-nosnippet>68</a>            Binder::&lt;bool, <span class="kw">crate</span>::tui::error::AppError&gt;::new().with_binding::&lt;DummyMoveLeft&gt;();
+<a href=#68 id=68 data-nosnippet>68</a>            Binder::&lt;bool, <span class="kw">crate</span>::tui::error::Error&gt;::new().with_binding::&lt;DummyMoveLeft&gt;();
 <a href=#69 id=69 data-nosnippet>69</a>
 <a href=#70 id=70 data-nosnippet>70</a>        <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="bool-val">false</span>;
 <a href=#71 id=71 data-nosnippet>71</a>        <span class="kw">let </span>result = binder.run_binding_for_keycode(
@@ -88,7 +88,7 @@
 <a href=#88 id=88 data-nosnippet>88</a>            DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char(<span class="string">'h'</span>),
 <a href=#89 id=89 data-nosnippet>89</a>            DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
 <a href=#90 id=90 data-nosnippet>90</a>            REQUIRED_FOCUS: Focus::Box,
-<a href=#91 id=91 data-nosnippet>91</a>            Error: <span class="kw">crate</span>::tui::error::AppError,
+<a href=#91 id=91 data-nosnippet>91</a>            Error: <span class="kw">crate</span>::tui::error::Error,
 <a href=#92 id=92 data-nosnippet>92</a>            context: bool,
 <a href=#93 id=93 data-nosnippet>93</a>            run: |b: <span class="kw-2">&amp;mut </span>bool| {
 <a href=#94 id=94 data-nosnippet>94</a>                <span class="kw-2">*</span>b = <span class="bool-val">true</span>;
@@ -97,7 +97,7 @@
 <a href=#97 id=97 data-nosnippet>97</a>        }
 <a href=#98 id=98 data-nosnippet>98</a>
 <a href=#99 id=99 data-nosnippet>99</a>        <span class="kw">let </span><span class="kw-2">mut </span>binder =
-<a href=#100 id=100 data-nosnippet>100</a>            Binder::&lt;bool, <span class="kw">crate</span>::tui::error::AppError&gt;::new().with_binding::&lt;DummyMoveLeft&gt;();
+<a href=#100 id=100 data-nosnippet>100</a>            Binder::&lt;bool, <span class="kw">crate</span>::tui::error::Error&gt;::new().with_binding::&lt;DummyMoveLeft&gt;();
 <a href=#101 id=101 data-nosnippet>101</a>        <span class="kw">let </span>rebind_res = binder.rebind_func_by_name(
 <a href=#102 id=102 data-nosnippet>102</a>            <span class="string">"move_left"</span>,
 <a href=#103 id=103 data-nosnippet>103</a>            (

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["AppError","Error"]};
+window.SIDEBAR_ITEMS = {"enum":["Error"]};

@@ -6,27 +6,17 @@
 <a href=#6 id=6 data-nosnippet>6</a>    <span class="attr">#[error(<span class="string">"Internal Toktio error"</span>)]
 <a href=#7 id=7 data-nosnippet>7</a>    </span>TokioJoin(<span class="attr">#[from] </span>tokio::task::JoinError),
 <a href=#8 id=8 data-nosnippet>8</a>
-<a href=#9 id=9 data-nosnippet>9</a>    <span class="attr">#[error(transparent)]
-<a href=#10 id=10 data-nosnippet>10</a>    </span>Notmuch(<span class="attr">#[from] </span>NotmuchError),
+<a href=#9 id=9 data-nosnippet>9</a>    <span class="attr">#[error(<span class="string">"Notmuch Worker setup failed"</span>)]
+<a href=#10 id=10 data-nosnippet>10</a>    </span>NotmuchWorkerSetup,
 <a href=#11 id=11 data-nosnippet>11</a>
-<a href=#12 id=12 data-nosnippet>12</a>    <span class="attr">#[error(<span class="string">"Notmuch Worker setup failed"</span>)]
-<a href=#13 id=13 data-nosnippet>13</a>    </span>NotmuchWorkerSetup,
+<a href=#12 id=12 data-nosnippet>12</a>    <span class="attr">#[error(transparent)]
+<a href=#13 id=13 data-nosnippet>13</a>    </span>Notmuch(<span class="attr">#[from] </span><span class="kw">crate</span>::notmuch::error::Error),
 <a href=#14 id=14 data-nosnippet>14</a>
-<a href=#15 id=15 data-nosnippet>15</a>    <span class="attr">#[error(<span class="string">"Notmuch Worker errored"</span>)]
-<a href=#16 id=16 data-nosnippet>16</a>    </span>Worker(<span class="attr">#[from] </span><span class="kw">crate</span>::notmuch::WorkerError&lt;()&gt;),
-<a href=#17 id=17 data-nosnippet>17</a>
-<a href=#18 id=18 data-nosnippet>18</a>    <span class="attr">#[error(<span class="string">"Notmuch Worker errored"</span>)]
-<a href=#19 id=19 data-nosnippet>19</a>    </span>WorkerNotmuch(<span class="attr">#[from] </span><span class="kw">crate</span>::notmuch::WorkerError&lt;NotmuchError&gt;),
-<a href=#20 id=20 data-nosnippet>20</a>
-<a href=#21 id=21 data-nosnippet>21</a>    <span class="attr">#[cfg(feature = <span class="string">"gui"</span>)]
-<a href=#22 id=22 data-nosnippet>22</a>    #[error(<span class="string">"GUI errored"</span>)]
-<a href=#23 id=23 data-nosnippet>23</a>    </span>Gui(<span class="attr">#[from] </span><span class="kw">crate</span>::gui::error::Error),
-<a href=#24 id=24 data-nosnippet>24</a>
-<a href=#25 id=25 data-nosnippet>25</a>    <span class="attr">#[cfg(feature = <span class="string">"tui"</span>)]
-<a href=#26 id=26 data-nosnippet>26</a>    #[error(<span class="string">"TUI errored"</span>)]
-<a href=#27 id=27 data-nosnippet>27</a>    </span>Tui(<span class="attr">#[from] </span><span class="kw">crate</span>::tui::error::Error),
-<a href=#28 id=28 data-nosnippet>28</a>}
-<a href=#29 id=29 data-nosnippet>29</a>
-<a href=#30 id=30 data-nosnippet>30</a><span class="attr">#[derive(Debug, thiserror::Error)]
-<a href=#31 id=31 data-nosnippet>31</a>#[error(<span class="string">"Notmuch errored"</span>)]
-<a href=#32 id=32 data-nosnippet>32</a></span><span class="kw">pub struct </span>NotmuchError(<span class="attr">#[from] </span>notmuch::Error);</code></pre></div></section></main></body></html>
+<a href=#15 id=15 data-nosnippet>15</a>    <span class="attr">#[cfg(feature = <span class="string">"gui"</span>)]
+<a href=#16 id=16 data-nosnippet>16</a>    #[error(<span class="string">"GUI errored"</span>)]
+<a href=#17 id=17 data-nosnippet>17</a>    </span>Gui(<span class="attr">#[from] </span><span class="kw">crate</span>::gui::error::Error),
+<a href=#18 id=18 data-nosnippet>18</a>
+<a href=#19 id=19 data-nosnippet>19</a>    <span class="attr">#[cfg(feature = <span class="string">"tui"</span>)]
+<a href=#20 id=20 data-nosnippet>20</a>    #[error(<span class="string">"TUI errored"</span>)]
+<a href=#21 id=21 data-nosnippet>21</a>    </span>Tui(<span class="attr">#[from] </span><span class="kw">crate</span>::tui::error::Error),
+<a href=#22 id=22 data-nosnippet>22</a>}</code></pre></div></section></main></body></html>
