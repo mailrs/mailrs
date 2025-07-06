@@ -88,36 +88,4 @@ impl<Context, Err> Binder<Context, Err> {
         );
         Some((helper.func)(context))
     }
-
-    pub fn rebind(
-        &mut self,
-        focus: Focus,
-        old: (KeyCode, KeyModifiers),
-        new: (KeyCode, KeyModifiers),
-    ) -> Option<()> {
-        let binding = self.mapping.remove(&(old.0, old.1, focus))?;
-        self.mapping.insert((new.0, new.1, focus), binding);
-        Some(())
-    }
-
-    pub fn rebind_func_by_name(
-        &mut self,
-        name: &str,
-        new_binding: (KeyCode, KeyModifiers),
-    ) -> Option<()> {
-        let ((keycode, modifiers, focus), _helper) =
-            self.find_binding_helper_for_func_name(name)?;
-        self.rebind(*focus, (*keycode, *modifiers), new_binding)
-    }
-
-    #[allow(clippy::type_complexity)]
-    fn find_binding_helper_for_func_name(
-        &self,
-        name: &str,
-    ) -> Option<(
-        &(KeyCode, KeyModifiers, Focus),
-        &BindingHelper<Context, Err>,
-    )> {
-        self.mapping.iter().find(|(_, helper)| helper.name == name)
-    }
 }
