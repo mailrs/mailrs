@@ -58,7 +58,7 @@ impl Message {
                 return tokio::fs::read_to_string(path.clone())
                     .await
                     .map(Some)
-                    .map_err(|source| crate::error::ApplicationError { source, path });
+                    .map_err(crate::error::Error::from);
             }
         }
 
