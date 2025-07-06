@@ -5,9 +5,9 @@ use crate::notmuch::NotmuchWorker;
 
 pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationError> {
     let nm_database_mode = if config.notmuch.database_readonly {
-        crate::notmuch::DatabaseMode::ReadOnly
+        crate::notmuch::database::DatabaseMode::ReadOnly
     } else {
-        crate::notmuch::DatabaseMode::ReadWrite
+        crate::notmuch::database::DatabaseMode::ReadWrite
     };
 
     let (handle_sender, handle_recv) = tokio::sync::oneshot::channel();
