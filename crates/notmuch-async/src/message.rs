@@ -51,8 +51,7 @@ impl Message {
             &self.worker_handle.sender,
             Request::file_names_for_message(self.id()),
         )
-        .await?
-        .map_err(WorkerError::Inner)?;
+        .await??;
 
         for path in pathes.into_iter().flatten() {
             if path.exists() {
