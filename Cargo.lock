@@ -3065,7 +3065,7 @@ dependencies = [
  "human-panic",
  "log",
  "miette",
- "notmuch",
+ "notmuch-async",
  "nucleo-matcher",
  "ratatui 0.29.0",
  "serde",
@@ -3268,6 +3268,18 @@ checksum = "e25d11a2449f4f91cb71b138b241db30765a3b2f595eba0dd6a282b0e961dd44"
 dependencies = [
  "from_variants",
  "libc",
+]
+
+[[package]]
+name = "notmuch-async"
+version = "0.1.0"
+dependencies = [
+ "notmuch",
+ "static_assertions",
+ "thiserror 2.0.11",
+ "time",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]

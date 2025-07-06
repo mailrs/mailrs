@@ -6,17 +6,11 @@ pub enum ApplicationError {
     #[error("Internal Toktio error")]
     TokioJoin(#[from] tokio::task::JoinError),
 
-    #[error(transparent)]
-    Notmuch(#[from] NotmuchError),
-
     #[error("Notmuch Worker setup failed")]
     NotmuchWorkerSetup,
 
-    #[error("Notmuch Worker errored")]
-    Worker(#[from] crate::notmuch::WorkerError<()>),
-
-    #[error("Notmuch Worker errored")]
-    WorkerNotmuch(#[from] crate::notmuch::WorkerError<NotmuchError>),
+    #[error(transparent)]
+    Notmuch(#[from] crate::notmuch::error::Error),
 
     #[cfg(feature = "gui")]
     #[error("GUI errored")]
@@ -26,7 +20,3 @@ pub enum ApplicationError {
     #[error("TUI errored")]
     Tui(#[from] crate::tui::error::Error),
 }
-
-#[derive(Debug, thiserror::Error)]
-#[error("Notmuch errored")]
-pub struct NotmuchError(#[from] notmuch::Error);

@@ -9,7 +9,7 @@ mod app;
 mod cli;
 mod config;
 mod error;
-mod notmuch;
+use notmuch_async as notmuch;
 
 #[cfg(feature = "gui")]
 mod gui;

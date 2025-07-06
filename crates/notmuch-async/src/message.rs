@@ -1,10 +1,8 @@
-#![allow(dead_code)]
-
 use std::path::PathBuf;
 
-use super::NotmuchWorkerHandle;
-use super::Request;
-use super::WorkerError;
+use crate::error::Error;
+use crate::handle::NotmuchWorkerHandle;
+use crate::request::Request;
 
 #[derive(Debug)]
 pub struct Message {
@@ -32,26 +30,19 @@ impl Message {
     }
 
     #[allow(unused)]
-    pub async fn get_file_names(
-        &self,
-    ) -> Result<Option<Vec<PathBuf>>, super::WorkerError<crate::error::NotmuchError>> {
+    pub async fn get_file_names(&self) -> Result<Option<Vec<PathBuf>>, Error> {
         super::handle::send_and_recv(
             &self.worker_handle.sender,
             Request::file_names_for_message(self.id()),
         )
         .await?
-        .map_err(WorkerError::Inner)
     }
 
-    pub async fn header(
-        &self,
-        header: &str,
-    ) -> Result<Option<String>, super::WorkerError<crate::error::NotmuchError>> {
+    pub async fn header(&self, header: &str) -> Result<Option<String>, Error> {
         super::handle::send_and_recv(
             &self.worker_handle.sender,
             Request::header_for_message(self.id(), header),
         )
         .await?
-        .map_err(WorkerError::Inner)
     }
 }
