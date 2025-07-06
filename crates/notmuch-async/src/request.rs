@@ -2,29 +2,29 @@ use std::path::PathBuf;
 
 use super::message::Message;
 use super::tag::Tag;
-use crate::error::NotmuchError;
+use crate::error::Error;
 
-pub type ResultRecv<Res> = tokio::sync::oneshot::Receiver<Result<Res, NotmuchError>>;
+pub type ResultRecv<Res> = tokio::sync::oneshot::Receiver<Result<Res, Error>>;
 
 #[derive(Debug)]
 pub enum Request {
     Shutdown(tokio::sync::oneshot::Sender<()>),
     QuerySearchMessages {
         query: String,
-        sender: tokio::sync::oneshot::Sender<Result<Vec<Message>, NotmuchError>>,
+        sender: tokio::sync::oneshot::Sender<Result<Vec<Message>, Error>>,
     },
     TagsForMessage {
         message_id: String,
-        sender: tokio::sync::oneshot::Sender<Result<Option<Vec<Tag>>, NotmuchError>>,
+        sender: tokio::sync::oneshot::Sender<Result<Option<Vec<Tag>>, Error>>,
     },
     FileNamesForMessage {
         message_id: String,
-        sender: tokio::sync::oneshot::Sender<Result<Option<Vec<PathBuf>>, NotmuchError>>,
+        sender: tokio::sync::oneshot::Sender<Result<Option<Vec<PathBuf>>, Error>>,
     },
     HeaderForMessage {
         message_id: String,
         header: String,
-        sender: tokio::sync::oneshot::Sender<Result<Option<String>, NotmuchError>>,
+        sender: tokio::sync::oneshot::Sender<Result<Option<String>, Error>>,
     },
 }
 

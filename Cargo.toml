@@ -3,3 +3,6 @@ resolver = "2"
 members = [
     "crates/*"
 ]
+
+[workspace.dependencies]
+notmuch-async.path = "crates/notmuch-async"

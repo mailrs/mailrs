@@ -1,7 +1,6 @@
 use super::NotmuchWorkerHandle;
 use super::Request;
-use super::WorkerError;
-use crate::error::NotmuchError;
+use crate::error::Error;
 
 pub type NotmuchRequestSender = tokio::sync::mpsc::Sender<Request>;
 pub type NotmuchRequestReceiver = tokio::sync::mpsc::Receiver<Request>;
@@ -12,20 +11,34 @@ pub struct NotmuchWorker {
     sender: NotmuchRequestSender,
 }
 
+pub enum DatabaseMode {
+    ReadOnly,
+    ReadWrite,
+}
+
+impl From<DatabaseMode> for notmuch::DatabaseMode {
+    fn from(value: DatabaseMode) -> Self {
+        match value {
+            DatabaseMode::ReadOnly => notmuch::DatabaseMode::ReadOnly,
+            DatabaseMode::ReadWrite => notmuch::DatabaseMode::ReadWrite,
+        }
+    }
+}
+
 impl NotmuchWorker {
     pub fn open_database<DP, CP>(
         database_path: Option<DP>,
-        mode: notmuch::DatabaseMode,
+        mode: impl Into<notmuch::DatabaseMode>,
         config_path: Option<CP>,
         profile: Option<String>,
-    ) -> Result<Self, NotmuchError>
+    ) -> Result<Self, Error>
     where
         DP: AsRef<std::path::Path>,
         CP: AsRef<std::path::Path>,
     {
         let database = notmuch::Database::open_with_config(
             database_path,
-            mode,
+            mode.into(),
             config_path,
             profile.as_deref(),
         )?;
@@ -43,7 +56,7 @@ impl NotmuchWorker {
         }
     }
 
-    pub fn run(mut self) -> Result<(), WorkerError<()>> {
+    pub fn run(mut self) -> Result<(), Error> {
         loop {
             let Some(request) = self.receiver.blocking_recv() else {
                 return Ok(());
@@ -54,7 +67,7 @@ impl NotmuchWorker {
 
             match request {
                 Request::Shutdown(sender) => {
-                    sender.send(()).map_err(|_| WorkerError::Send)?;
+                    sender.send(()).map_err(|_| Error::WorkerSend)?;
                     break;
                 }
                 Request::QuerySearchMessages { query, sender } => {
@@ -62,8 +75,8 @@ impl NotmuchWorker {
                         Ok(q) => q,
                         Err(e) => {
                             sender
-                                .send(Err(NotmuchError::from(e)))
-                                .map_err(|_| WorkerError::Send)?;
+                                .send(Err(Error::from(e)))
+                                .map_err(|_| Error::WorkerSend)?;
                             continue;
                         }
                     };
@@ -94,12 +107,12 @@ impl NotmuchWorker {
                                 })
                                 .collect();
 
-                            sender.send(Ok(messages)).map_err(|_| WorkerError::Send)?;
+                            sender.send(Ok(messages)).map_err(|_| Error::WorkerSend)?;
                         }
                         Err(e) => {
                             sender
-                                .send(Err(NotmuchError::from(e)))
-                                .map_err(|_| WorkerError::Send)?;
+                                .send(Err(Error::from(e)))
+                                .map_err(|_| Error::WorkerSend)?;
                             continue;
                         }
                     }
@@ -109,39 +122,39 @@ impl NotmuchWorker {
                     let tags = match self.database.find_message(&message_id) {
                         Ok(Some(msg)) => msg.tags(),
                         Ok(None) => {
-                            sender.send(Ok(None)).map_err(|_| WorkerError::Send)?;
+                            sender.send(Ok(None)).map_err(|_| Error::WorkerSend)?;
                             continue;
                         }
                         Err(e) => {
                             sender
-                                .send(Err(NotmuchError::from(e)))
-                                .map_err(|_| WorkerError::Send)?;
+                                .send(Err(Error::from(e)))
+                                .map_err(|_| Error::WorkerSend)?;
                             continue;
                         }
                     };
 
                     let tags = tags.map(super::tag::Tag::new).collect();
-                    sender.send(Ok(Some(tags))).map_err(|_| WorkerError::Send)?;
+                    sender.send(Ok(Some(tags))).map_err(|_| Error::WorkerSend)?;
                 }
 
                 Request::FileNamesForMessage { message_id, sender } => {
                     let filenames = match self.database.find_message(&message_id) {
                         Ok(Some(msg)) => msg.filenames().collect(),
                         Ok(None) => {
-                            sender.send(Ok(None)).map_err(|_| WorkerError::Send)?;
+                            sender.send(Ok(None)).map_err(|_| Error::WorkerSend)?;
                             continue;
                         }
                         Err(e) => {
                             sender
-                                .send(Err(NotmuchError::from(e)))
-                                .map_err(|_| WorkerError::Send)?;
+                                .send(Err(Error::from(e)))
+                                .map_err(|_| Error::WorkerSend)?;
                             continue;
                         }
                     };
 
                     sender
                         .send(Ok(Some(filenames)))
-                        .map_err(|_| WorkerError::Send)?;
+                        .map_err(|_| Error::WorkerSend)?;
                 }
 
                 Request::HeaderForMessage {
@@ -156,18 +169,18 @@ impl NotmuchWorker {
                             Err(e) => Err(e.into()),
                         },
                         Ok(None) => {
-                            sender.send(Ok(None)).map_err(|_| WorkerError::Send)?;
+                            sender.send(Ok(None)).map_err(|_| Error::WorkerSend)?;
                             continue;
                         }
                         Err(e) => {
                             sender
-                                .send(Err(NotmuchError::from(e)))
-                                .map_err(|_| WorkerError::Send)?;
+                                .send(Err(Error::from(e)))
+                                .map_err(|_| Error::WorkerSend)?;
                             continue;
                         }
                     };
 
-                    sender.send(header_value).map_err(|_| WorkerError::Send)?;
+                    sender.send(header_value).map_err(|_| Error::WorkerSend)?;
                 }
             }
 

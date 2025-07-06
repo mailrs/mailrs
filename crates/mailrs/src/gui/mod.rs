@@ -54,7 +54,7 @@ pub async fn run(cli: Cli, config: Config, notmuch: NotmuchWorkerHandle) -> Resu
             }
         })
         .collect::<futures::stream::FuturesUnordered<_>>()
-        .collect::<Vec<Result<Message, crate::notmuch::WorkerError<_>>>>()
+        .collect::<Vec<Result<Message, Error>>>()
         .await
         .into_iter()
         .collect::<Result<Vec<_>, _>>()?;

@@ -13,7 +13,6 @@ use tui_commander::Commander;
 
 use super::bindings::binder::Binder;
 use super::context::TuiContext;
-use super::error::AppError;
 use super::widgets::boxes::Boxes;
 use super::widgets::boxes::BoxesState;
 use crate::tui::commands::TuiCommandContext;
@@ -23,7 +22,7 @@ use crate::tui::widgets::logger::LoggerState;
 #[allow(unused)]
 pub struct App {
     tui_context: TuiContext,
-    keybindings: Binder<AppState, AppError>,
+    keybindings: Binder<AppState, crate::tui::error::Error>,
     state: AppState,
 }
 
@@ -99,7 +98,10 @@ impl App {
         self.state.boxes_state.decrease_boxes_count();
     }
 
-    pub async fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<(), AppError> {
+    pub async fn run(
+        mut self,
+        mut terminal: Terminal<impl Backend>,
+    ) -> Result<(), crate::tui::error::Error> {
         let mut events = EventStream::new();
         loop {
             if self.state.do_exit {
@@ -198,7 +200,10 @@ impl App {
         None
     }
 
-    async fn handle_app_message(&mut self, message: AppMessage) -> Result<(), AppError> {
+    async fn handle_app_message(
+        &mut self,
+        message: AppMessage,
+    ) -> Result<(), crate::tui::error::Error> {
         match message {
             AppMessage::Quit => {
                 self.state.do_exit = true;
@@ -228,7 +233,7 @@ impl App {
                     .create_query(&query)
                     .search_messages()
                     .await
-                    .map_err(AppError::from)?
+                    .map_err(crate::tui::error::Error::from)?
                     .into_iter()
                     .map(|message| {
                         let notmuch = self.tui_context.notmuch.clone();
@@ -280,11 +285,10 @@ impl App {
                         }
                     })
                     .collect::<futures::stream::FuturesUnordered<_>>()
-                    .collect::<Vec<Result<Message, crate::notmuch::WorkerError<_>>>>()
+                    .collect::<Vec<Result<Message, crate::tui::error::Error>>>()
                     .await
                     .into_iter()
-                    .collect::<Result<Vec<_>, _>>()
-                    .map_err(AppError::from)?;
+                    .collect::<Result<Vec<_>, _>>()?;
 
                 let mbox = MBox::new(query, messages);
                 self.add_box(Arc::new(mbox));
@@ -313,6 +317,6 @@ pub enum AppMessage {
     NextMessage,
     Query(Vec<String>),
     Close,
-    KeyBindingErrored(AppError),
+    KeyBindingErrored(crate::tui::error::Error),
     UnboundKey(ratatui::crossterm::event::KeyEvent),
 }

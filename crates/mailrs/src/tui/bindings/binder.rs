@@ -19,7 +19,7 @@ pub struct Binder<Context, Err> {
     mapping: HashMap<(KeyCode, KeyModifiers, Focus), BindingHelper<Context, Err>>,
 }
 
-impl<State> Binder<State, crate::tui::error::AppError> {
+impl<State> Binder<State, crate::tui::error::Error> {
     pub fn new() -> Self {
         Self {
             mapping: HashMap::new(),

@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use error::AppError;
 use futures::StreamExt;
 use model::MBox;
 use model::Message;
@@ -37,7 +36,7 @@ pub async fn run(
             .create_query(startup_query)
             .search_messages()
             .await
-            .map_err(AppError::from)?
+            .map_err(crate::tui::error::Error::from)?
             .into_iter()
             .map(|message| {
                 let notmuch = notmuch.clone();
@@ -88,11 +87,10 @@ pub async fn run(
                 }
             })
             .collect::<futures::stream::FuturesUnordered<_>>()
-            .collect::<Vec<Result<Message, crate::notmuch::WorkerError<_>>>>()
+            .collect::<Vec<Result<Message, crate::tui::error::Error>>>()
             .await
             .into_iter()
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(AppError::from)?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         MBox::new(startup_query.to_string(), messages)
     };
@@ -104,7 +102,7 @@ pub async fn run(
     let res = app.run(terminal).await;
 
     restore_tui()?;
-    res.map_err(self::error::Error::from)
+    res
 }
 
 fn init_tui() -> std::io::Result<ratatui::Terminal<impl ratatui::prelude::Backend>> {

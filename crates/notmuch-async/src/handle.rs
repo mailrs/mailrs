@@ -2,23 +2,24 @@ use super::message::Message;
 use super::tag::Tag;
 use super::worker::NotmuchRequestSender;
 use super::Request;
-use super::WorkerError;
-use crate::error::NotmuchError;
+use crate::error::Error;
 
 #[derive(Clone)]
 pub struct NotmuchWorkerHandle {
     pub(super) sender: NotmuchRequestSender,
 }
 
+static_assertions::assert_impl_all!(NotmuchWorkerHandle: Send, Sync);
+
 pub(super) async fn send_and_recv<Res>(
     sender: &NotmuchRequestSender,
     (request, recv): (Request, tokio::sync::oneshot::Receiver<Res>),
-) -> Result<Res, WorkerError<NotmuchError>>
+) -> Result<Res, Error>
 where
     Res: std::fmt::Debug + Send,
 {
-    let () = sender.send(request).await.map_err(|_| WorkerError::Send)?;
-    recv.await.map_err(|_| WorkerError::Recv)
+    let () = sender.send(request).await.map_err(|_| Error::WorkerSend)?;
+    recv.await.map_err(|_| Error::WorkerRecv)
 }
 
 impl std::fmt::Debug for NotmuchWorkerHandle {
@@ -29,13 +30,13 @@ impl std::fmt::Debug for NotmuchWorkerHandle {
 }
 
 impl NotmuchWorkerHandle {
-    pub async fn shutdown(self) -> Result<(), WorkerError<()>> {
+    pub async fn shutdown(self) -> Result<(), Error> {
         let (request, res) = Request::shutdown();
         self.sender
             .send(request)
             .await
-            .map_err(|_| WorkerError::Send)?;
-        res.await.map_err(|_| WorkerError::Recv)?;
+            .map_err(|_| Error::WorkerSend)?;
+        res.await.map_err(|_| Error::WorkerRecv)?;
         Ok(())
     }
 
@@ -46,13 +47,8 @@ impl NotmuchWorkerHandle {
         }
     }
 
-    pub async fn tags_for_message(
-        &self,
-        message: &Message,
-    ) -> Result<Option<Vec<Tag>>, WorkerError<NotmuchError>> {
-        send_and_recv(&self.sender, Request::tags_for_message(message.id()))
-            .await?
-            .map_err(WorkerError::Inner)
+    pub async fn tags_for_message(&self, message: &Message) -> Result<Option<Vec<Tag>>, Error> {
+        send_and_recv(&self.sender, Request::tags_for_message(message.id())).await?
     }
 }
 
@@ -62,12 +58,11 @@ pub struct Query<'q> {
 }
 
 impl Query<'_> {
-    pub async fn search_messages(&self) -> Result<Vec<Message>, WorkerError<NotmuchError>> {
+    pub async fn search_messages(&self) -> Result<Vec<Message>, Error> {
         send_and_recv(
             &self.sender,
             Request::search_messages(self.query.to_string()),
         )
         .await?
-        .map_err(WorkerError::Inner)
     }
 }

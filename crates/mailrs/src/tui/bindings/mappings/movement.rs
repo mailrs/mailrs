@@ -4,7 +4,7 @@ crate::map_key_to_function! {
     DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('h'),
     DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
-    Error: crate::tui::error::AppError,
+    Error: crate::tui::error::Error,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         app.boxes_state.focus_prev();
@@ -18,7 +18,7 @@ crate::map_key_to_function! {
     DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('j'),
     DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
-    Error: crate::tui::error::AppError,
+    Error: crate::tui::error::Error,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         let Some(mbox_state) = app.boxes_state.get_current_state_mut() else {
@@ -36,7 +36,7 @@ crate::map_key_to_function! {
     DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('k'),
     DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
-    Error: crate::tui::error::AppError,
+    Error: crate::tui::error::Error,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         let Some(mbox_state) = app.boxes_state.get_current_state_mut() else {
@@ -54,7 +54,7 @@ crate::map_key_to_function! {
     DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('l'),
     DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: crate::tui::focus::Focus::Box,
-    Error: crate::tui::error::AppError,
+    Error: crate::tui::error::Error,
     context: crate::tui::app::AppState,
     run: |app: &mut crate::tui::app::AppState| {
         app.boxes_state.focus_next();

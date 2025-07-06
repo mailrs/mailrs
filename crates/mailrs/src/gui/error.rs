@@ -4,5 +4,5 @@ pub enum Error {
     SlintPlatform(#[from] slint::PlatformError),
 
     #[error(transparent)]
-    WorkerNotmuch(#[from] crate::notmuch::WorkerError<crate::error::NotmuchError>),
+    WorkerNotmuch(#[from] crate::notmuch::error::Error),
 }

@@ -56,7 +56,7 @@ mod tests {
             DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('h'),
             DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
             REQUIRED_FOCUS: Focus::Box,
-            Error: crate::tui::error::AppError,
+            Error: crate::tui::error::Error,
             context: bool,
             run: |b: &mut bool| {
                 *b = true;
@@ -65,7 +65,7 @@ mod tests {
         }
 
         let binder =
-            Binder::<bool, crate::tui::error::AppError>::new().with_binding::<DummyMoveLeft>();
+            Binder::<bool, crate::tui::error::Error>::new().with_binding::<DummyMoveLeft>();
 
         let mut context = false;
         let result = binder.run_binding_for_keycode(
@@ -88,7 +88,7 @@ mod tests {
             DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('h'),
             DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
             REQUIRED_FOCUS: Focus::Box,
-            Error: crate::tui::error::AppError,
+            Error: crate::tui::error::Error,
             context: bool,
             run: |b: &mut bool| {
                 *b = true;
@@ -97,7 +97,7 @@ mod tests {
         }
 
         let mut binder =
-            Binder::<bool, crate::tui::error::AppError>::new().with_binding::<DummyMoveLeft>();
+            Binder::<bool, crate::tui::error::Error>::new().with_binding::<DummyMoveLeft>();
         let rebind_res = binder.rebind_func_by_name(
             "move_left",
             (
