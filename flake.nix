@@ -1,7 +1,7 @@
 {
   description = "The mailrs project";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-24.11";
+    nixpkgs.url = "nixpkgs/nixos-25.05";
     unstable-nixpkgs.url = "nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     crane.url = "github:ipetkov/crane";
@@ -23,23 +23,9 @@
         pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [
-            (_: _: { } // inputs.self.packages."${system}")
             (import inputs.rust-overlay)
           ];
         };
-
-        callPackage = pkgs.lib.callPackageWith (
-          pkgs
-          // {
-            inherit
-              callPackage
-              buildInputs
-              craneLib
-              src
-              version
-              ;
-          }
-        );
 
         unstable = import inputs.unstable-nixpkgs {
           inherit system;
@@ -60,8 +46,6 @@
 
         tomlInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
         inherit (tomlInfo) version;
-
-        pname = "mailrs";
 
         src =
           let
@@ -85,43 +69,6 @@
             filter = filterPath;
           };
 
-        buildInputs = [
-          pkgs.pkg-config
-          pkgs.fontconfig
-          pkgs.wayland-protocols
-        ];
-
-        nativeBuildInputs = [
-          pkgs.notmuch
-        ];
-
-        cargoArtifacts = craneLib.buildDepsOnly {
-          inherit src pname buildInputs;
-        };
-
-        mailrs = craneLib.buildPackage {
-          inherit
-            cargoArtifacts
-            src
-            pname
-            version
-            buildInputs
-            nativeBuildInputs
-            ;
-          cargoExtraArgs = "--all-features -p mailrs";
-        };
-
-        mailrs-doc = craneLib.cargoDoc {
-          inherit
-            cargoArtifacts
-            src
-            pname
-            version
-            buildInputs
-            ;
-          cargoExtraArgs = "--document-private-items -p mailrs";
-        };
-
         rustfmt' = pkgs.writeShellScriptBin "rustfmt" ''
           exec "${nightlyRustTarget}/bin/rustfmt" "$@"
         '';
@@ -139,51 +86,78 @@
         '';
 
         treefmt = inputs.treefmt-nix.lib.evalModule pkgs ./nix/treefmt.nix;
+
+        rustSrc = pkgs.lib.fileset.toSource {
+          root = ./.;
+          fileset =
+            let
+              includeFilesWithExt = ext: (pkgs.lib.fileset.fileFilter (file: file.hasExt ext) ./.);
+            in
+            pkgs.lib.fileset.unions (
+              [
+                ./Cargo.lock
+              ]
+              ++ (builtins.map includeFilesWithExt [
+                "rs"
+                "toml"
+              ])
+            );
+        };
+
+        callPackage = pkgs.lib.callPackageWith (
+          pkgs
+          // {
+            inherit
+              callPackage
+              craneLib
+              nightlyCraneLib
+              src
+              version
+              rustSrc
+              ;
+          }
+        );
+
+        crates = pkgs.lib.pipe ./crates [
+          builtins.readDir
+          builtins.attrNames
+          (map (
+            name:
+            if (builtins.pathExists (./crates + "/${name}/default.nix")) then
+              [
+                {
+                  inherit name;
+                  value = callPackage (./crates + "/${name}") { };
+                }
+              ]
+            else
+              [ ]
+          ))
+          builtins.concatLists
+          builtins.listToAttrs
+        ];
       in
-      rec {
+      {
         formatter = treefmt.config.build.wrapper;
 
-        checks = {
-          inherit mailrs;
-
-          mailrs-clippy = craneLib.cargoClippy {
-            inherit cargoArtifacts src pname;
-            cargoClippyExtraArgs = "--benches --examples --tests --all-features -- --deny warnings";
-          };
-
-          mailrs-clippy-no-gui = craneLib.cargoClippy {
-            inherit cargoArtifacts src pname;
-            cargoClippyExtraArgs = "--benches --examples --tests --no-default-features --features gui -- --deny warnings";
-          };
-
-          mailrs-clippy-no-tui = craneLib.cargoClippy {
-            inherit cargoArtifacts src pname;
-            cargoClippyExtraArgs = "--benches --examples --tests --no-default-features --features tui -- --deny warnings";
-          };
-
-          mailrs-fmt = nightlyCraneLib.cargoFmt {
-            inherit src pname;
-          };
-
-          mailrs-tests = craneLib.cargoNextest {
-            inherit
-              cargoArtifacts
-              src
-              pname
-              buildInputs
-              ;
-            nativeBuildInputs = nativeBuildInputs ++ [
-              pkgs.coreutils
+        checks =
+          let
+            individualCrates = pkgs.lib.pipe (builtins.attrNames crates) [
+              (map (name: crates."${name}".checks))
             ];
-          };
+          in
+          {
+            formatting = treefmt.config.build.check inputs.self;
+          }
+          // pkgs.lib.attrsets.mergeAttrsList individualCrates;
 
-          formatting = treefmt.config.build.check inputs.self;
-        };
-
-        packages = {
-          default = packages.mailrs;
-          inherit mailrs mailrs-doc;
-        };
+        packages =
+          let
+            individualCrates = pkgs.lib.pipe (builtins.attrNames crates) [
+              (map (name: crates."${name}".packages))
+            ];
+          in
+          pkgs.lib.attrsets.mergeAttrsList individualCrates;
 
         devShells.default = pkgs.mkShell {
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
