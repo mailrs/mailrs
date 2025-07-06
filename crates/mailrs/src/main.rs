@@ -2,20 +2,9 @@
 // starting the app via file manager. Ignored on other platforms.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#[cfg(all(not(feature = "gui"), not(feature = "tui")))]
-compile_error!("Either 'gui' or 'tui' feature must be enabled!");
-
 mod app;
 mod cli;
-mod config;
 mod error;
-use notmuch_async as notmuch;
-
-#[cfg(feature = "gui")]
-mod gui;
-
-#[cfg(feature = "tui")]
-mod tui;
 
 use clap::Parser;
 use miette::IntoDiagnostic;
@@ -23,9 +12,6 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Layer;
-
-#[cfg(feature = "gui")]
-slint::include_modules!();
 
 struct Guards {
     _append_guard: Option<tracing_appender::non_blocking::WorkerGuard>,
@@ -69,31 +55,17 @@ fn setup_logging(cli: &crate::cli::Cli) -> Guards {
         (None, None)
     };
 
-    if let Err(error) = tui_logger::init_logger({
-        let level = cli
-            .verbosity
-            .tracing_level()
-            .unwrap_or(tracing::Level::INFO);
+    let registry = tracing_subscriber::registry().with(file_layer);
 
-        match level {
-            tracing::Level::TRACE => log::LevelFilter::Trace,
-            tracing::Level::DEBUG => log::LevelFilter::Debug,
-            tracing::Level::INFO => log::LevelFilter::Info,
-            tracing::Level::WARN => log::LevelFilter::Warn,
-            tracing::Level::ERROR => log::LevelFilter::Error,
-        }
-    }) {
-        eprintln!("Failed to initialize TUI logger: {error:?}");
-        std::process::exit(1);
-    }
+    let level = cli
+        .verbosity
+        .tracing_level()
+        .unwrap_or(tracing::Level::INFO);
+    let tui_layer = mailrs_tui::init_logger(level).with_filter(tui_filter);
 
-    let tui_layer = tui_logger::TuiTracingSubscriberLayer.with_filter(tui_filter);
+    let registry = registry.with(tui_layer);
 
-    if let Err(error) = tracing_subscriber::registry()
-        .with(file_layer)
-        .with(tui_layer)
-        .try_init()
-    {
+    if let Err(error) = registry.try_init() {
         eprintln!("Failed to initialize logging: {error:?}");
         std::process::exit(1)
     }
@@ -115,7 +87,7 @@ async fn main() -> Result<(), miette::Error> {
     let _guards = setup_logging(&cli);
     tracing::debug!(?cli, "Found CLI");
 
-    let config = crate::config::Config::find(cli.config.clone())
+    let config = mailrs_config::Config::find(cli.config.clone())
         .await
         .map_err(crate::error::ApplicationError::from)
         .into_diagnostic()?;

@@ -1,7 +1,7 @@
 #[derive(Debug, thiserror::Error)]
 pub enum ApplicationError {
     #[error("Configuration error")]
-    Config(#[from] crate::config::ConfigError),
+    Config(#[from] mailrs_config::ConfigError),
 
     #[error("Internal Toktio error")]
     TokioJoin(#[from] tokio::task::JoinError),
@@ -10,13 +10,11 @@ pub enum ApplicationError {
     NotmuchWorkerSetup,
 
     #[error(transparent)]
-    Notmuch(#[from] crate::notmuch::error::Error),
+    Notmuch(#[from] notmuch_async::error::Error),
 
-    #[cfg(feature = "gui")]
     #[error("GUI errored")]
-    Gui(#[from] crate::gui::error::Error),
+    Gui(#[from] mailrs_gui::error::Error),
 
-    #[cfg(feature = "tui")]
     #[error("TUI errored")]
-    Tui(#[from] crate::tui::error::Error),
+    Tui(#[from] mailrs_tui::error::Error),
 }

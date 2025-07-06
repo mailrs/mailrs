@@ -3057,6 +3057,74 @@ name = "mailrs"
 version = "0.1.0"
 dependencies = [
  "camino",
+ "cfg-if",
+ "clap",
+ "clap-verbosity-flag",
+ "derive_more 2.0.1",
+ "futures",
+ "human-panic",
+ "log",
+ "mailrs-config",
+ "mailrs-gui",
+ "mailrs-tui",
+ "miette",
+ "notmuch-async",
+ "serde",
+ "thiserror 2.0.11",
+ "time",
+ "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "xdg",
+]
+
+[[package]]
+name = "mailrs-config"
+version = "0.1.0"
+dependencies = [
+ "camino",
+ "clap",
+ "clap-verbosity-flag",
+ "derive_more 2.0.1",
+ "serde",
+ "thiserror 2.0.11",
+ "tokio",
+ "toml",
+ "xdg",
+]
+
+[[package]]
+name = "mailrs-gui"
+version = "0.1.0"
+dependencies = [
+ "camino",
+ "clap",
+ "clap-verbosity-flag",
+ "derive_more 2.0.1",
+ "futures",
+ "human-panic",
+ "log",
+ "miette",
+ "notmuch-async",
+ "serde",
+ "slint",
+ "slint-build",
+ "thiserror 2.0.11",
+ "time",
+ "tokio",
+ "toml",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "xdg",
+]
+
+[[package]]
+name = "mailrs-tui"
+version = "0.1.0"
+dependencies = [
+ "camino",
  "clap",
  "clap-verbosity-flag",
  "derive_more 2.0.1",
@@ -3069,8 +3137,6 @@ dependencies = [
  "nucleo-matcher",
  "ratatui 0.29.0",
  "serde",
- "slint",
- "slint-build",
  "thiserror 2.0.11",
  "time",
  "tokio",

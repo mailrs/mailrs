@@ -1,13 +1,14 @@
+use mailrs_config::Config;
+use notmuch_async::NotmuchWorker;
+
 use crate::cli::Cli;
-use crate::config::Config;
 use crate::error::ApplicationError;
-use crate::notmuch::NotmuchWorker;
 
 pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationError> {
     let nm_database_mode = if config.notmuch.database_readonly {
-        crate::notmuch::database::DatabaseMode::ReadOnly
+        notmuch_async::database::DatabaseMode::ReadOnly
     } else {
-        crate::notmuch::database::DatabaseMode::ReadWrite
+        notmuch_async::database::DatabaseMode::ReadWrite
     };
 
     let (handle_sender, handle_recv) = tokio::sync::oneshot::channel();
@@ -35,14 +36,12 @@ pub(crate) async fn start(cli: Cli, config: Config) -> Result<(), ApplicationErr
         .map_err(|_| ApplicationError::NotmuchWorkerSetup)?;
 
     match cli.mode {
-        #[cfg(feature = "gui")]
         crate::cli::Mode::Gui => {
-            let () = crate::gui::run(cli, config, handle.clone()).await?;
+            let () = mailrs_gui::run(cli.init_query, config.default_query, handle.clone()).await?;
         }
 
-        #[cfg(feature = "tui")]
         crate::cli::Mode::Tui => {
-            let () = crate::tui::run(cli, config, handle.clone()).await?;
+            let () = mailrs_tui::run(cli.init_query, config.default_query, handle.clone()).await?;
         }
 
         crate::cli::Mode::Test => {
