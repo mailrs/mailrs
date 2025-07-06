@@ -74,26 +74,6 @@ in
       cargoClippyExtraArgs = "--benches --examples --tests --all-features -- --deny warnings";
     };
 
-    mailrs-clippy-no-gui = craneLib.cargoClippy {
-      inherit
-        cargoArtifacts
-        src
-        pname
-        version
-        ;
-      cargoClippyExtraArgs = "--benches --examples --tests --no-default-features --features gui -- --deny warnings";
-    };
-
-    mailrs-clippy-no-tui = craneLib.cargoClippy {
-      inherit
-        cargoArtifacts
-        src
-        pname
-        version
-        ;
-      cargoClippyExtraArgs = "--benches --examples --tests --no-default-features --features tui -- --deny warnings";
-    };
-
     mailrs-fmt = nightlyCraneLib.cargoFmt {
       inherit src pname version;
     };

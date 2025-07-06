@@ -1,31 +1,38 @@
 [package]
-name = "mailrs"
+name = "mailrs-tui"
 version = "0.1.0"
 edition = "2021"
 
 license = "GPL-3.0-only"
-description = "a notmuch GUI/TUI mail client"
+description = "a notmuch GUI/TUI mail client - the TUI part"
 
 [dependencies]
 camino = { version = "1.1.9", features = ["serde1"] }
-cfg-if = "1"
 clap = { version = "4.5.34", features = ["color", "suggestions", "derive"] }
 clap-verbosity-flag = { version = "3.0.2", default-features = false, features = ["tracing"] }
 derive_more = { version = "2.0.1", features = ["try_into", "from", "display"] }
+enum-iterator = "2.1.0"
 futures = "0.3.31"
 human-panic = "2.0.2"
 miette = { version = "7.5.0", features = ["fancy"] }
+nucleo-matcher = "0.3.1"
+ratatui = { version = "0.29.0", features = ["crossterm"] }
 serde = { version = "1.0.219", features = ["derive"] }
+thiserror = "2.0.11"
 time = "0.3.41"
+tokio = { version = "1.45.1", features = ["rt", "macros", "fs", "sync"] }
+toml = "0.8.23"
+tracing = "0.1.41"
 log = "0.4"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter", "registry"] }
+tui-commander.git = "https://github.com/matthiasbeyer/tui-commander"
+tui-input = "0.12.1"
+tui-widget-list = "0.13.2"
+tui-logger = { version = "0.17.3", default-features = false, features = [
+  "tracing-support",
+] }
 xdg = "2.5.2"
 
-mailrs-config.workspace = true
-mailrs-gui.workspace = true
-mailrs-tui.workspace = true
 notmuch-async.workspace = true
-thiserror.workspace = true
-tokio = { workspace = true, features = ["rt", "macros", "fs", "sync"] }
-tracing.workspace = true
+
