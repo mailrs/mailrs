@@ -36,7 +36,7 @@ pub(crate) struct AppState {
 }
 
 impl App {
-    pub fn new(initial_box: Arc<crate::tui::model::MBox>, tui_context: TuiContext) -> Self {
+    pub fn new(initial_box: Arc<crate::model::MBox>, tui_context: TuiContext) -> Self {
         Self {
             tui_context,
 

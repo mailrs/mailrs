@@ -90,7 +90,7 @@ impl StatefulWidget for &mut MBox {
                 return;
             };
 
-            let mut message = crate::tui::widgets::message::Message::from(message);
+            let mut message = crate::widgets::message::Message::from(message);
             message.render(area, buf, message_state);
         } else {
             tracing::info!("Showing message box");

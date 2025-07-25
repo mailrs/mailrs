@@ -25,8 +25,8 @@ struct MessageHeader {
     pub tags: Vec<String>,
 }
 
-impl From<&crate::tui::model::Message> for Message {
-    fn from(value: &crate::tui::model::Message) -> Self {
+impl From<&crate::model::Message> for Message {
+    fn from(value: &crate::model::Message) -> Self {
         Self {
             header: MessageHeader {
                 id: value.id.clone(),

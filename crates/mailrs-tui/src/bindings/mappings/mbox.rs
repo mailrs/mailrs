@@ -70,9 +70,9 @@ crate::map_key_to_function! {
     DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Enter,
     DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: Focus::Box,
-    Error: crate::tui::error::AppError,
-    context: crate::tui::app::AppState,
-    run: |app: &mut crate::tui::app::AppState| {
+    Error: crate::error::Error,
+    context: crate::app::AppState,
+    run: |app: &mut crate::app::AppState| {
         if let Some(mbox_state) = app.boxes_state.get_current_state_mut() {
             tracing::debug!("Open message");
             mbox_state.show_current_message();
@@ -88,9 +88,9 @@ crate::map_key_to_function! {
     DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Esc,
     DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: Focus::Message,
-    Error: crate::tui::error::AppError,
-    context: crate::tui::app::AppState,
-    run: |app: &mut crate::tui::app::AppState| {
+    Error: crate::error::Error,
+    context: crate::app::AppState,
+    run: |app: &mut crate::app::AppState| {
         if let Some(mbox_state) = app.boxes_state.get_current_state_mut() {
             tracing::debug!("Close message");
             mbox_state.hide_message();
