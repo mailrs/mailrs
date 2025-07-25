@@ -13,7 +13,6 @@ use tui_commander::Commander;
 
 use super::bindings::binder::Binder;
 use super::context::TuiContext;
-use super::widgets::boxes::Boxes;
 use super::widgets::boxes::BoxesState;
 use crate::commands::TuiCommandContext;
 use crate::focus::Focus;
