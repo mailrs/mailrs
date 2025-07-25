@@ -85,7 +85,7 @@ crate::map_key_to_function! {
 crate::map_key_to_function! {
     name: CloseMessage,
     display: "close_mail",
-    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Esc,
+    DEFAULT_KEY: ratatui::crossterm::event::KeyCode::Char('q'),
     DEFAULT_MODIFIER: ratatui::crossterm::event::KeyModifiers::NONE,
     REQUIRED_FOCUS: Focus::Message,
     Error: crate::error::Error,
