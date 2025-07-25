@@ -61,6 +61,10 @@ impl App {
                     .with_binding::<mbox::PrevBox>()
                     .with_binding::<mbox::OpenMessage>()
                     .with_binding::<mbox::CloseMessage>()
+                    .with_binding::<mbox::ScrollMessageDown>()
+                    .with_binding::<mbox::ScrollMessageUp>()
+                    .with_binding::<mbox::ScrollMessageTop>()
+                    .with_binding::<mbox::ScrollMessageBottom>()
             },
 
             state: AppState {
