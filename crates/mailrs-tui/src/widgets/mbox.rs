@@ -40,13 +40,28 @@ impl MBoxState {
             .map(|message| {
                 tracing::debug!(?message, "Found message");
                 let message_id = message.id.clone();
-                let state = super::message::MessageState {};
+                let state = super::message::MessageState {
+                    body_state: super::message::BodyState::new({
+                        let l = message.body.lines();
+
+                        if l > u16::MAX as usize {
+                            tracing::warn!("Body longer than {}", u16::MAX);
+                            u16::MAX
+                        } else {
+                            l as u16
+                        }
+                    }),
+                };
 
                 (message_id, state)
             });
 
         tracing::info!(?message, "Setting message to show");
         self.show_message = message;
+    }
+
+    pub fn currently_shown_message_mut(&mut self) -> Option<&mut super::message::MessageState> {
+        self.show_message.as_mut().map(|(_, m)| m)
     }
 
     #[inline]

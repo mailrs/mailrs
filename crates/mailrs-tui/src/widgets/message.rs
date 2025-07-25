@@ -7,14 +7,16 @@ use ratatui::widgets::Block;
 use ratatui::widgets::Cell;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::Row;
+use ratatui::widgets::ScrollbarState;
 use ratatui::widgets::StatefulWidget;
 use ratatui::widgets::Table;
+use ratatui::widgets::Widget;
 use ratatui::widgets::Wrap;
 
 #[derive(Debug)]
 pub struct Message {
     header: MessageHeader,
-    text: String,
+    body: crate::model::Body,
 }
 
 #[derive(Debug)]
@@ -35,13 +37,15 @@ impl From<&crate::model::Message> for Message {
                 tags: value.tags.iter().map(|t| t.name.clone()).collect(),
             },
 
-            text: String::new(), // TODO
+            body: value.body.clone(),
         }
     }
 }
 
 #[derive(Debug)]
-pub struct MessageState {}
+pub struct MessageState {
+    pub(crate) body_state: BodyState,
+}
 
 impl StatefulWidget for &mut MessageHeader {
     type State = MessageState;
@@ -96,14 +100,95 @@ impl StatefulWidget for &mut Message {
         let [header_area, text_area] =
             Layout::vertical([Constraint::Min(6), Constraint::Percentage(100)]).areas(area);
 
-        let text = Paragraph::new(self.text.clone())
-            .block(Block::bordered())
-            .style(Style::new().white().on_black())
-            .alignment(Alignment::Left)
-            .wrap(Wrap { trim: true })
-            .scroll((0, 0));
-
         self.header.render(header_area, buf, state);
-        ratatui::widgets::Widget::render(text, text_area, buf);
+        Body { body: &self.body }.render(text_area, buf, &mut state.body_state);
+    }
+}
+
+#[derive(Debug)]
+pub struct Body<'a> {
+    body: &'a crate::model::Body,
+}
+
+#[derive(Debug)]
+pub struct BodyState {
+    body_lines: u16,
+    scrollbar: ScrollbarState,
+    vertical_scroll: u16,
+    horizontal_scroll: u16,
+}
+
+impl BodyState {
+    pub fn new(body_lines: u16) -> Self {
+        Self {
+            body_lines,
+            scrollbar: ScrollbarState::default(),
+            vertical_scroll: 0,
+            horizontal_scroll: 0,
+        }
+    }
+
+    #[inline]
+    pub fn scroll_to_top(&mut self) {
+        tracing::debug!(body_lines = self.body_lines, "Scrolling to top");
+        self.scrollbar.first();
+        self.vertical_scroll = 0;
+    }
+
+    #[inline]
+    pub fn scroll_to_bottom(&mut self) {
+        tracing::debug!(body_lines = self.body_lines, "Scrolling to bottom");
+        self.scrollbar.last();
+        self.vertical_scroll = self.body_lines;
+    }
+
+    #[inline]
+    pub fn scroll_down(&mut self) {
+        if self.body_lines <= self.vertical_scroll {
+            tracing::debug!("Not scrolling down, as there are no more lines");
+            return;
+        }
+
+        tracing::debug!("Scrolling down");
+        self.scrollbar.next();
+        self.vertical_scroll = self.vertical_scroll.saturating_add(1);
+    }
+
+    #[inline]
+    pub fn scroll_up(&mut self) {
+        tracing::debug!("Scrolling up");
+        self.scrollbar.prev();
+        self.vertical_scroll = self.vertical_scroll.saturating_sub(1);
+    }
+}
+
+impl StatefulWidget for Body<'_> {
+    type State = BodyState;
+
+    fn render(
+        self,
+        area: ratatui::prelude::Rect,
+        buf: &mut ratatui::prelude::Buffer,
+        state: &mut Self::State,
+    ) where
+        Self: Sized,
+    {
+        if let Some(content) = self.body.content.as_ref() {
+            let offset = (state.vertical_scroll, state.horizontal_scroll);
+            tracing::debug!(?offset, "Displaying body");
+
+            let text = Paragraph::new(content.clone())
+                .block(Block::bordered())
+                .style(Style::new().white().on_black())
+                .alignment(Alignment::Left)
+                .wrap(Wrap { trim: true })
+                .scroll(offset);
+
+            text.render(area, buf);
+        } else {
+            ratatui::text::Text::from("no body found")
+                .style(Style::new().italic())
+                .render(area, buf);
+        }
     }
 }

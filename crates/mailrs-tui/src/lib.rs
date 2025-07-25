@@ -91,6 +91,19 @@ pub async fn run(
 
                     tracing::info!(id = ?message.id(), ?tags, "Found message");
 
+                    let body = match message.content().await.map(model::Body::new) {
+                        Ok(body) => body,
+                        Err(error) => {
+                            tracing::error!(
+                                ?error,
+                                id = message.id(),
+                                "Failed to fetch 'body' header for message"
+                            );
+                            model::Body::new(None)
+                        }
+                    };
+                    tracing::info!(id = ?message.id(), "Found body");
+
                     Ok(Message {
                         id: message.id().to_string(),
                         from,
@@ -101,6 +114,7 @@ pub async fn run(
                                 name: name.to_string(),
                             })
                             .collect::<Vec<Tag>>(),
+                        body,
                     })
                 }
             })
