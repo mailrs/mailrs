@@ -97,7 +97,7 @@ impl StatefulWidget for &mut Message {
             Layout::vertical([Constraint::Min(6), Constraint::Percentage(100)]).areas(area);
 
         let text = Paragraph::new(self.text.clone())
-            .block(Block::bordered().title("Paragraph"))
+            .block(Block::bordered())
             .style(Style::new().white().on_black())
             .alignment(Alignment::Left)
             .wrap(Wrap { trim: true })
