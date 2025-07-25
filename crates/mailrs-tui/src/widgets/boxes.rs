@@ -24,7 +24,7 @@ impl BoxesState {
     }
 
     pub fn add_box(&mut self, bx: Arc<crate::model::MBox>) {
-        self.boxes.push(crate::widgets::mbox::MBox::new(bx));
+        self.boxes.push(crate::widgets::mbox::MBoxState::new(bx));
     }
 
     pub fn remove_index(&mut self, i: usize) {
