@@ -80,8 +80,6 @@ impl StatefulWidget for &mut MessageHeader {
             .style(Style::new().blue())
             .column_spacing(1);
 
-        let mut table_state = TableState::default();
-
         ratatui::widgets::Widget::render(table, area, buf);
     }
 }
