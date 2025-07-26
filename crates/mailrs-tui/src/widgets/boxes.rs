@@ -58,10 +58,6 @@ impl BoxesState {
         self.boxes.remove(self.tab_bar_focus);
         self.focus_prev();
     }
-
-    pub(crate) fn current_index(&self) -> usize {
-        self.tab_bar_focus
-    }
 }
 
 #[derive(Debug)]
