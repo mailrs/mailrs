@@ -4,7 +4,8 @@ use super::message::Message;
 use super::tag::Tag;
 use crate::error::Error;
 
-pub type ResultRecv<Res> = tokio::sync::oneshot::Receiver<Result<Res, Error>>;
+pub type ResultRecv<Res, Error = crate::error::Error> =
+    tokio::sync::oneshot::Receiver<Result<Res, Error>>;
 
 #[derive(Debug)]
 pub enum Request {

@@ -10,37 +10,33 @@ use ratatui::widgets::Tabs;
 use ratatui::widgets::Widget;
 
 #[derive(Debug)]
-pub struct Boxes {
-    boxes: Vec<crate::widgets::mbox::MBox>,
+pub struct BoxesState {
+    boxes: Vec<crate::widgets::mbox::MBoxState>,
+    tab_bar_focus: usize,
 }
 
-impl Boxes {
-    pub fn empty() -> Self {
-        Self { boxes: Vec::new() }
+impl BoxesState {
+    pub fn new(bx: Arc<crate::model::MBox>) -> Self {
+        Self {
+            boxes: vec![crate::widgets::mbox::MBoxState::new(bx)],
+            tab_bar_focus: 0,
+        }
     }
 
     pub fn add_box(&mut self, bx: Arc<crate::model::MBox>) {
-        self.boxes.push(crate::widgets::mbox::MBox::new(bx));
+        self.boxes.push(crate::widgets::mbox::MBoxState::new(bx));
     }
 
     pub fn remove_index(&mut self, i: usize) {
         self.boxes.remove(i);
     }
-}
 
-#[derive(Debug, Default)]
-pub struct BoxesState {
-    tab_bar_focus: usize,
-    box_state: Vec<super::mbox::MBoxState>,
-}
-
-impl BoxesState {
     #[inline]
     pub fn focus_next(&mut self) {
         self.tab_bar_focus = self.tab_bar_focus.saturating_add(1);
 
-        if self.tab_bar_focus >= self.box_state.len() {
-            self.tab_bar_focus = self.box_state.len() - 1;
+        if self.tab_bar_focus >= self.boxes.len() {
+            self.tab_bar_focus = self.boxes.len() - 1;
         }
     }
 
@@ -51,26 +47,21 @@ impl BoxesState {
 
     #[inline]
     pub fn focus_last(&mut self) {
-        self.tab_bar_focus = self.box_state.len() - 1;
+        self.tab_bar_focus = self.boxes.len() - 1;
     }
 
     pub fn get_current_state_mut(&mut self) -> Option<&mut super::mbox::MBoxState> {
-        self.box_state.get_mut(self.tab_bar_focus)
+        self.boxes.get_mut(self.tab_bar_focus)
     }
 
-    pub(crate) fn increase_boxes_count(&mut self) {
-        self.box_state.push(Default::default());
-    }
-
-    pub(crate) fn decrease_boxes_count(&mut self) {
-        self.box_state.remove(self.tab_bar_focus);
+    pub(crate) fn remove_current_box(&mut self) {
+        self.boxes.remove(self.tab_bar_focus);
         self.focus_prev();
     }
-
-    pub(crate) fn current_index(&self) -> usize {
-        self.tab_bar_focus
-    }
 }
+
+#[derive(Debug)]
+pub struct Boxes;
 
 impl StatefulWidget for &mut Boxes {
     type State = BoxesState;
@@ -88,7 +79,8 @@ impl StatefulWidget for &mut Boxes {
 
         {
             let tabs = Tabs::new(
-                self.boxes
+                state
+                    .boxes
                     .iter()
                     .map(|bx| bx.query().to_string())
                     .collect::<Vec<String>>(),
@@ -103,15 +95,10 @@ impl StatefulWidget for &mut Boxes {
             tabs.render(tab_bar, buf);
         }
 
-        if let Some((bx, state)) = self
-            .boxes
-            .get_mut(state.tab_bar_focus)
-            .into_iter()
-            .zip(state.get_current_state_mut())
-            .next()
-        {
+        if let Some(mbox_state) = state.get_current_state_mut() {
             tracing::debug!("Rendering box");
-            bx.render(message_list, buf, state);
+            let mut mbox = crate::widgets::mbox::MBox;
+            mbox.render(message_list, buf, mbox_state);
         } else {
             tracing::debug!("Rendering no box, none there");
         }

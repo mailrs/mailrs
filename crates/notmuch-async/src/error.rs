@@ -13,6 +13,9 @@ pub enum Error {
 
     #[error("Notmuch error: {}", .0)]
     Notmuch(String),
+
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
 }
 
 impl From<notmuch::Error> for Error {
