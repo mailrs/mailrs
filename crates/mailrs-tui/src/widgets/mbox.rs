@@ -42,7 +42,7 @@ impl MBoxState {
                 let message_id = message.id.clone();
                 let state = super::message::MessageState {
                     body_state: super::message::BodyState::new({
-                        let l = message.body.lines();
+                        let l = message.body.raw_content_lines();
 
                         if l > u16::MAX as usize {
                             tracing::warn!("Body longer than {}", u16::MAX);

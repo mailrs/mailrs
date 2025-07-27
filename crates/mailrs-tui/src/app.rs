@@ -267,7 +267,7 @@ impl App {
 
                             tracing::info!(id = ?message.id(), ?tags, "Found message");
 
-                            let body = match message.content().await.map(crate::model::Body::new) {
+                            let body = match message.content().await.map(crate::model::Body::from) {
                                 Ok(body) => body,
                                 Err(error) => {
                                     tracing::error!(

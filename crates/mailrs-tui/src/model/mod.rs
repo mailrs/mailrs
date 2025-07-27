@@ -26,16 +26,31 @@ pub struct Tag {
 
 #[derive(Debug, Clone)]
 pub struct Body {
-    pub(crate) content: Option<String>,
+    raw_content: Option<String>,
 }
 
 impl Body {
     pub fn new(content: Option<String>) -> Self {
-        Self { content }
+        if let Some(content) = content.as_ref() {
+            let message = match mail_parser::MessageParser::default()
+                .parse(file_content)
+                .map_err(crate::error::Error::from)
+            {
+                Err(error) => {
+                    tracing::warn!(?error, "Failed to parse message");
+                    None
+                }
+                Ok(message) => Some(message),
+            };
+        }
+
+        Self {
+            raw_content: content,
+        }
     }
 
-    pub fn lines(&self) -> usize {
-        self.content
+    pub fn raw_content_lines(&self) -> usize {
+        self.raw_content
             .as_ref()
             .map(|c| c.lines().count())
             .unwrap_or(0)
