@@ -3070,7 +3070,7 @@ dependencies = [
  "miette",
  "notmuch-async",
  "serde",
- "thiserror 2.0.11",
+ "thiserror 2.0.12",
  "time",
  "tokio",
  "tracing",
@@ -3088,7 +3088,7 @@ dependencies = [
  "clap-verbosity-flag",
  "derive_more 2.0.1",
  "serde",
- "thiserror 2.0.11",
+ "thiserror 2.0.12",
  "tokio",
  "toml 0.8.23",
  "xdg",
@@ -3110,7 +3110,7 @@ dependencies = [
  "serde",
  "slint",
  "slint-build",
- "thiserror 2.0.11",
+ "thiserror 2.0.12",
  "time",
  "tokio",
  "toml 0.8.23",
@@ -3137,7 +3137,7 @@ dependencies = [
  "nucleo-matcher",
  "ratatui 0.29.0",
  "serde",
- "thiserror 2.0.11",
+ "thiserror 2.0.12",
  "time",
  "tokio",
  "toml 0.8.23",
@@ -3342,7 +3342,7 @@ version = "0.1.0"
 dependencies = [
  "notmuch",
  "static_assertions",
- "thiserror 2.0.11",
+ "thiserror 2.0.12",
  "time",
  "tokio",
  "tracing",
@@ -3794,7 +3794,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "198db74531d58c70a361c42201efde7e2591e976d518caf7662a47dc5720e7b6"
 dependencies = [
  "memchr",
- "thiserror 2.0.11",
+ "thiserror 2.0.12",
  "ucd-trie",
 ]
 
@@ -4159,7 +4159,7 @@ dependencies = [
  "lru",
  "paste",
  "strum",
- "thiserror 2.0.11",
+ "thiserror 2.0.12",
  "unicode-segmentation",
  "unicode-truncate 2.0.0",
  "unicode-width 0.2.0",
@@ -5053,11 +5053,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.11"
+version = "2.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d452f284b73e6d76dd36758a0c8684b1d5be31f92b89d07fd5822175732206fc"
+checksum = "567b8a2dae586314f7be2a752ec7474332959c6460e02bde30d702a66d488708"
 dependencies = [
- "thiserror-impl 2.0.11",
+ "thiserror-impl 2.0.12",
 ]
 
 [[package]]
@@ -5073,9 +5073,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.11"
+version = "2.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26afc1baea8a989337eeb52b6e72a039780ce45c3edfcc9c5b9d112feeb173c2"
+checksum = "7f7cf42b4507d8ea322120659672cf1b9dbb93f8f2d4ecfd6e51350ff5b17a1d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5385,7 +5385,7 @@ dependencies = [
  "downcast-rs 2.0.1",
  "nucleo-matcher",
  "ratatui 0.29.0",
- "thiserror 2.0.11",
+ "thiserror 2.0.12",
  "tui-input 0.11.1",
 ]
 
