@@ -11,6 +11,6 @@ mailrs-tui.path = "crates/mailrs-tui"
 notmuch-async.path = "crates/notmuch-async"
 
 serde = { version = "1", features = ["derive"] }
-tokio = "1.45.1"
+tokio = "1.47.1"
 thiserror = "2"
 tracing = "0.1.41"
