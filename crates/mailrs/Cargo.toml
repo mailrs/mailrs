@@ -19,7 +19,7 @@ serde = { version = "1.0.219", features = ["derive"] }
 time = "0.3.41"
 log = "0.4"
 tracing-appender = "0.2.3"
-tracing-subscriber = { version = "0.3.19", features = ["env-filter", "registry"] }
+tracing-subscriber = { version = "0.3.20", features = ["env-filter", "registry"] }
 xdg = "2.5.2"
 
 mailrs-config.workspace = true
