@@ -23,7 +23,7 @@ toml = "0.8.23"
 tracing = "0.1.41"
 log = "0.4"
 tracing-appender = "0.2.3"
-tracing-subscriber = { version = "0.3.19", features = ["env-filter", "registry"] }
+tracing-subscriber = { version = "0.3.20", features = ["env-filter", "registry"] }
 xdg = "2.5.2"
 
 notmuch-async.workspace = true
