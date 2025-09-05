@@ -27,7 +27,7 @@ log = "0.4"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter", "registry"] }
 tui-commander.git = "https://github.com/matthiasbeyer/tui-commander"
-tui-input = "0.12.1"
+tui-input = "0.14.0"
 tui-widget-list = "0.13.2"
 tui-logger = { version = "0.17.3", default-features = false, features = [
   "tracing-support",
