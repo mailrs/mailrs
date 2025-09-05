@@ -18,7 +18,7 @@ serde = { version = "1.0.219", features = ["derive"] }
 slint = "1.8.0"
 thiserror = "2.0.12"
 time = "0.3.41"
-tokio = { version = "1.45.1", features = ["rt", "macros", "fs", "sync"] }
+tokio = { version = "1.47.1", features = ["rt", "macros", "fs", "sync"] }
 toml = "0.8.23"
 tracing = "0.1.41"
 log = "0.4"
