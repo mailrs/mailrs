@@ -16,7 +16,7 @@ futures = "0.3.31"
 human-panic = "2.0.3"
 miette = { version = "7.5.0", features = ["fancy"] }
 serde = { version = "1.0.219", features = ["derive"] }
-time = "0.3.41"
+time = "0.3.44"
 log = "0.4"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter", "registry"] }
