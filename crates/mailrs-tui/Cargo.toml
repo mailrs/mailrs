@@ -32,7 +32,7 @@ tui-widget-list = "0.13.2"
 tui-logger = { version = "0.17.4", default-features = false, features = [
   "tracing-support",
 ] }
-xdg = "2.5.2"
+xdg = "3.0.0"
 
 notmuch-async.workspace = true
 
