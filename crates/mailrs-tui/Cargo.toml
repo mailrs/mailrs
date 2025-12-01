@@ -24,7 +24,7 @@ tokio = { version = "1.47.1", features = ["rt", "macros", "fs", "sync"] }
 toml = "0.8.23"
 tracing = "0.1.41"
 log = "0.4"
-tracing-appender = "0.2.3"
+tracing-appender = "0.2.4"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter", "registry"] }
 tui-commander.git = "https://github.com/matthiasbeyer/tui-commander"
 tui-input = "0.14.0"
