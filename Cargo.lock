@@ -1186,7 +1186,6 @@ checksum = "829d955a0bb380ef178a640b91779e3987da38c9aea133b20614cfed8cdea9c6"
 dependencies = [
  "bitflags 2.9.0",
  "crossterm_winapi",
- "futures-core",
  "mio",
  "parking_lot",
  "rustix",
@@ -1406,9 +1405,9 @@ checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
 name = "downcast-rs"
-version = "2.0.1"
+version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea8a8b81cacc08888170eef4d13b775126db426d0b348bee9d18c2c1eaf123cf"
+checksum = "117240f60069e65410b3ae1bb213295bd828f707b5bec6596a1afc8793ce0cbc"
 
 [[package]]
 name = "dpi"
@@ -2821,7 +2820,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc2f4eb4bc735547cfed7c0a4922cbd04a4655978c09b54f1f7b228750664c34"
 dependencies = [
  "cfg-if",
- "windows-targets 0.52.6",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -3043,7 +3042,7 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "tui-commander",
- "tui-input 0.14.0",
+ "tui-input",
  "tui-logger",
  "tui-widget-list",
  "xdg",
@@ -4975,25 +4974,14 @@ checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 
 [[package]]
 name = "tui-commander"
-version = "0.1.1"
-source = "git+https://github.com/matthiasbeyer/tui-commander#215685619a3442b05bb627e8fdd92cc09a40b2cf"
+version = "0.3.0"
+source = "git+https://github.com/matthiasbeyer/tui-commander#3fbf211f108e762b9dacd2ae64da4f8212e1e8b9"
 dependencies = [
- "crossterm",
- "downcast-rs 2.0.1",
+ "downcast-rs 2.0.2",
  "nucleo-matcher",
  "ratatui",
  "thiserror 2.0.17",
- "tui-input 0.11.1",
-]
-
-[[package]]
-name = "tui-input"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5d1733c47f1a217b7deff18730ff7ca4ecafc5771368f715ab072d679a36114"
-dependencies = [
- "ratatui",
- "unicode-width 0.2.0",
+ "tui-input",
 ]
 
 [[package]]
@@ -5505,7 +5493,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
