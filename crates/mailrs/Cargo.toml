@@ -20,7 +20,7 @@ time = "0.3.44"
 log = "0.4"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter", "registry"] }
-xdg = "2.5.2"
+xdg = "3.0.0"
 
 mailrs-config.workspace = true
 mailrs-gui.workspace = true
