@@ -6,6 +6,12 @@ updates:
       interval: monthly
     commit-message:
       prefix: "Cargo"
+    groups:
+      non-breaking:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
